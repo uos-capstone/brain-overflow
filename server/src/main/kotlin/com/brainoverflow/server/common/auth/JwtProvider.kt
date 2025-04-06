@@ -16,13 +16,12 @@ class JwtProvider(
 ) {
     private val key: Key = Keys.hmacShaKeyFor(secretKey.toByteArray())
 
-    // JWT 토큰 생성
-    fun generateToken(authentication: Authentication): String {
+    fun generateToken(authentication: Authentication, userId: String): String {
         val now = Date()
         val expiry = Date(now.time + validityInMs)
-
         return Jwts.builder()
-            .setSubject(authentication.name)           // username
+            .setSubject(authentication.name) // 예: username
+            .claim("userId", userId)           // 사용자 ID 클레임 추가
             .setIssuedAt(now)
             .setExpiration(expiry)
             .signWith(key, SignatureAlgorithm.HS256)
@@ -38,6 +37,16 @@ class JwtProvider(
             .body
             .subject
     }
+
+    fun getUserIdFromToken(token: String): String {
+        val claims = Jwts.parserBuilder()
+            .setSigningKey(key)
+            .build()
+            .parseClaimsJws(token)
+            .body
+        return claims["userId"] as String
+    }
+
 
     // 토큰 유효성 검사
     fun validateToken(token: String): Boolean {

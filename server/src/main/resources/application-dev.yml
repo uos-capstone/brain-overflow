@@ -10,13 +10,28 @@ spring:
   jpa:
     open-in-view: true
     hibernate:
-      ddl-auto: validate
+      ddl-auto: none
       naming:
         physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
     show-sql: true
     properties:
       '[hibernate.format_sql]': true
 
+  rabbitmq:
+    addresses: localhost:5672
+    username: guest
+    password: guest
+    listener:
+      simple:
+        acknowledge-mode: auto # manual X auto O
+        retry:
+          enabled: true # 재시도
+          initial-interval: 3s # 최초 메시지 처리 실패 후 재시도까지의 인터벌
+          max-interval: 10s # 최대 재시도 인터벌
+          max-attempts: 2 # 최대 재시도 횟수
+          multiplier: 2 # 이전 interval * multiplier = 다음 interval
+
 jwt:
   secret: 823e399822c5170927c9802b3feb60b1fe54debefb406ca5f4eaf05e0014ea63
   expiration-ms: 6000000
+
