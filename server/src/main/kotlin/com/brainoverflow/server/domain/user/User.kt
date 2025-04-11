@@ -2,6 +2,8 @@ package com.brainoverflow.server.domain.user
 
 import com.brainoverflow.server.common.enums.Role
 import jakarta.persistence.Entity
+import jakarta.persistence.EnumType
+import jakarta.persistence.Enumerated
 import jakarta.persistence.Id
 import java.util.UUID
 
@@ -13,9 +15,10 @@ class User (
     password : String
 ){
     @Id
-    private val id: UUID = UUID.randomUUID()
+    val id: UUID = UUID.randomUUID()
 
     var nickname:String = nickname
+    @Enumerated(value = EnumType.STRING)
     val role : Role = role
     val username : String = username
     val password : String = password
