@@ -1,8 +1,8 @@
 spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/brainoverflow
-    username: test
-    password: test
+    username: postgres
+    password: postgres
     driver-class-name: org.postgresql.Driver
   h2:
     console:
@@ -10,7 +10,7 @@ spring:
   jpa:
     open-in-view: true
     hibernate:
-      ddl-auto: none
+      ddl-auto: create
       naming:
         physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
     show-sql: true
@@ -18,7 +18,8 @@ spring:
       '[hibernate.format_sql]': true
 
   rabbitmq:
-    addresses: localhost:5672
+    host: ${SPRING_RABBITMQ_HOST}
+    port: 5672
     username: guest
     password: guest
     listener:

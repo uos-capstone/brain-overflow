@@ -3,14 +3,16 @@ package com.brainoverflow.server.service.mri
 import com.brainoverflow.server.common.enums.PredictionStatus
 import com.brainoverflow.server.common.enums.ReturnCode
 import com.brainoverflow.server.common.exception.BOException
-import com.brainoverflow.server.common.external.AlzheimerAiService
 import com.brainoverflow.server.domain.mri.MriImage
 import com.brainoverflow.server.domain.mri.MriImageRepository
 import com.brainoverflow.server.domain.mri.MriResult
 import com.brainoverflow.server.domain.mri.MriResultRepository
 import com.brainoverflow.server.domain.user.UserRepository
+import com.brainoverflow.server.service.port.Message
+import com.brainoverflow.server.service.port.MessageQueue
 import org.slf4j.LoggerFactory
 import org.springframework.amqp.rabbit.annotation.RabbitListener
+import org.springframework.context.annotation.Lazy
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -22,8 +24,8 @@ import java.util.*
 class MriService (
     private val mriImageRepository: MriImageRepository,
     private val mriResultRepository: MriResultRepository,
-    private val alzheimerAiService: AlzheimerAiService,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    @Lazy private val messageQueue: MessageQueue
 ){
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -37,17 +39,17 @@ class MriService (
     fun registerMRIPrediction(mriId: UUID){
         val mriImage = mriImageRepository.findByIdOrNull(mriId) ?: throw BOException(ReturnCode.NOT_EXIST_IMAGE)
         val mriResult = createMriResult(mriImage)
-        alzheimerAiService.startPrediction(mriImage)
+        messageQueue.sendMessage(
+            Message("AlzheimerAiQueue", mriImage.id.toString())
+        )
         mriResult.changeStatus(PredictionStatus.PROGRESS)
     }
 
     private fun createMriResult(mriImage: MriImage): MriResult {
         val newResult = MriResult(mriImage = mriImage, predictionStatus = PredictionStatus.NOT_STARTED)
         return mriResultRepository.save(newResult)
-
     }
 
-    @RabbitListener(queues = ["aiCompleteQueue"])
     @Transactional
     fun receiveResult(aiResult: AiResult) {
         val mriResult =

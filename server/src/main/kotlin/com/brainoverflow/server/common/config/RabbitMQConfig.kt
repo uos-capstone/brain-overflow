@@ -14,7 +14,7 @@ class RabbitMQConfig {
     // Fanout Exchange를 사용하여 모든 바인딩된 큐로 메시지 전송
     @Bean
     fun fanoutExchange(): FanoutExchange {
-        return FanoutExchange("AlzheimerAiService")
+        return FanoutExchange("AlzheimerAiFinishQueue")
     }
 
     @Bean
