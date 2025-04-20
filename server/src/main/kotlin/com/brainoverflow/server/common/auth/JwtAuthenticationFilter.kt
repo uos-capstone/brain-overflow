@@ -31,8 +31,8 @@ class JwtAuthenticationFilter(
         if (!authorizationHeader.isNullOrBlank() && authorizationHeader.startsWith(JWT_HEADER)) {
             val token = authorizationHeader.substring(7)
             if (jwtProvider.validateToken(token)) {
-                val username = jwtProvider.getUsernameFromToken(token)
-                val userDetails: UserDetails = customUserDetailsService.loadUserByUsername(username)
+                val userId = jwtProvider.getUserIdFromToken(token)
+                val userDetails: UserDetails = customUserDetailsService.loadUserByUserId(userId)
 
                 val authentication = UsernamePasswordAuthenticationToken(
                     userDetails, null, userDetails.authorities
