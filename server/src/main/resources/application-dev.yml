@@ -1,6 +1,10 @@
 spring:
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
   datasource:
-    url: jdbc:postgresql://localhost:5432/brainoverflow
+    url: ${SPRING_DATASOURCE_URL}
     username: postgres
     password: postgres
     driver-class-name: org.postgresql.Driver
@@ -10,7 +14,7 @@ spring:
   jpa:
     open-in-view: true
     hibernate:
-      ddl-auto: create
+      ddl-auto: validate
       naming:
         physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
     show-sql: true

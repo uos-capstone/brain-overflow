@@ -3,4 +3,4 @@ spring:
     import: optional:file:.env[.properties]
   profiles:
     active:
-      ${PROFILE}
+      ${PROFILE:dev}
