@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>채팅 방</title>
+    <!-- SockJS와 STOMP.js 라이브러리 CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.1/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 0;
+        }
+        .chat-container {
+            width: 90%;
+            max-width: 800px;
+            margin: 50px auto;
+            border: 1px solid #ccc;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .chat-container h2 {
+            margin-top: 0;
+            text-align: center;
+        }
+        .chat-messages {
+            height: 400px;
+            border: 1px solid #ddd;
+            overflow-y: auto;
+            padding: 10px;
+            margin-bottom: 20px;
+            background-color: #fafafa;
+        }
+        .chat-input {
+            display: flex;
+        }
+        .chat-input input[type="text"] {
+            flex-grow: 1;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .chat-input button {
+            padding: 10px 20px;
+            margin-left: 10px;
+            border: none;
+            background-color: #007bff;
+            color: #fff;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .chat-input button:hover {
+            background-color: #0056b3;
+        }
+        .message {
+            margin-bottom: 10px;
+        }
+        .message em {
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+<div class="chat-container">
+    <h2>채팅 방</h2>
+    <div class="chat-messages" id="chatMessages"></div>
+    <div class="chat-input">
+        <input type="text" id="chatInput" placeholder="메시지를 입력하세요..." autofocus />
+        <button id="sendButton">전송</button>
+    </div>
+</div>
+
+<script>
+    var stompClient = null;
+    // 채팅룸 식별자; 필요한 경우 여러 채팅룸을 추가하여 관리할 수 있음
+    const roomId = "room1";
+    // 사용자명은 페이지 로드 시 prompt를 통해 입력 받음 (기본값: guest)
+    const userName = prompt("사용자명을 입력하세요:", "guest") || "guest";
+
+    // 서버와 연결 후 채팅룸 구독 및 입장 메시지 전송
+    function connect() {
+        const socket = new SockJS('/ws');
+        stompClient = Stomp.over(socket);
+        stompClient.connect({}, function(frame) {
+            console.log("Connected: " + frame);
+            // 지정한 채팅룸(/topic/room/room1)으로 구독
+            stompClient.subscribe('/topic/' + roomId, function(response) {
+                let message = JSON.parse(response.body);
+                displayMessage(message);
+            });
+            // 채팅방 입장 (JOIN 이벤트)
+            joinRoom();
+        });
+    }
+
+    // 채팅방 입장 메시지를 전송 (JOIN 타입)
+    function joinRoom() {
+        const joinMessage = {
+            type: "JOIN",
+            roomId: roomId,
+            sender: userName,
+            content: null,
+            timestamp: new Date().getTime()
+        };
+        stompClient.send("/app/chat.sendMessage", {}, JSON.stringify(joinMessage));
+    }
+
+    // 메시지 전송 (CHAT 타입)
+    function sendMessage() {
+        const messageContent = document.getElementById("chatInput").value;
+        if (messageContent && stompClient) {
+            const chatMessage = {
+                type: "CHAT",
+                roomId: roomId,
+                sender: userName,
+                content: messageContent,
+                timestamp: new Date().getTime()
+            };
+            stompClient.send("/app/chat.sendMessage", {}, JSON.stringify(chatMessage));
+            document.getElementById("chatInput").value = "";
+        }
+    }
+
+    // 화면에 메시지를 출력하는 함수
+    function displayMessage(message) {
+        const chatMessages = document.getElementById("chatMessages");
+        const messageElement = document.createElement("div");
+        messageElement.classList.add("message");
+        let content = "";
+
+        // 메시지 유형에 따라 화면 출력 형식 지정
+        if(message.type === "JOIN") {
+            content = "<em>" + message.sender + "님이 입장했습니다.</em>";
+        } else if(message.type === "CHAT") {
+            content = "<strong>" + message.sender + ":</strong> " + message.content;
+        } else if(message.type === "LEAVE") {
+            content = "<em>" + message.sender + "님이 퇴장했습니다.</em>";
+        }
+        messageElement.innerHTML = content;
+        chatMessages.appendChild(messageElement);
+        // 스크롤을 항상 최신 메시지로 이동
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    // 전송 버튼 클릭 이벤트 및 엔터키 이벤트 등록
+    document.getElementById("sendButton").addEventListener("click", sendMessage);
+    document.getElementById("chatInput").addEventListener("keypress", function(event) {
+        if(event.key === "Enter") {
+            sendMessage();
+        }
+    });
+
+    // 연결 시작
+    connect();
+</script>
+</body>
+</html>
