@@ -16,11 +16,11 @@ class JwtProvider(
 ) {
     private val key: Key = Keys.hmacShaKeyFor(secretKey.toByteArray())
 
-    fun generateToken(authentication: Authentication, userId: String): String {
+    fun generateToken(username : String, userId: String): String {
         val now = Date()
         val expiry = Date(now.time + validityInMs)
         return Jwts.builder()
-            .setSubject(authentication.name) // 예: username
+            .setSubject(username) // 예: username
             .claim("userId", userId)           // 사용자 ID 클레임 추가
             .setIssuedAt(now)
             .setExpiration(expiry)
@@ -38,13 +38,14 @@ class JwtProvider(
             .subject
     }
 
-    fun getUserIdFromToken(token: String): String {
+    fun getUserIdFromToken(token: String): UUID {
         val claims = Jwts.parserBuilder()
             .setSigningKey(key)
             .build()
             .parseClaimsJws(token)
             .body
-        return claims["userId"] as String
+        val userId = claims["userId"] as String
+        return UUID.fromString(userId)
     }
 
 
