@@ -78,6 +78,7 @@ class GlobalControllerAdvice {
 	)
 	fun handleBusinessException(e: RuntimeException, request: HttpServletRequest): ResponseEntity<ApiResponse<Unit>> {
 //		slackService.sendSlackForError(e, request)
+		logger.error(e.message, e)
 		return ResponseEntity
 			.status(HttpStatus.INTERNAL_SERVER_ERROR)
 			.body(ApiResponse.error(ReturnCode.INTERNAL_SERVER_ERROR))
