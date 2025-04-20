@@ -7,13 +7,17 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder as AuthBuilder
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
+import org.springframework.web.cors.CorsConfiguration
+import org.springframework.web.cors.CorsConfigurationSource
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder as AuthBuilder
+
 
 @Configuration
 @EnableWebSecurity
@@ -27,8 +31,17 @@ class SecurityConfig(
             .csrf { it.disable() }
             .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
             .authorizeHttpRequests {
-                it.requestMatchers("/auth/login", "/auth/signup", "/mri/**").permitAll()
+                it.requestMatchers("/auth/login",
+                    "/auth/signup", "/mri/**",
+                    "/chat/**", "/chat.html","/ai.html",
+                    "/ws/**", "/swagger-ui/**",
+                    "/v3/api-docs",        // <-- 추가!
+                    "/v3/api-docs/**")
+                        .permitAll()
                 it.anyRequest().authenticated()
+            }
+            .cors {
+                corsConfigurationSource()
             }
 
         // DaoAuthenticationProvider 등록
@@ -38,6 +51,21 @@ class SecurityConfig(
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter::class.java)
 
         return http.build()
+    }
+
+    @Bean
+    fun corsConfigurationSource(): CorsConfigurationSource {
+        val config = CorsConfiguration()
+
+        config.allowCredentials = true
+        config.allowedOrigins = listOf("http://localhost:5173")
+        config.allowedMethods = listOf("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
+        config.allowedHeaders = listOf("*")
+        config.exposedHeaders = listOf("*")
+
+        val source: UrlBasedCorsConfigurationSource = UrlBasedCorsConfigurationSource()
+        source.registerCorsConfiguration("/**", config)
+        return source
     }
 
     @Bean
