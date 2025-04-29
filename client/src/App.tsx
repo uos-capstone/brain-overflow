@@ -13,6 +13,7 @@ export interface NiiFile {
   name: string;
   active: boolean;
   file: File;
+  age: number;
 }
 
 function App() {
@@ -28,6 +29,7 @@ function App() {
         name: 'example.nii',
         active: true,
         file: file,
+        age: 0,
       };
   
       setFiles([exampleFile]);

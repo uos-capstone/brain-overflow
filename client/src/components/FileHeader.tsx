@@ -8,6 +8,7 @@ export interface NiiFile {
     name: string;
     active: boolean;
     file: File;
+    age: number;
 }
 
 interface TabProps {

@@ -4,6 +4,7 @@ interface NiiFile {
     name: string;
     active: boolean;
     file: File;
+    age: number;
 }
 
 interface FileUploadProps {
@@ -24,7 +25,7 @@ function FileUpload({ files, setFiles }: FileUploadProps) {
         const droppedFiles = Array.from(e.dataTransfer.files);
         const niiFiles: NiiFile[] = droppedFiles
             .filter(isNiiFile)
-            .map(file => ({ name: file.name, active: false, file }));
+            .map(file => ({ name: file.name, active: false, file, age:0, }));
 
         if (niiFiles.length === 0) {
             alert('Only .nii files are allowed.');
@@ -38,7 +39,7 @@ function FileUpload({ files, setFiles }: FileUploadProps) {
         const selectedFiles = Array.from(e.target.files || []);
         const niiFiles: NiiFile[] = selectedFiles
             .filter(isNiiFile)
-            .map(file => ({ name: file.name, active: false, file }));
+            .map(file => ({ name: file.name, active: false, file, age:0, }));
 
         if (niiFiles.length === 0) {
             alert('Only .nii files are allowed.');
@@ -84,7 +85,7 @@ function FileUpload({ files, setFiles }: FileUploadProps) {
                     backgroundColor: isDragging ? '#2a2a2a' : 'transparent',
                     color: '#888',
                     textAlign: 'center',
-                    minHeight: '100px',
+                    minHeight: '200px',
                     cursor: 'pointer',
                     transition: 'all 0.2s ease',
                     display: temporaryFiles.length === 0 ? 'flex' : 'block',
@@ -98,32 +99,51 @@ function FileUpload({ files, setFiles }: FileUploadProps) {
                     temporaryFiles.map((file, idx) => (
                         <div key={idx} style={{
                             display: 'flex',
+                            gap: '10px',
+                            alignItems: 'center',
                             padding: '6px 0',
                             borderBottom: '1px solid #444',
-                            alignItems: 'center',
                             color: '#ccc'
                         }}>
-                            <div style={{ width: '90%' }}>{file.name}</div>
-                            <div style={{ width: '10%' }}>
-                                <button
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        const updated = temporaryFiles.filter((_, i) => i !== idx);
-                                        setTemporaryFiles(updated);
-                                    }}
-                                    style={{
-                                        fontSize: '12px',
-                                        color: 'red',
-                                        background: 'none',
-                                        border: 'none',
-                                        cursor: 'pointer'
-                                    }}
-                                >
-                                    삭제
-                                </button>
-                            </div>
+                            <div style={{ flex: '1' }}>{file.name}</div>
+
+                            <span style={{ color: '#ccc', fontSize: '14px' }}>MRI age:</span>
+                    
+                            <input
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                }}
+                                type="number"
+                                placeholder="추가 정보 입력"
+                                style={{
+                                    padding: '6px',
+                                    fontSize: '14px',
+                                    borderRadius: '4px',
+                                    border: '1px solid #555',
+                                    backgroundColor: '#2a2a2a',
+                                    color: '#fff',
+                                    width: '200px'
+                                }}
+                            />
+                    
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    const updated = temporaryFiles.filter((_, i) => i !== idx);
+                                    setTemporaryFiles(updated);
+                                }}
+                                style={{
+                                    fontSize: '12px',
+                                    color: 'red',
+                                    background: 'none',
+                                    border: 'none',
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                삭제
+                            </button>
                         </div>
-                    ))
+                    ))                    
                 )}
             </div>
             <div style={{ display: 'flex', gap: '10px', marginTop: '10px', alignItems: 'center', justifyContent: 'center' }}>
@@ -143,22 +163,22 @@ function FileUpload({ files, setFiles }: FileUploadProps) {
                     <option value="b">Female</option>
                 </select>
 
-                <span style={{ color: '#ccc', fontSize: '14px' }}>Last MRI scan time:</span>
+                <span style={{ color: '#ccc', fontSize: '14px' }}>Last MRI cognitive status:</span>
 
-                <input
-                    type="text"
-                    placeholder="ex) 2025.01.01"
+                <select
                     style={{
                         padding: '8px',
                         fontSize: '14px',
-                        maxWidth: '20%',
                         borderRadius: '4px',
                         border: '1px solid #555',
                         backgroundColor: '#2a2a2a',
-                        color: '#fff',
-                        flex: '1'
+                        color: '#fff'
                     }}
-                />
+                >
+                    <option value="a">Alzheimer's Disease</option>
+                    <option value="b">Mild Cognitive Impairment</option>
+                    <option value="c">Cognitively Normal</option>
+                </select>
 
                 <button
                     onClick={handleGenerate}

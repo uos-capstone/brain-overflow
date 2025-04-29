@@ -7,6 +7,7 @@ interface NiiFile {
   name: string;
   active: boolean;
   file: File;
+  age: number;
 }
 
 interface CanvasAreaProps {
