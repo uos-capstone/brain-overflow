@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 
@@ -17,6 +17,24 @@ export interface NiiFile {
 
 function App() {
   const [files, setFiles] = useState<NiiFile[]>([]);
+
+  useEffect(() => {
+    async function loadExample() {
+      const response = await fetch('/mri/example.nii');
+      const blob = await response.blob();
+      const file = new File([blob], 'example.nii');
+  
+      const exampleFile: NiiFile = {
+        name: 'example.nii',
+        active: true,
+        file: file,
+      };
+  
+      setFiles([exampleFile]);
+    }
+  
+    loadExample();
+  }, []);
 
   return (
     <DndProvider backend={HTML5Backend}>
