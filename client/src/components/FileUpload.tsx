@@ -13,6 +13,7 @@ interface FileUploadProps {
 
 function FileUpload({ files, setFiles }: FileUploadProps) {
     const [isDragging, setIsDragging] = useState(false);
+    const [temporaryFiles, setTemporaryFiles] = useState<NiiFile[]>([]);
     const inputRef = useRef<HTMLInputElement | null>(null);
 
     const isNiiFile = (file: File) => file.name.toLowerCase().endsWith('.nii');
@@ -30,7 +31,7 @@ function FileUpload({ files, setFiles }: FileUploadProps) {
             return;
         }
 
-        setFiles(prev => [...prev, ...niiFiles]);
+        setTemporaryFiles(prev => [...prev, ...niiFiles]);
     };
 
     const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -42,10 +43,15 @@ function FileUpload({ files, setFiles }: FileUploadProps) {
         if (niiFiles.length === 0) {
             alert('Only .nii files are allowed.');
         } else {
-            setFiles(prev => [...prev, ...niiFiles]);
+            setTemporaryFiles(prev => [...prev, ...niiFiles]);
         }
 
         e.target.value = "";
+    };
+
+    const handleGenerate = () => {
+        setFiles(prev => [...prev, ...temporaryFiles]);
+        setTemporaryFiles([]);
     };
 
     return (
@@ -81,15 +87,15 @@ function FileUpload({ files, setFiles }: FileUploadProps) {
                     minHeight: '100px',
                     cursor: 'pointer',
                     transition: 'all 0.2s ease',
-                    display: files.length === 0 ? 'flex' : 'block',
+                    display: temporaryFiles.length === 0 ? 'flex' : 'block',
                     justifyContent: 'center',
                     alignItems: 'center'
                 }}
             >
-                {files.length === 0 ? (
+                {temporaryFiles.length === 0 ? (
                     <p>파일을 이 곳으로 끌어오거나 클릭하여 업로드하세요.</p>
                 ) : (
-                    files.map((file, idx) => (
+                    temporaryFiles.map((file, idx) => (
                         <div key={idx} style={{
                             display: 'flex',
                             padding: '6px 0',
@@ -102,8 +108,8 @@ function FileUpload({ files, setFiles }: FileUploadProps) {
                                 <button
                                     onClick={(e) => {
                                         e.stopPropagation();
-                                        const updated = files.filter((_, i) => i !== idx);
-                                        setFiles(updated);
+                                        const updated = temporaryFiles.filter((_, i) => i !== idx);
+                                        setTemporaryFiles(updated);
                                     }}
                                     style={{
                                         fontSize: '12px',
@@ -119,6 +125,56 @@ function FileUpload({ files, setFiles }: FileUploadProps) {
                         </div>
                     ))
                 )}
+            </div>
+            <div style={{ display: 'flex', gap: '10px', marginTop: '10px', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ color: '#ccc', fontSize: '14px' }}>Sex:</span>
+
+                <select
+                    style={{
+                        padding: '8px',
+                        fontSize: '14px',
+                        borderRadius: '4px',
+                        border: '1px solid #555',
+                        backgroundColor: '#2a2a2a',
+                        color: '#fff'
+                    }}
+                >
+                    <option value="a">Male</option>
+                    <option value="b">Female</option>
+                </select>
+
+                <span style={{ color: '#ccc', fontSize: '14px' }}>Last MRI scan time:</span>
+
+                <input
+                    type="text"
+                    placeholder="ex) 2025.01.01"
+                    style={{
+                        padding: '8px',
+                        fontSize: '14px',
+                        maxWidth: '20%',
+                        borderRadius: '4px',
+                        border: '1px solid #555',
+                        backgroundColor: '#2a2a2a',
+                        color: '#fff',
+                        flex: '1'
+                    }}
+                />
+
+                <button
+                    onClick={handleGenerate}
+                    style={{
+                        padding: '10px',
+                        backgroundColor: '#007acc',
+                        border: 'none',
+                        color: 'white',
+                        cursor: 'pointer',
+                        fontSize: '14px',
+                        borderRadius: '4px'
+                    }}
+                    disabled={temporaryFiles.length === 0}
+                >
+                    Generate
+                </button>
             </div>
         </div>
     );

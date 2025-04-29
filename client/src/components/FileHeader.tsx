@@ -84,6 +84,7 @@ const FileHeader: React.FC<FileHeaderProps> = ({ files, setFiles }) => {
         setFiles(prev => {
             const updated = [...prev];
             const wasActive = updated[index].active;
+            updated[index].file = null as unknown as File;
             updated.splice(index, 1);
             if (wasActive && updated.length > 0) updated[0].active = true;
             return updated;

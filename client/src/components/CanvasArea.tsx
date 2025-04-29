@@ -16,7 +16,12 @@ interface CanvasAreaProps {
 function CanvasArea({ activeFile }: CanvasAreaProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [sliceCenters, setSliceCenters] = useState<[number, number, number]>([0, 0, 0]);
+  const sliceCentersRef = useRef<[number, number, number]>([0, 0, 0]);
   const [dims, setDims] = useState<[number, number, number]>([1, 1, 1]);
+
+  useEffect(() => {
+    sliceCentersRef.current = sliceCenters;
+  }, [sliceCenters]);
 
   useEffect(() => {
     if (!activeFile || !activeFile.file) return;
@@ -33,6 +38,12 @@ function CanvasArea({ activeFile }: CanvasAreaProps) {
           header.dims[3],
         ];
         setDims(dims);
+
+        setSliceCenters([
+          dims[2] / 2,
+          dims[0] / 2,
+          dims[1] / 2,
+        ]);
 
         const imageData = nifti.readImage(header, fileBuffer);
         const raw = new Int16Array(imageData);
@@ -53,7 +64,7 @@ function CanvasArea({ activeFile }: CanvasAreaProps) {
         const affine = new Float32Array((header as any).affine.flat());
 
         if (canvasRef.current) {
-          await main(canvasRef.current, voxel, dims, affine, device, sliceCenters);
+          await main(canvasRef.current, voxel, dims, affine, device, sliceCentersRef);
         }
       } else {
         alert('Not a valid NIfTI file.');
@@ -68,7 +79,7 @@ function CanvasArea({ activeFile }: CanvasAreaProps) {
       <canvas
         id="canvas"
         ref={canvasRef}
-        style={{ width: '100%', height: '100%', backgroundColor: '#000' }}
+        style={{ width: '100%', height: '70%', paddingBottom: '40px', backgroundColor: '#000' }}
       />
       <div style={{ position: 'absolute', top: 10, right: 10, background: 'rgba(255,255,255,0.7)', padding: '10px', borderRadius: '8px' }}>
         <div>
