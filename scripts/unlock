@@ -1,0 +1,35 @@
+#!/usr/bin/env python3
+
+import os
+import subprocess
+
+
+def check_git_crypt():
+    # Check if git-crypt is installed
+    try:
+        subprocess.run(
+            ["git-crypt", "version"],
+            check=True,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
+    except:
+        print("git-crypt is not installed. Please install it and try again.")
+        exit(1)
+
+
+def main():
+    check_git_crypt()
+
+    # Get secret key from user (password prompt)
+    secret_key = input("Enter the secret key: ")
+
+    # Clear screen
+    os.system("clear")
+
+    # Run git-crypt unlock
+    subprocess.run(["git-crypt", "unlock", secret_key])
+
+
+if __name__ == "__main__":
+    main()

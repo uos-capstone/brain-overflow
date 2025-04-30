@@ -2,11 +2,8 @@
 	"name": "Brain Overflow",
 	"image": "mcr.microsoft.com/devcontainers/java:1-21-bullseye",
 	"features": {
-		"ghcr.io/devcontainers/features/java:1": {
-			"version": "none",
-			"installMaven": "false",
-			"installGradle": "false"
-		}
+		"ghcr.io/devcontainers/features/java:1": {},
+		"ghcr.io/devcontainers-extra/features/kubectl-asdf:2": {}
 	},
 	"customizations": {
 		"vscode": {
@@ -17,7 +14,8 @@
 				"wayou.vscode-todo-highlight",
 				"dbaeumer.vscode-eslint",
 				"yoavbls.pretty-ts-errors",
-				"fwcd.kotlin"
+				"fwcd.kotlin",
+				"ms-python.black-formatter"
 			]
 		}
 	}
