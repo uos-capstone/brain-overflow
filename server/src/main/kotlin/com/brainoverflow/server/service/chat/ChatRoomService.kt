@@ -1,6 +1,7 @@
 package com.brainoverflow.server.service.chat
 
 import com.brainoverflow.server.api.dto.request.chat.CreateRoomDto
+import com.brainoverflow.server.api.dto.response.chat.ChatRoomDto
 import com.brainoverflow.server.common.enums.ReturnCode
 import com.brainoverflow.server.common.exception.BOException
 import com.brainoverflow.server.domain.chat.ChatRoom
@@ -33,9 +34,10 @@ class ChatRoomService(
     }
 
     @Transactional
-    fun invite(inviteUserId: UUID, targetUserId : UUID, roomId: Long){
+    fun invite(inviteUserId: UUID, targetUserId: UUID, roomId: Long) {
         val inviteUser = userService.getByUserId(inviteUserId)
-        val chatRoom = chatRoomRepository.findByIdOrNull(roomId) ?: throw BOException(ReturnCode.WRONG_PARAMETER)
+        val chatRoom = chatRoomRepository.findByIdOrNull(roomId)
+            ?: throw BOException(ReturnCode.WRONG_PARAMETER)
         checkUserInRoom(chatRoom, inviteUser)
 
         val targetUser = userService.getByUserId(targetUserId)
@@ -44,7 +46,14 @@ class ChatRoomService(
     }
 
     private fun checkUserInRoom(chatRoom: ChatRoom, user: User) {
-        chatRoomUserRepository.findByUserAndChatRoom(user, chatRoom)?: throw BOException(ReturnCode.USER_NOT_IN_ROOM)
+        chatRoomUserRepository.findByUserAndChatRoom(user, chatRoom)
+            ?: throw BOException(ReturnCode.USER_NOT_IN_ROOM)
+    }
+
+    fun getAllUserChatRooms(userId: UUID): List<ChatRoomDto> {
+        val user = userService.getByUserId(userId)
+        val roomUsers = chatRoomUserRepository.findByUser(user)
+        return roomUsers.map { it.chatRoom }.map { ChatRoomDto.from(it) }
     }
 
 }
