@@ -21,5 +21,8 @@
 			]
 		}
 	},
-	"postCreateCommand": "scripts/init"
+	"postCreateCommand": "scripts/init",
+	"remoteEnv": {
+		"PATH": "${containerEnv:PATH}:/${containerWorkspaceFolder}/scripts"
+	}
 }
