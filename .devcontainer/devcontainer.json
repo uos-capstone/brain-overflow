@@ -3,7 +3,8 @@
 	"image": "mcr.microsoft.com/devcontainers/java:1-21-bullseye",
 	"features": {
 		"ghcr.io/devcontainers/features/java:1": {},
-		"ghcr.io/devcontainers-extra/features/kubectl-asdf:2": {}
+		"ghcr.io/devcontainers-extra/features/kubectl-asdf:2": {},
+		"ghcr.io/devcontainers/features/docker-in-docker:2": {}
 	},
 	"customizations": {
 		"vscode": {
@@ -15,8 +16,10 @@
 				"dbaeumer.vscode-eslint",
 				"yoavbls.pretty-ts-errors",
 				"fwcd.kotlin",
-				"ms-python.black-formatter"
+				"ms-python.black-formatter",
+				"ms-azuretools.vscode-docker"
 			]
 		}
-	}
+	},
+	"postCreateCommand": "scripts/init"
 }
