@@ -31,13 +31,16 @@ class SecurityConfig(
             .csrf { it.disable() }
             .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
             .authorizeHttpRequests {
-                it.requestMatchers("/auth/login",
+                it.requestMatchers(
+                    "/auth/login",
                     "/auth/signup", "/mri/**",
-                    "/chat/**", "/chat.html","/ai.html",
+                    "/chat/**", "/chat.html", "/ai.html", "/**.html",
                     "/ws/**", "/swagger-ui/**",
                     "/v3/api-docs",        // <-- 추가!
-                    "/v3/api-docs/**")
-                        .permitAll()
+                    "/v3/api-docs/**",
+                    "/chatroom"
+                )
+                    .permitAll()
                 it.anyRequest().authenticated()
             }
             .cors {
@@ -48,7 +51,10 @@ class SecurityConfig(
         http.authenticationProvider(daoAuthenticationProvider())
 
         // JWT 인증 필터를 UsernamePasswordAuthenticationFilter 이전에 삽입
-        http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter::class.java)
+        http.addFilterBefore(
+            jwtAuthenticationFilter,
+            UsernamePasswordAuthenticationFilter::class.java
+        )
 
         return http.build()
     }

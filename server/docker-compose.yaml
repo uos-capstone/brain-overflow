@@ -7,9 +7,7 @@ x-spring-common: &spring-common
     dockerfile: Dockerfile
   image: my-spring-app:latest
   depends_on:
-#    - postgres
     - redis
-#    - rabbitmq
   environment:
     PROFILE: dev
     # PostgreSQL
@@ -30,23 +28,6 @@ services:
     ports:
       - "6379:6379"
 
-  # RabbitMQ (with management UI)
-#  rabbitmq:
-#    image: rabbitmq:4.0-management
-#    container_name: rabbitmq
-#    environment:
-#      RABBITMQ_DEFAULT_USER: guest
-#      RABBITMQ_DEFAULT_PASS: guest
-#    ports:
-#      - "5672:5672"
-#      - "15672:15672"
-#      - "61613:61613"   # <-- STOMP TCP 포트 추가
-#  # STOMP 플러그인 활성화를 위해 커맨드를 오버라이드
-#    command: >
-#      bash -lc "rabbitmq-plugins enable --offline rabbitmq_stomp rabbitmq_web_stomp &&
-#               rabbitmq-server"
-  # Spring Boot 애플리케이션 3개 인스턴스
-
   spring-1:
     <<: *spring-common
     ports:
@@ -61,6 +42,3 @@ services:
     <<: *spring-common
     ports:
       - "8082:8080"
-#
-#volumes:
-#  postgres_data:
