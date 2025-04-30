@@ -34,15 +34,12 @@ class DynamicRabbitListenerRegistrar(
         val serverId = serverIdProvider.get()
         val queueName = "ai.response.queue.$serverId"
 
-        // 1) Queue 선언
         val queue = Queue(queueName, true)
         amqpAdmin.declareQueue(queue)
 
-        // 2) Exchange 선언 (이미 선언돼 있으면 중복 선언해도 무시됩니다)
-        val exchange = TopicExchange(EXCHANGE_NAME, true, false)
+        val exchange = TopicExchange(EXCHANGE_NAME, true, true)
         amqpAdmin.declareExchange(exchange)
 
-        // 3) Binding 선언: routingKey = queueName 으로 묶어주기
         val binding = BindingBuilder
             .bind(queue)
             .to(exchange)
@@ -56,9 +53,9 @@ class DynamicRabbitListenerRegistrar(
             setMessageListener { message ->
                 val json = objectMapper.readTree(String(message.body))
                 val userId = json["userId"].asText()
-                val msg    = json["message"].asText()
+                val msg = json["message"].asText()
                 val payload = mapOf(
-                    "userId"  to userId,
+                    "userId" to userId,
                     "message" to msg
                 )
                 messagingTemplate.convertAndSend("/topic/ai-response.$userId", payload)

@@ -1,16 +1,20 @@
 package com.brainoverflow.server.common.ws
 
 import com.brainoverflow.server.common.auth.JwtProvider
+import org.slf4j.LoggerFactory
 import org.springframework.http.server.ServerHttpRequest
 import org.springframework.http.server.ServerHttpResponse
 import org.springframework.http.server.ServletServerHttpRequest
 import org.springframework.web.socket.WebSocketHandler
 import org.springframework.web.socket.server.HandshakeInterceptor
 import org.springframework.web.util.UriComponentsBuilder
+import kotlin.math.log
 
 class JwtHandshakeInterceptor(
     private val jwtProvider: JwtProvider
 ) : HandshakeInterceptor {
+
+    private val logger = LoggerFactory.getLogger(javaClass)
 
     override fun beforeHandshake(
         request: ServerHttpRequest,
@@ -50,9 +54,10 @@ class JwtHandshakeInterceptor(
             }
             val userId = jwtProvider.getUserIdFromToken(token)
             attributes["userId"] = userId
+            logger.info("user Access : $userId")
             true
         } catch (ex: Exception) {
-            println("JWT 검증 실패: ${ex.message}")
+            logger.error(ex.message, ex)
             false
         }
     }
