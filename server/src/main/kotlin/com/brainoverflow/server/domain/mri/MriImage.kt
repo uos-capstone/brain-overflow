@@ -8,15 +8,18 @@ import kotlin.collections.ArrayList
 
 @Entity
 class MriImage(
-    user: User
+    user: User,
+    filePath: String
 ) {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    val id : UUID? = null
+    val id: UUID? = null
 
     @ManyToOne(fetch = FetchType.LAZY)
-    val user:User = user
+    val user: User = user
+
+    val filePath: String = filePath  // ← 실제 저장 경로
 
     @OneToMany(mappedBy = "mriImage")
-    val mriResults : List<MriResult> = listOf()
+    val mriResults: List<MriResult> = listOf()
 }

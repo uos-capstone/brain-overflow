@@ -2,38 +2,39 @@ package com.brainoverflow.server.api.controller.mri
 
 import com.brainoverflow.server.api.dto.request.mri.MriResultDto
 import com.brainoverflow.server.service.mri.MriService
+import org.springframework.http.MediaType
+import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.security.core.userdetails.UserDetails
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
+import org.springframework.web.multipart.MultipartFile
 import java.util.*
 
 @RestController
 @RequestMapping("/mri")
-class MriController (
+class MriController(
     private val mriService: MriService
-){
-    @PostMapping
+) {
+    @PostMapping(consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     fun registerMRI(
-//        @AuthenticationPrincipal userDetails: UserDetails
-    ){
-        mriService.registerMRIImage()
+        @AuthenticationPrincipal user: UserDetails,
+        @RequestPart("file") file: MultipartFile
+    ): ResponseEntity<String> {
+        mriService.registerMRIImage(file, UUID.fromString(user.username))
+        return ResponseEntity.ok("MRI 이미지 업로드 성공")
     }
 
     @PostMapping("/check-ad")
     fun calculateMRI(
-        @RequestParam mriImageId : UUID
-    ){
+        @RequestParam mriImageId: UUID
+    ) {
         mriService.registerMRIPrediction(mriImageId)
     }
 
     @PostMapping("/check/complete")
     fun completeMRI(
         @RequestBody mriResultDto: MriResultDto
-    ){
+    ) {
         mriService.receiveResult(mriResultDto)
     }
 }
