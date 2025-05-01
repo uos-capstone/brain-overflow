@@ -23,6 +23,7 @@
 	},
 	"postCreateCommand": "scripts/init",
 	"remoteEnv": {
-		"PATH": "${containerEnv:PATH}:/${containerWorkspaceFolder}/scripts"
+		"PATH": "${containerEnv:PATH}:/${containerWorkspaceFolder}/scripts",
+		"KUBECONFIG": "${containerWorkspaceFolder}/kubernetes/secret-kubeconfig.yaml"
 	}
 }
