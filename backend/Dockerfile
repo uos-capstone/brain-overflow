@@ -1,14 +1,21 @@
-# 1. Java 21 slim 이미지를 사용합니다.
-FROM openjdk:21-jdk-slim
+FROM gradle:8.12.0-jdk21-corretto AS builder
+WORKDIR /build
 
-# 2. 작업 디렉터리 생성
+COPY build.gradle.kts settings.gradle.kts /build/
+RUN gradle build -x test --parallel --continue > /dev/null 2>&1 || true
+
+COPY . /build
+RUN gradle build -x test --parallel
+
+FROM amazoncorretto:21-alpine AS production
 WORKDIR /app
 
-# 3. 빌드된 JAR 파일을 복사합니다. (예시: target 디렉터리에 생성된 JAR)
-COPY build/libs/server-0.0.1-SNAPSHOT.jar app.jar
+# 1️⃣  uploads 폴더 생성 + 퍼미션 변경 (USER 전환 전에!)
+RUN mkdir -p /app/mri-uploads && chown -R nobody:nobody /app/mri-uploads
 
-# 4. 컨테이너가 실행될 포트 설정 (기본적으로 8080 포트를 많이 사용)
+COPY --from=builder /build/build/libs/server-*.jar app.jar
+
 EXPOSE 8080
 
-# 5. 컨테이너 실행 시, JAR 파일을 실행하도록 설정
-ENTRYPOINT ["java", "-jar", "app.jar"]
+USER nobody
+ENTRYPOINT ["java", "-jar", "-Djava.security.egd=file:/dev/./urandom", "-Dsun.net.inetaddr.ttl=0", "app.jar"]

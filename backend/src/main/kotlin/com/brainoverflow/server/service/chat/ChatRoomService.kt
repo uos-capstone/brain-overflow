@@ -1,6 +1,5 @@
 package com.brainoverflow.server.service.chat
 
-import com.brainoverflow.server.api.dto.request.chat.CreateRoomDto
 import com.brainoverflow.server.domain.exception.ReturnCode
 import com.brainoverflow.server.domain.exception.BOException
 import com.brainoverflow.server.domain.chat.ChatRoom
@@ -8,6 +7,7 @@ import com.brainoverflow.server.domain.chat.ChatRoomUser
 import com.brainoverflow.server.domain.chat.ChatRoomUserRepository
 import com.brainoverflow.server.domain.chat.ChatRoomRepository
 import com.brainoverflow.server.domain.user.User
+import com.brainoverflow.server.external.dto.request.chat.CreateRoomDto
 import com.brainoverflow.server.service.UserService
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service

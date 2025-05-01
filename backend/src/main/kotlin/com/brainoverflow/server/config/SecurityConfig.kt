@@ -34,7 +34,7 @@ class SecurityConfig(
                 it.requestMatchers(
                     "/auth/login",
                     "/auth/signup", "/mri/**",
-                    "/chat/**", "/chat.html", "/ai.html", "/**.html",
+                    "/chat/**", "/**.html",
                     "/ws/**", "/swagger-ui/**",
                     "/v3/api-docs",        // <-- 추가!
                     "/v3/api-docs/**",

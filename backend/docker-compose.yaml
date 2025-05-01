@@ -31,7 +31,8 @@ x-spring-common: &spring-common
 
     # MongoDB
     SPRING_DATA_MONGODB_URI: mongodb://mongodb:27017/brainoverflow
-
+  volumes:
+    - uploads-data:/app/mri-uploads
 services:
   # ────────────────
   # Infrastructure
@@ -48,10 +49,20 @@ services:
     ports:
       - "5672:5672"
       - "15672:15672"   # 관리 UI
+      - "61613:61613"    # ★ STOMP
     environment:
       - RABBITMQ_DEFAULT_USER=guest
       - RABBITMQ_DEFAULT_PASS=guest
-
+    command: >
+      bash -c "
+        rabbitmq-plugins enable --offline rabbitmq_stomp &&
+        rabbitmq-server
+      "
+    healthcheck: # 👉 STOMP 포트 열릴 때까지 대기
+      test: [ "CMD-SHELL", "rabbitmq-diagnostics -q check_port_connectivity -p 61613" ]
+      interval: 5s
+      timeout: 5s
+      retries: 12
   mongodb:
     image: mongo:7
     container_name: mongodb
@@ -65,7 +76,7 @@ services:
     container_name: postgres
     restart: always
     ports:
-      - "5432:5432"
+      - "5433:5432"
     environment:
       - POSTGRES_DB=brainoverflow
       - POSTGRES_USER=postgres
@@ -78,18 +89,24 @@ services:
   # ────────────────
   spring-1:
     <<: *spring-common
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
     ports:
       - "8080:8080"
 
   spring-2:
     <<: *spring-common
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
     ports:
       - "8081:8080"
-
-  spring-3:
-    <<: *spring-common
-    ports:
-      - "8082:8080"
+#
+#  spring-3:
+#    <<: *spring-common
+#    ports:
+#      - "8082:8080"
 
 # ────────────────
 # Persistence volumes
@@ -97,3 +114,4 @@ services:
 volumes:
   mongo-data:
   postgres-data:
+  uploads-data:
