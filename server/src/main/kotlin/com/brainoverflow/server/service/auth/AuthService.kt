@@ -1,17 +1,11 @@
 package com.brainoverflow.server.service.auth
 
-import com.brainoverflow.server.api.dto.request.user.LoginRequest
-import com.brainoverflow.server.api.dto.request.user.SignupRequest
-import com.brainoverflow.server.api.dto.response.user.TokenResponse
-import com.brainoverflow.server.common.auth.JwtProvider
-import com.brainoverflow.server.common.enums.ReturnCode
-import com.brainoverflow.server.common.exception.BOException
+import com.brainoverflow.server.external.dto.response.user.TokenResponse
+import com.brainoverflow.server.external.controller.auth.JwtProvider
+import com.brainoverflow.server.domain.exception.ReturnCode
+import com.brainoverflow.server.domain.exception.BOException
 import com.brainoverflow.server.domain.user.User
 import com.brainoverflow.server.domain.user.UserRepository
-import org.springframework.data.repository.findByIdOrNull
-import org.springframework.security.authentication.AuthenticationManager
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
-import org.springframework.security.core.Authentication
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -21,8 +15,10 @@ class AuthService(
     private val jwtProvider: JwtProvider,
     private val userRepository: UserRepository,
 ) {
-    fun login(loginRequest: LoginRequest): TokenResponse {
-        val user = userRepository.findByUsername(loginRequest.username) ?: throw BOException(ReturnCode.NOT_EXIST_USER)
+    fun login(loginRequest: com.brainoverflow.server.external.dto.request.user.LoginRequest): com.brainoverflow.server.external.dto.response.user.TokenResponse {
+        val user = userRepository.findByUsername(loginRequest.username) ?: throw BOException(
+            ReturnCode.NOT_EXIST_USER
+        )
         checkPassword(user, user.password)
 
         val token = jwtProvider.generateToken(user.username, user.id.toString())
@@ -36,7 +32,7 @@ class AuthService(
     }
 
     @Transactional
-    fun signup(signupRequest: SignupRequest) {
+    fun signup(signupRequest: com.brainoverflow.server.external.dto.request.user.SignupRequest) {
         userRepository.save(signupRequest.toUser())
     }
 }

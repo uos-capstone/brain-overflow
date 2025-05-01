@@ -22,10 +22,10 @@
     <button id="loginBtn">로그인</button>
     <div id="loginError" style="color: red;"></div>
 </div>
-
 <div class="container" id="chatContainer">
     <h2>AI 응답 알림</h2>
-    <div class="chat-messages" id="chatMessages"></div>
+    <div id="chatRoomList"></div> <!-- 채팅방 리스트 추가 -->
+    <div class="chat-messages" id="chatMessages" style="display: none;"></div>
 </div>
 
 <script>
@@ -72,7 +72,6 @@
         stompClient = Stomp.over(socket);
 
         stompClient.connect(
-            {},  // STOMP 헤더 대신 HandshakeInterceptor에서 token 검사
             frame => {
                 console.log('STOMP 연결됨:', frame, 'userId=', userId);
                 stompClient.subscribe(

@@ -1,14 +1,12 @@
 package com.brainoverflow.server.service.mri
 
-import com.brainoverflow.server.api.dto.request.mri.MriResultDto
-import com.brainoverflow.server.common.enums.PredictionStatus
-import com.brainoverflow.server.common.enums.ReturnCode
-import com.brainoverflow.server.common.exception.BOException
+import com.brainoverflow.server.domain.mri.PredictionStatus
+import com.brainoverflow.server.domain.exception.ReturnCode
+import com.brainoverflow.server.domain.exception.BOException
 import com.brainoverflow.server.domain.mri.MriImage
 import com.brainoverflow.server.domain.mri.MriImageRepository
 import com.brainoverflow.server.domain.mri.MriResult
 import com.brainoverflow.server.domain.mri.MriResultRepository
-import com.brainoverflow.server.domain.user.UserRepository
 import com.brainoverflow.server.service.UserService
 import com.brainoverflow.server.service.port.Message
 import com.brainoverflow.server.service.port.MessageQueue
@@ -52,7 +50,7 @@ class MriService(
     }
 
     @Transactional
-    fun receiveResult(mriResultDto: MriResultDto) {
+    fun receiveResult(mriResultDto: com.brainoverflow.server.external.dto.request.mri.MriResultDto) {
         val mriImage =
             mriImageRepository.findByIdOrNull(mriResultDto.mriImageId) ?: throw BOException(
                 ReturnCode.NOT_EXIST_IMAGE

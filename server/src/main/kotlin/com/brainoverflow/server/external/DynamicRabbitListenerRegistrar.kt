@@ -1,6 +1,6 @@
 package com.brainoverflow.server.external
 
-import com.brainoverflow.server.common.ws.ServerIdProvider
+import com.brainoverflow.server.external.ws.ServerIdProvider
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.amqp.core.AmqpAdmin
 import org.springframework.amqp.core.BindingBuilder

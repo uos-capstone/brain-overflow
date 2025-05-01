@@ -1,15 +1,13 @@
 package com.brainoverflow.server.service.chat
 
 import com.brainoverflow.server.api.dto.request.chat.CreateRoomDto
-import com.brainoverflow.server.api.dto.response.chat.ChatRoomDto
-import com.brainoverflow.server.common.enums.ReturnCode
-import com.brainoverflow.server.common.exception.BOException
+import com.brainoverflow.server.domain.exception.ReturnCode
+import com.brainoverflow.server.domain.exception.BOException
 import com.brainoverflow.server.domain.chat.ChatRoom
 import com.brainoverflow.server.domain.chat.ChatRoomUser
 import com.brainoverflow.server.domain.chat.ChatRoomUserRepository
 import com.brainoverflow.server.domain.chat.ChatRoomRepository
 import com.brainoverflow.server.domain.user.User
-import com.brainoverflow.server.domain.user.UserRepository
 import com.brainoverflow.server.service.UserService
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
@@ -50,10 +48,11 @@ class ChatRoomService(
             ?: throw BOException(ReturnCode.USER_NOT_IN_ROOM)
     }
 
-    fun getAllUserChatRooms(userId: UUID): List<ChatRoomDto> {
+    fun getAllUserChatRooms(userId: UUID): List<com.brainoverflow.server.external.dto.response.chat.ChatRoomDto> {
         val user = userService.getByUserId(userId)
         val roomUsers = chatRoomUserRepository.findByUser(user)
-        return roomUsers.map { it.chatRoom }.map { ChatRoomDto.from(it) }
+        return roomUsers.map { it.chatRoom }
+            .map { com.brainoverflow.server.external.dto.response.chat.ChatRoomDto.from(it) }
     }
 
 }

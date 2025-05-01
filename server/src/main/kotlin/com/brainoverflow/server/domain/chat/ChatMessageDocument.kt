@@ -1,6 +1,5 @@
 package com.brainoverflow.server.domain.chat
 
-import com.brainoverflow.server.common.enums.MessageType
 import jakarta.persistence.Id
 import org.springframework.data.mongodb.core.mapping.Document
 import java.time.Instant
