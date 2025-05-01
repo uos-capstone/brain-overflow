@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 
+import hashlib
 import os
+import re
 import subprocess
 
 
@@ -32,11 +34,81 @@ def check_docker():
         exit(1)
 
 
+def hash_path(path, ignore_regex=None):
+    # If path is ignored, return empty string
+    if ignore_regex and re.match(ignore_regex, path):
+        return ""
+
+    # If the path is a file, hash the file
+    if os.path.isfile(path):
+        return hashlib.sha256(open(path, "rb").read()).hexdigest()
+
+    # If the path is a directory, recursively hash the directory
+    elif os.path.isdir(path):
+        hashes = []
+        for child in os.listdir(path):
+            hashes.append(hash_path(os.path.join(path, child)))
+        return hashlib.sha256("".join(hashes).encode("utf-8")).hexdigest()
+
+    # If the path is neither a file nor a directory, return empty string
+    return ""
+
+
+def build_service(directory):
+    # Hash the directory
+    hash = hash_path(directory)
+
+    # Build the service
+    tag = f"brain-overflow-{directory}:{hash}"
+    subprocess.run(["docker", "build", "-t", tag, directory])
+
+    # Push the service
+    subprocess.run(["docker", "push", tag])
+
+    return tag
+
+
 def main():
+    # Change to the root directory
+    current_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    os.chdir(current_dir)
+
     check_kubectl()
     check_docker()
 
-    print("kubectl and docker are installed. Proceeding with deployment...")
+    # Build the services
+    try:
+        services = [
+            "backend",
+            "frontend",
+        ]
+        tags = []
+        for service in services:
+            print(f"Building {service}...")
+            tags.append((service, build_service(service)))
+    except Exception as e:
+        print(f"Error: {e}")
+        exit(1)
+
+    # Deploy the resources
+    try:
+        resources_file_path = "kubernetes/resources.yaml"
+        tmp_file_path = "/tmp/brain-overflow-resources.yaml"
+        with open(resources_file_path, "r") as resource_file:
+            with open(tmp_file_path, "w") as tmp_file:
+                # Replace the image tag with the new tag
+                for line in resource_file:
+                    for service, tag in tags:
+                        line = line.replace(f"${service}", tag)
+                    tmp_file.write(line)
+        # Deploy the resources
+        subprocess.run(["kubectl", "apply", "-f", tmp_file_path])
+    except Exception as e:
+        print(f"Error: {e}")
+        exit(1)
+    finally:
+        # Remove the temporary files
+        os.remove(tmp_file)
 
 
 if __name__ == "__main__":
