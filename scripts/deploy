@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import hashlib
+import json
 import os
 import re
 import subprocess
@@ -34,6 +35,27 @@ def check_docker():
         exit(1)
 
 
+def docker_login():
+    with open("scripts/secret-harbor.json", "r") as f:
+        harbor_config = json.load(f)
+        harbor_url = "https://harbor.unknownpgr.com"
+        username = harbor_config["name"]
+        password = harbor_config["secret"]
+        command = ["docker", "login", "-u", username, "-p", password, harbor_url]
+
+        try:
+            subprocess.run(command, check=True)
+        except:
+            print(
+                "Failed to login to Harbor. Please check the credentials and try again.\n"
+                "\033[92m"
+                "Tip: remove `~/.docker/config.json` and try again.\n"
+                "Warning: you will be logged out from Docker Hub.\n"
+                "\033[0m\n"
+            )
+            exit(1)
+
+
 def hash_path(path, ignore_regex=None):
     # If path is ignored, return empty string
     if ignore_regex and re.match(ignore_regex, path):
@@ -59,7 +81,7 @@ def build_service(directory):
     hash = hash_path(directory)
 
     # Build the service
-    tag = f"brain-overflow-{directory}:{hash}"
+    tag = f"harbor.unknownpgr.com/brain-overflow/{directory}:{hash}"
     subprocess.run(["docker", "build", "-t", tag, directory])
 
     # Push the service
@@ -75,6 +97,7 @@ def main():
 
     check_kubectl()
     check_docker()
+    docker_login()
 
     # Build the services
     try:
@@ -92,7 +115,7 @@ def main():
 
     # Deploy the resources
     try:
-        resources_file_path = "kubernetes/resources.yaml"
+        resources_file_path = "kubernetes/secret-resources.yaml"
         tmp_file_path = "/tmp/brain-overflow-resources.yaml"
         with open(resources_file_path, "r") as resource_file:
             with open(tmp_file_path, "w") as tmp_file:
@@ -106,9 +129,6 @@ def main():
     except Exception as e:
         print(f"Error: {e}")
         exit(1)
-    finally:
-        # Remove the temporary files
-        os.remove(tmp_file)
 
 
 if __name__ == "__main__":
