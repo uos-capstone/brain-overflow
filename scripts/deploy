@@ -35,6 +35,17 @@ def check_docker():
         exit(1)
 
 
+def check_unlock():
+    # Check if git-crypt is unlocked
+    # (Check if `scripts/secret-harbor.json` is correct json file)
+    try:
+        with open("scripts/secret-harbor.json", "r") as f:
+            json.load(f)
+    except:
+        print("Repository is not unlocked. Please run `scripts/unlock` and try again.")
+        exit(1)
+
+
 def docker_login():
     with open("scripts/secret-harbor.json", "r") as f:
         harbor_config = json.load(f)
@@ -97,6 +108,7 @@ def main():
 
     check_kubectl()
     check_docker()
+    check_unlock()
     docker_login()
 
     # Build the services
