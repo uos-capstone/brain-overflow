@@ -106,9 +106,9 @@ def main():
     current_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     os.chdir(current_dir)
 
+    check_unlock()
     check_kubectl()
     check_docker()
-    check_unlock()
     docker_login()
 
     # Build the services
