@@ -1,0 +1,108 @@
+/* ChatWindow.module.css */
+
+.window {
+	position: fixed;
+	width: 350px;
+	height: 500px; 
+	max-height: 500px; 
+	background: #fff;
+	border: 1px solid #888;
+	border-radius: 8px;
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+	display: flex;
+	flex-direction: column;
+	user-select: none;
+	overflow: hidden; 
+}
+
+.header {
+	padding: 8px 12px;
+	background: #4e4e4e;
+	color: #fff;
+	border-top-left-radius: 7px;
+	border-top-right-radius: 7px;
+	cursor: move;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	flex-shrink: 0;
+}
+
+.headerTitle {
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+	margin-right: 10px; 
+}
+
+.headerControls {
+	display: flex;
+	align-items: center;
+}
+
+.controlButton {
+	background: transparent;
+	border: none;
+	color: #fff;
+	cursor: pointer;
+	font-size: 16px;
+	padding: 0 5px;
+	line-height: 1;
+	margin-left: 5px;
+	outline: none;
+}
+
+.content {
+	flex: 1; /* 남은 공간 모두 차지 */
+	padding: 15px 12px; /* 내부 여백 조정 */
+	overflow-y: auto; /* 세로 스크롤 자동 생성 */
+	background: #ABC1D1; /* 카카오톡 채팅방 배경색 유사 */
+	min-height: 100px; /* 최소 높이 */
+	display: flex; /* Flexbox 사용 */
+	flex-direction: column; /* 메시지를 세로로 쌓음 */
+	/* gap: 5px; /* 메시지 사이 간격 (margin으로 조절 시 불필요) */
+}
+
+.inputArea {
+	padding: 8px;
+	border-top: 1px solid #eee;
+	display: flex;
+	align-items: center;
+	background: #fff;
+	flex-shrink: 0;
+}
+
+.inputField {
+	height: 35px;
+	flex: 1;
+	padding: 6px 10px;
+	font-size: 16px;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+	box-sizing: border-box; 
+}
+
+.sendButton {
+	height: 35px;
+	padding: 0 15px;
+	margin-left: 8px;
+	font-size: 14px;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+	background: #f0f0f0;
+	cursor: pointer;
+	flex-shrink: 0; 
+	box-sizing: border-box;
+}
+
+	.sendButton:hover {
+		background: #e0e0e0;
+	}
+
+	.sendButton:active {
+		background: #d0d0d0;
+	}
+
+	.inputField:focus, .sendButton:focus, .controlButton:focus {
+		outline: none;
+	}

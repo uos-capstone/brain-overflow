@@ -1,0 +1,39 @@
+/* OtherChatMessage.module.css */
+.messageContainer {
+  display: flex;
+  flex-direction: column; /* 이름과 말풍선 세로 배치 */
+  align-items: flex-start; /* 왼쪽 정렬 */
+  margin-bottom: 10px; /* 메시지 간 간격 */
+  padding-left: 5px; /* 좌측 약간 여백 */
+}
+
+.senderName {
+  font-size: 0.8rem;
+  color: #555;
+  margin: 0 0 3px 5px; /* 말풍선 약간 위, 왼쪽에 이름 표시 */
+  font-weight: 500;
+}
+
+.messageBubble {
+  background-color: #FFFFFF; /* 흰색 배경 */
+  color: #333;
+  padding: 8px 12px;
+  border-radius: 12px 12px 12px 0; /* 말풍선 모양 */
+  max-width: 75%;
+  word-wrap: break-word;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
+}
+
+.messageContent {
+  margin: 0 0 4px 0;
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+
+.messageTimestamp {
+  font-size: 0.7rem;
+  color: #999; /* 더 연한 회색 */
+  text-align: right;
+  display: block;
+  margin-top: 2px;
+}

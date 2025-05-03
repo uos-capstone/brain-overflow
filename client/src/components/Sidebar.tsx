@@ -1,8 +1,10 @@
 // Sidebar.tsx
-import React, { useState, useCallback, useEffect } from 'react'; // Added useEffect
+import React, { useState, useCallback, useEffect } from 'react';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { ChatWindow } from './ChatWindow';
+import styles from '../css/Sidebar.module.css'; 
+import { AddRoom } from './AddRoom';
 
 interface Chatroom { id: number; name: string; }
 const BASE_Z_INDEX = 10000;
@@ -10,9 +12,14 @@ const SIDEBAR_Z_INDEX = 11000;
 const DRAWER_Z_INDEX = 10500;
 const MINIMIZED_BAR_Z_INDEX = 10800;
 const BACKDROP_Z_INDEX = BASE_Z_INDEX - 1;
-
+interface ChatMessageData {
+    senderName: string;
+    senderId: string;
+    content: string;
+    timestamp: string;
+}
 export default function Sidebar() {
-    const [chatrooms] = useState<Chatroom[]>([
+    const [chatrooms, setChatrooms] = useState<Chatroom[]>([
         { id: 1, name: '방1' },
         { id: 2, name: '방2' },
         { id: 3, name: '방3333' },
@@ -26,12 +33,17 @@ export default function Sidebar() {
 
     const [zIndices, setZIndices] = useState<Record<number, number>>({});
     const [activeId, setActiveId] = useState<number | null>(null);
-
     const [pinnedIds, setPinnedIds] = useState<number[]>([]);
+    const [isAddRoomOpen, setIsAddRoomOpen] = useState(false);
 
-    const bringToFront = useCallback((id: number) => { 
+    const handleAddRoom = useCallback((name: string) => {
+        const newId = Date.now(); // ID 생성
+        const newRoom: Chatroom = { id: newId, name: name };
+        setChatrooms(currentRooms => [...currentRooms, newRoom]);
+    }, [setChatrooms]);
+
+    const bringToFront = useCallback((id: number) => {
         setActiveId(id);
-
         setZIndices(currentZIndices => {
             let maxZ = BASE_Z_INDEX;
             openIds
@@ -48,9 +60,8 @@ export default function Sidebar() {
         });
     }, [openIds, minimizedIds]);
 
-    const openRoom = useCallback((id: number) => { 
+    const openRoom = useCallback((id: number) => {
         let needsBringToFront = true;
-
         if (openIds.includes(id)) {
             if (minimizedIds.includes(id)) {
                 setMinimizedIds(ids => ids.filter(v => v !== id));
@@ -65,12 +76,11 @@ export default function Sidebar() {
                 return { ...p, [id]: { x: initialX, y: initialY } };
             });
         }
-
         if (needsBringToFront) {
             bringToFront(id);
         }
-
     }, [openIds, minimizedIds, bringToFront]);
+
 
     const moveRoom = useCallback((id: number, x: number, y: number) => {
         setPos(p => ({ ...p, [id]: { x, y } }));
@@ -81,7 +91,6 @@ export default function Sidebar() {
         setOpenIds(ids => ids.filter(v => v !== id));
         setMinimizedIds(ids => ids.filter(v => v !== id));
         setPinnedIds(ids => ids.filter(v => v !== id));
-
         setPos(currentPos => {
             const { [id]: _, ...rest } = currentPos;
             return rest;
@@ -90,17 +99,15 @@ export default function Sidebar() {
             const { [id]: _, ...rest } = currentZIndices;
             return rest;
         });
-
         if (activeId === id) {
             let nextActiveId: number | null = null;
             let maxZ = BASE_Z_INDEX - 1;
             const currentZIndicesSnapshot = { ...zIndices };
             delete currentZIndicesSnapshot[id];
-
             openIds
                 .filter(oid => oid !== id && !minimizedIds.includes(oid))
                 .forEach(oid => {
-                    const z = currentZIndicesSnapshot[oid]; 
+                    const z = currentZIndicesSnapshot[oid];
                     if (z !== undefined && z > maxZ) {
                         maxZ = z;
                         nextActiveId = oid;
@@ -113,6 +120,7 @@ export default function Sidebar() {
     const minimizeRoom = useCallback((id: number) => {
         setMinimizedIds(ids => (ids.includes(id) ? ids : [...ids, id]));
     }, []);
+
 
     const restoreRoom = useCallback((id: number) => {
         setMinimizedIds(ids => ids.filter(v => v !== id));
@@ -134,69 +142,61 @@ export default function Sidebar() {
                 minimizeRoom(id);
             }
         });
-    }, [activeWindows, pinnedIds, minimizeRoom]); 
+    }, [activeWindows, pinnedIds, minimizeRoom]);
 
     return (
         <DndProvider backend={HTML5Backend}>
             {activeWindows.some(id => !pinnedIds.includes(id)) && (
                 <div
                     onClick={handleOutsideClick}
-                    style={{
-                        position: 'fixed',
-                        top: 0,
-                        left: 0,
-                        width: '100vw',
-                        height: '100vh',
-                        zIndex: BACKDROP_Z_INDEX,
-                    }}
+                    className={styles.backdrop} 
+                    style={{ zIndex: BACKDROP_Z_INDEX }} 
                 />
             )}
 
-
-            {/* 사이드바 */}
             <div
-                style={{
-                    position: 'fixed',
-                    top: 0,
-                    left: 0,
-                    width: 60,
-                    background: '#1e1e1e',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    height: '100vh',
-                    boxSizing: 'border-box',
-                    zIndex: SIDEBAR_Z_INDEX,
-                }}
+                className={styles.sidebar} 
+                style={{ zIndex: SIDEBAR_Z_INDEX }} 
             >
-                <div onClick={() => setDrawerOpen(o => !o)} style={{ marginTop: '20px', cursor: 'pointer', fontSize: '24px' }}>
+                <div
+                    onClick={() => setDrawerOpen(o => !o)}
+                    className={`${styles.sidebarIcon} ${styles.sidebarIconTop}`}
+                    title={drawerOpen ? "목록 닫기" : "목록 열기"} 
+                >
                     🔍
                 </div>
-                <div style={{ marginBottom: 20, cursor: 'pointer', fontSize: '24px' }}>⚙️</div>
+                <div
+                    className={`${styles.sidebarIcon} ${styles.sidebarIconBottom}`}
+                    title="설정" 
+                >
+                    ⚙️
+                </div>
             </div>
 
-            {/* 채팅방 리스트 */}
             <div
+                className={styles.drawer} 
                 style={{
-                    position: 'fixed',
-                    top: 0,
-                    left: drawerOpen ? 60 : -240,
-                    width: 240,
-                    height: '100vh',
-                    background: '#2e2e2e',
-                    color: '#fff',
-                    transition: 'left 0.3s ease',
-                    zIndex: DRAWER_Z_INDEX,
-                    boxSizing: 'border-box',
-                    paddingTop: '60px',
-                    overflowY: 'auto',
+                    left: drawerOpen ? 60 : -240, 
+                    zIndex: DRAWER_Z_INDEX,       
                 }}
             >
-                <h3 style={{ padding: '10px 20px', margin: 0, borderBottom: '1px solid #444' }}>채팅 목록</h3>
-                <ul style={{ listStyle: 'none', margin: 0, padding: '10px 0' }}>
+                <div className={styles.drawerHeaderContainer}>
+                    <h3 className={styles.drawerHeader}>채팅 목록</h3>
+                    <button
+                        className={styles.addRoomButton}
+                        onClick={() => setIsAddRoomOpen(true)} // Open the modal
+                        title="새 채팅방 추가"
+                    >
+                        ⊕
+                    </button>
+                </div>
+
+                <ul className={styles.drawerList}>
                     {chatrooms.map(r => (
-                        <li key={r.id} onClick={() => openRoom(r.id)} style={{ margin: '2px 0', cursor: 'pointer', padding: '8px 20px', transition: 'background 0.2s' }}
+                        <li
+                            key={r.id}
+                            onClick={() => openRoom(r.id)}
+                            className={styles.drawerListItem} 
                             onMouseEnter={(e) => e.currentTarget.style.background = '#444'}
                             onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
                         >
@@ -206,12 +206,11 @@ export default function Sidebar() {
                 </ul>
             </div>
 
-            {/* 채팅방 */}
             {activeWindows.map(id => {
                 const room = chatrooms.find(r => r.id === id)!;
                 const { x, y } = pos[id] || { x: 300, y: 80 };
                 const zIndex = zIndices[id] || BASE_Z_INDEX;
-                const isPinned = pinnedIds.includes(id); // Check if pinned
+                const isPinned = pinnedIds.includes(id);
 
                 return (
                     <ChatWindow
@@ -233,43 +232,36 @@ export default function Sidebar() {
                 );
             })}
 
-            {/* 하단바 */}
-            <div style={{
-                position: 'fixed',
-                bottom: 0,
-                left: 60,
-                width: 'calc(100% - 60px)',
-                height: 40,
-                background: '#333',
-                borderTop: '1px solid #555',
-                display: 'flex',
-                alignItems: 'center',
-                padding: '0 10px',
-                boxSizing: 'border-box',
-                zIndex: MINIMIZED_BAR_Z_INDEX,
-                overflowX: 'auto',
-            }}>
+            <div
+                className={styles.minimizedBar} 
+                style={{ zIndex: MINIMIZED_BAR_Z_INDEX }} 
+            >
                 {minimizedWindows.map(id => {
                     const room = chatrooms.find(r => r.id === id)!;
                     return (
                         <button
                             key={id}
                             onClick={() => restoreRoom(id)}
-                            style={{
-                                background: '#555', color: '#fff', border: '1px solid #777',
-                                borderRadius: '4px', padding: '5px 10px', marginRight: '10px',
-                                cursor: 'pointer', whiteSpace: 'nowrap',
-                            }}
-                            title={`${room.name} 복원`}
+                            className={styles.minimizedButton}
                         >
                             {room.name}
                         </button>
                     );
                 })}
+                {/* 
                 {minimizedWindows.length === 0 && (
-                    <span style={{ color: '#888', fontSize: '12px' }}>최소화된 창 없음</span>
+                    <span className={styles.minimizedEmptyText}> 
+                        최소화된 창 없음
+                    </span>
                 )}
+                */}
             </div>
+            {isAddRoomOpen && (
+                <AddRoom
+                    onClose={() => setIsAddRoomOpen(false)} 
+                    onAdd={handleAddRoom}                 
+                />
+            )}
         </DndProvider>
     );
 }

@@ -1,0 +1,31 @@
+/* MyChatMessage.module.css */
+.messageContainer {
+  display: flex;
+  justify-content: flex-end; /* 오른쪽 정렬 */
+  margin-bottom: 5px; /* 메시지 간 간격 */
+  padding-right: 5px; /* 우측 약간 여백 */
+}
+
+.messageBubble {
+  background-color: #DCF8C6; /* 카카오톡 나와의 채팅 색상 유사 */
+  color: #333;
+  padding: 8px 12px;
+  border-radius: 12px 12px 0 12px; /* 말풍선 모양 */
+  max-width: 75%; /* 최대 너비 */
+  word-wrap: break-word; /* 긴 단어 줄바꿈 */
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
+}
+
+.messageContent {
+  margin: 0 0 4px 0;
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+
+.messageTimestamp {
+  font-size: 0.7rem; /* 작은 글씨 */
+  color: #666; /* 회색 */
+  text-align: right;
+  display: block;
+  margin-top: 2px;
+}

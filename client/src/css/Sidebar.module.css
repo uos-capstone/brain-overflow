@@ -1,0 +1,149 @@
+/* Sidebar.module.css */
+
+.sidebar {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 60px;
+	background: #1e1e1e;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	align-items: center;
+	height: 100vh;
+	box-sizing: border-box;
+}
+
+.sidebarIcon {
+	cursor: pointer;
+	font-size: 24px;
+}
+
+.sidebarIconTop {
+	margin-top: 20px;
+}
+
+.sidebarIconBottom {
+	margin-bottom: 20px;
+}
+
+.drawer {
+	position: fixed;
+	top: 0;
+	width: 240px;
+	height: 100vh;
+	background: #2e2e2e;
+	color: #fff;
+	transition: left 0.3s ease;
+	box-sizing: border-box;
+	padding-top: 60px;
+	overflow-y: auto;
+}
+
+.drawerHeader {
+	padding: 10px 20px;
+	margin: 0;
+	color: #fff; 
+}
+
+.drawerHeaderContainer {
+	display: flex; 
+	align-items: center; 
+	padding: 0 15px 0 20px; 
+	height: 50px; 
+	border-bottom: 1px solid #444;
+	box-sizing: border-box;
+	flex-shrink: 0;
+}
+
+.addRoomButton {
+	background-color: transparent;
+	border: none;
+	color: #fff;
+	width: 25px;
+	height: 25px;
+	border-radius: 50%;
+	padding: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	position: relative;
+	top: -2px;
+	font-size: 35px;
+	font-weight: 300;
+	cursor: pointer;
+	transition: background-color .2s;
+}
+
+	.addRoomButton:hover {
+		background: #444;
+	}
+
+.addRoomButton:focus {
+  outline: none;
+}
+
+.drawerList {
+	list-style: none;
+	margin: 0;
+	padding: 10px 0;
+}
+
+.drawerListItem {
+	margin: 2px 0;
+	cursor: pointer;
+	padding: 8px 20px;
+	transition: background 0.2s;
+	color: #fff; 
+}
+
+	.drawerListItem:hover {
+		background: #444;
+	}
+
+.backdrop {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100vw;
+	height: 100vh;
+}
+
+
+.minimizedBar {
+	position: fixed;
+	bottom: 0;
+	left: 60px;
+	width: calc(100% - 60px);
+	height: 40px;
+	background: #333;
+	border-top: 1px solid #555;
+	display: flex;
+	align-items: center;
+	padding: 0 10px;
+	box-sizing: border-box;
+	overflow-x: auto;
+	overflow-y: hidden;
+}
+
+.minimizedButton {
+	background: #555;
+	color: #fff;
+	border: 1px solid #777;
+	border-radius: 4px;
+	padding: 5px 10px;
+	margin-right: 10px;
+	cursor: pointer;
+	white-space: nowrap; 
+	flex-shrink: 0; 
+}
+
+	.minimizedButton:focus {
+		outline: none;
+		box-shadow: 0 0 0 2px rgba(78, 115, 223, 0.6); 
+	}
+
+.minimizedEmptyText {
+	color: #888;
+	font-size: 12px;
+}

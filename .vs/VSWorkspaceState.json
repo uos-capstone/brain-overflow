@@ -1,0 +1,13 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\client",
+    "\\client\\src",
+    "\\client\\src\\assets",
+    "\\client\\src\\components",
+    "\\client\\src\\css",
+    "\\kubernetes"
+  ],
+  "SelectedNode": "\\client\\src\\components\\MyChatMessage.tsx",
+  "PreviewInSolutionExplorer": false
+}
