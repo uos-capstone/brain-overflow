@@ -243,7 +243,7 @@ function FileUpload({ setFiles }: FileUploadProps) {
                         borderRadius: '4px',
                         width: '100%'
                     }}
-                    disabled={temporaryFiles.length === 0}
+                    // disabled={temporaryFiles.length === 0}
                 >
                     Generate
                 </button>

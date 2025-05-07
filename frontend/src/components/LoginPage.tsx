@@ -15,12 +15,12 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
         e.preventDefault();
 
         // 간단한 로그인 로직 (실제 앱에서는 인증 API 호출)
-        if (username === 'admin' && password === '1234') {
+        // if (username === 'admin' && password === '1234') {
             onLogin();
             navigate('/generator');
-        } else {
-            alert('Invalid credentials');
-        }
+        // } else {
+        //     alert('Invalid credentials');
+        // }
     };
 
     return (
