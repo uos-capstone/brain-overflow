@@ -13,7 +13,7 @@ function TopBanner() {
                 fontWeight: 'bold',
                 fontSize: '48px'
             }}>
-                MRI Viewer
+                MRI Generator
             </div>
         </div>
     );

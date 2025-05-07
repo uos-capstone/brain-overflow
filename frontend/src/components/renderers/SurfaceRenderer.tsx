@@ -146,17 +146,17 @@ export class SurfaceRenderer {
 
     const isovalues = 0.35;
 
-    // const blurredVoxelData = gaussianBlur3D(voxelData, dims, 3, 1.2);
+    const blurredVoxelData = gaussianBlur3D(voxelData, dims, 3, 1.2);
 
     const mesh = surfaceNets([width, height, depth], (x:number, y:number, z:number) => {
       const index = x + y * width + z * width * height;
-      return voxelData[index] - isovalues;
+      return blurredVoxelData[index] - isovalues;
     });
 
-    // const cleanedMesh = filterLargestComponent(mesh);
+    const cleanedMesh = filterLargestComponent(mesh);
 
-    const vertices = new Float32Array(mesh.positions.flat());
-    const indices = new Uint32Array(mesh.cells.flat());
+    const vertices = new Float32Array(cleanedMesh.positions.flat());
+    const indices = new Uint32Array(cleanedMesh.cells.flat());
     this.indexCount = indices.length;
 
     this.vertexBuffer = this.device.createBuffer({
@@ -275,7 +275,7 @@ export class SurfaceRenderer {
     pass.setBindGroup(0, this.bindGroup);
     pass.setVertexBuffer(0, this.vertexBuffer);
     pass.setIndexBuffer(this.indexBuffer, 'uint32');
-    pass.setViewport(0, 0, this.canvas.width / 3 * 2, this.canvas.height, 0, 1);
+    pass.setViewport(0, 0, this.canvas.width/3*2, this.canvas.height, 0, 1);
     pass.drawIndexed(this.indexCount, 1, 0, 0, 0);
   }
 }

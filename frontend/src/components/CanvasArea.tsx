@@ -76,7 +76,7 @@ function CanvasArea({ activeFile }: CanvasAreaProps) {
   }, [activeFile]);
 
   return (
-    <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+    <div style={{ position: 'relative', width: '100%', height: '100%', backgroundColor: 'black' }}>
       <canvas
         id="canvas"
         ref={canvasRef}
