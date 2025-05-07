@@ -13,7 +13,7 @@ interface FileUploadProps {
     setFiles: React.Dispatch<React.SetStateAction<NiiFile[]>>;
 }
 
-function FileUpload({ files, setFiles }: FileUploadProps) {
+function FileUpload({ setFiles }: FileUploadProps) {
     const navigate = useNavigate();
 
     const [isDragging, setIsDragging] = useState(false);

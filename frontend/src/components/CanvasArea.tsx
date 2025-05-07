@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import * as nifti from 'nifti-reader-js';
 import { main } from './MRIRender';
 import { getGPUDevice } from './GPUDevice';

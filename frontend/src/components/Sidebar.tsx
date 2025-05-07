@@ -1,5 +1,5 @@
 // Sidebar.tsx
-import React, { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { ChatWindow } from './ChatWindow';
@@ -12,12 +12,12 @@ const SIDEBAR_Z_INDEX = 11000;
 const DRAWER_Z_INDEX = 10500;
 const MINIMIZED_BAR_Z_INDEX = 10800;
 const BACKDROP_Z_INDEX = BASE_Z_INDEX - 1;
-interface ChatMessageData {
-    senderName: string;
-    senderId: string;
-    content: string;
-    timestamp: string;
-}
+// interface ChatMessageData {
+//     senderName: string;
+//     senderId: string;
+//     content: string;
+//     timestamp: string;
+// }
 export default function Sidebar() {
     const [chatrooms, setChatrooms] = useState<Chatroom[]>([
         { id: 1, name: '방1' },

@@ -1,6 +1,6 @@
 import { mat4, vec3, quat } from 'gl-matrix';
 import { VolumeRenderer } from './renderers/VolumeRenderer';
-import { SurfaceRenderer } from './renderers/SurfaceRenderer';
+// import { SurfaceRenderer } from './renderers/SurfaceRenderer';
 import { BoxRingRenderer } from './renderers/BoxRingRenderer';
 import { SliceRenderer } from './renderers/SliceRenderer';
 import { GizmoRenderer } from './renderers/GizmoRenderer';
@@ -86,7 +86,7 @@ export async function main(
   }, { passive: false });
 
   const volumeRenderer = new VolumeRenderer(device, texture, dims, canvas);
-  const surfaceRenderer = new SurfaceRenderer(device, voxelData, dims, canvas);
+  // const surfaceRenderer = new SurfaceRenderer(device, voxelData, dims, canvas);
   const sliceRenderer = new SliceRenderer(device, texture, dims, canvas);
   const boxRingRenderer = new BoxRingRenderer(device, dims, canvas);
   const gizmoRenderer = new GizmoRenderer(device, canvas);

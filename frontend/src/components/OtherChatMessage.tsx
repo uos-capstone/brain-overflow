@@ -1,8 +1,8 @@
 // OtherChatMessage.tsx
 import React from 'react';
-import styles from '../css/OtherChatMessage.module.css'; // ÇØ´ç CSS ¸ðµâ »ý¼º ÇÊ¿ä
+import styles from '../css/OtherChatMessage.module.css'; // ï¿½Ø´ï¿½ CSS ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ê¿ï¿½
 
-// ChatMessageData Å¸ÀÔÀ» import ÇÏ°Å³ª ¿©±â¿¡ Á¤ÀÇ
+// ChatMessageData Å¸ï¿½ï¿½ï¿½ï¿½ import ï¿½Ï°Å³ï¿½ ï¿½ï¿½ï¿½â¿¡ ï¿½ï¿½ï¿½ï¿½
 interface ChatMessageData {
     senderName: string;
     senderId: string;
@@ -17,7 +17,7 @@ interface OtherChatMessageProps {
 export const OtherChatMessage: React.FC<OtherChatMessageProps> = ({ chat }) => {
     return (
         <div className={styles.messageContainer}>
-            {/* º¸³½ »ç¶÷ ÀÌ¸§À» ¸Þ½ÃÁö ¹öºí À§¿¡ Ç¥½Ã */}
+            {/* ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½Ì¸ï¿½ï¿½ï¿½ ï¿½Þ½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ Ç¥ï¿½ï¿½ */}
             <p className={styles.senderName}>{chat.senderName}</p>
             <div className={styles.messageBubble}>
                 <p className={styles.messageContent}>{chat.content}</p>

@@ -4,7 +4,7 @@ import styles from '../css/AddRoom.module.css';
 
 interface AddRoomProps {
     onClose: () => void;
-    // onAdd: (name: string) => void;
+    onAdd: (name: string) => void;
 }
 
 export const AddRoom: React.FC<AddRoomProps> = ({ onClose, onAdd }) => {

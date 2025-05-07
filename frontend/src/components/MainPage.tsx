@@ -4,8 +4,8 @@ import { HTML5Backend } from 'react-dnd-html5-backend';
 import Sidebar from './Sidebar';
 import TopBanner from './TopBanner';
 import FileUpload from './FileUpload';
-import FileHeader from './FileHeader';
-import CanvasArea from './CanvasArea';
+// import FileHeader from './FileHeader';
+// import CanvasArea from './CanvasArea';
 import './MainPage.css';
 
 export interface NiiFile {

@@ -2,7 +2,7 @@
 import React from 'react';
 import styles from '../css/MyChatMessage.module.css';
 
-// ChatMessageData Å¸ÀÔÀ» import ÇÏ°Å³ª ¿©±â¿¡ Á¤ÀÇ
+// ChatMessageData Å¸ï¿½ï¿½ï¿½ï¿½ import ï¿½Ï°Å³ï¿½ ï¿½ï¿½ï¿½â¿¡ ï¿½ï¿½ï¿½ï¿½
 interface ChatMessageData {
     senderName: string;
     senderId: string;

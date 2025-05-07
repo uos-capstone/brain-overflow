@@ -35,6 +35,8 @@ export interface ChatWindowProps {
     onMinimize: (id: number) => void;
     onBringToFront: (id: number) => void;
     onTogglePin: (id: number) => void;
+
+    children?: React.ReactNode;
 }
 
 export const ChatWindow: React.FC<ChatWindowProps> = ({
@@ -110,6 +112,9 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
         messagesEndRef.current?.scrollIntoView({ behavior: "auto" });
     }, [messages]);
 
+    const headerRef = useRef<HTMLDivElement>(null);
+    drag(headerRef);
+
     return (
         <div
             className={styles.window}
@@ -117,7 +122,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
             style={dynamicWindowStyle}
         >
             <div
-                ref={drag}
+                ref={headerRef}
                 className={styles.header}
                 style={{ cursor: 'move' }}
             >
