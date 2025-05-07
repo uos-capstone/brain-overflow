@@ -36,6 +36,9 @@ def check_docker():
 
 
 def check_unlock():
+    # set KUBECONFIG to ./kubernetes/secret-kubeconfig.yaml
+    os.environ["KUBECONFIG"] = "./kubernetes/secret-kubeconfig.yaml"
+
     # Check if git-crypt is unlocked
     # (Check if `scripts/secret-harbor.json` is correct json file)
     try:
