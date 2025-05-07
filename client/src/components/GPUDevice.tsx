@@ -8,6 +8,11 @@ export async function getGPUDevice(): Promise<GPUDevice> {
         throw new Error("WebGPU not supported");
     }
 
-    globalDevice = await adapter.requestDevice();
+    globalDevice = await adapter.requestDevice({
+        requiredLimits: {
+            maxBufferSize: adapter.limits.maxBufferSize,
+            maxStorageBufferBindingSize: adapter.limits.maxStorageBufferBindingSize,        
+        },
+    });
     return globalDevice;
 }
