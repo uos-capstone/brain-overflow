@@ -96,7 +96,9 @@ def build_service(directory):
 
     # Build the service
     tag = f"harbor.unknownpgr.com/brain-overflow/{directory}:{hash}"
-    subprocess.run(["docker", "build", "-t", tag, directory])
+    subprocess.run(
+        ["docker", "build", "--platform", "linux/amd64", "-t", tag, directory]
+    )
 
     # Push the service
     subprocess.run(["docker", "push", tag])
