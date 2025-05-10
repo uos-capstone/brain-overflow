@@ -76,58 +76,66 @@ function CanvasArea({ activeFile }: CanvasAreaProps) {
   }, [activeFile]);
 
   return (
-    <div style={{ position: 'relative', width: '100%', height: '100%', backgroundColor: 'black' }}>
-      <canvas
-        id="canvas"
-        ref={canvasRef}
-        style={{ width: '100%', height: '70%', paddingBottom: '40px', backgroundColor: '#000' }}
-      />
-      <div style={{ position: 'absolute', top: 10, right: 10, background: 'rgba(255,255,255,0.7)', padding: '10px', borderRadius: '8px' }}>
-        <div>
-          XY Slice:
-          <input
-            type="range"
-            min="0"
-            max={dims[2] - 1}
-            step="0.01"
-            value={sliceCenters[0]}
-            onChange={(e) => {
-              const v = parseFloat(e.target.value);
-              setSliceCenters(prev => [v, prev[1], prev[2]]);
-            }}
-          />
-        </div>
-        <div>
-          YZ Slice:
-          <input
-            type="range"
-            min="0"
-            max={dims[0] - 1}
-            step="0.01"
-            value={sliceCenters[1]}
-            onChange={(e) => {
-              const v = parseFloat(e.target.value);
-              setSliceCenters(prev => [prev[0], v, prev[2]]);
-            }}
-          />
-        </div>
-        <div>
-          ZX Slice:
-          <input
-            type="range"
-            min="0"
-            max={dims[1] - 1}
-            step="0.01"
-            value={sliceCenters[2]}
-            onChange={(e) => {
-              const v = parseFloat(e.target.value);
-              setSliceCenters(prev => [prev[0], prev[1], v]);
-            }}
-          />
-        </div>
+    <div className="w-full h-[90vh] overflow-hidden flex items-start">
+      <div className="scale-[0.9] origin-top-left">
+        <canvas
+          ref={canvasRef}
+          width={1440}
+          height={720}
+          className="bg-black"
+        />
       </div>
-    </div>
+
+      {/* 슬라이더 영역*/}
+      <div className="absolute top-4 right-4 bg-[#2c2c2c] p-4 rounded-lg space-y-4 shadow-md z-10 w-72">
+        <Slider
+          label="XY Slice"
+          value={sliceCenters[0]}
+          max={dims[2] - 1}
+          onChange={(v) => setSliceCenters(prev => [v, prev[1], prev[2]])}
+        />
+        <Slider
+          label="YZ Slice"
+          value={sliceCenters[1]}
+          max={dims[0] - 1}
+          onChange={(v) => setSliceCenters(prev => [prev[0], v, prev[2]])}
+        />
+        <Slider
+          label="ZX Slice"
+          value={sliceCenters[2]}
+          max={dims[1] - 1}
+          onChange={(v) => setSliceCenters(prev => [prev[0], prev[1], v])}
+        />
+      </div>
+    </div >
   );
 }
+
+const Slider = ({
+  label,
+  value,
+  max,
+  onChange,
+}: {
+  label: string;
+  value: number;
+  max: number;
+  onChange: (v: number) => void;
+}) => {
+  return (
+    <div className="flex items-center gap-4">
+      <label className="w-24 text-sm text-white">{label}:</label>
+      <input
+        type="range"
+        min={0}
+        max={max}
+        step={0.01}
+        value={value}
+        onChange={(e) => onChange(parseFloat(e.target.value))}
+        className="w-full accent-blue-500"
+      />
+    </div>
+  );
+};
 
 export default CanvasArea;

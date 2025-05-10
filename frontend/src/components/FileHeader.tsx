@@ -32,7 +32,7 @@ const Tab: React.FC<TabProps> = ({ file, index, moveTab, onClose, onClick }) => 
         hover: (item) => {
             if (item.index !== index) {
                 moveTab(item.index, index);
-                item.index = index; // Web safe way in this context
+                item.index = index;
             }
         }
     });
@@ -42,28 +42,19 @@ const Tab: React.FC<TabProps> = ({ file, index, moveTab, onClose, onClick }) => 
         item: { index, type: ItemType },
     });
 
-    drag(drop(ref)); // connect drag and drop to ref
+    drag(drop(ref));
 
     return (
         <div
             ref={ref}
-            style={{
-                padding: '5px 10px',
-                backgroundColor: file.active ? '#1e1e1e' : '#2d2d2d',
-                color: file.active ? 'white' : '#ccc',
-                borderRight: '1px solid #444',
-                display: 'flex',
-                alignItems: 'center',
-                cursor: 'pointer',
-                fontSize: '13px',
-                userSelect: 'none',
-            }}
+            className={`flex items-center px-2 py-1 text-sm whitespace-nowrap border-r border-gray-600 cursor-pointer select-none transition-colors
+        ${file.active ? 'bg-[#1e1e1e] text-white' : 'bg-[#2a2a2a] text-gray-300 hover:bg-[#333333]'}`}
             onClick={() => onClick(index)}
         >
-            <span style={{ marginRight: '5px' }}>🧠</span>
+            <span className="mr-2 text-pink-400">🧠</span>
             {file.name}
             <span
-                style={{ marginLeft: '8px', color: '#888', cursor: 'pointer' }}
+                className="ml-2 text-gray-400 hover:text-red-400 cursor-pointer"
                 onClick={(e) => {
                     e.stopPropagation();
                     onClose(index);
@@ -109,16 +100,7 @@ const FileHeader: React.FC<FileHeaderProps> = ({ files, setFiles }) => {
 
     return (
         <DndProvider backend={HTML5Backend}>
-            <div
-                style={{
-                    display: 'flex',
-                    backgroundColor: '#2d2d2d',
-                    borderBottom: '1px solid #444',
-                    overflowX: 'auto',
-                    whiteSpace: 'nowrap',
-                    minHeight: '35px',
-                }}
-            >
+            <div className="flex h-9 border-b border-gray-700 overflow-x-auto bg-[#2a2a2a]">
                 {files.map((file, index) => (
                     <Tab
                         key={`${file.name}-${index}`}

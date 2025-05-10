@@ -4,7 +4,6 @@ import { HTML5Backend } from 'react-dnd-html5-backend';
 import Sidebar from './Sidebar';
 import FileHeader from './FileHeader';
 import CanvasArea from './CanvasArea';
-import './MainPage.css';
 
 export interface NiiFile {
   name: string;
@@ -34,14 +33,19 @@ const ViewerPage: React.FC = () => {
 
   return (
     <DndProvider backend={HTML5Backend}>
-      <div className="app-container">
-        <Sidebar />
-        <div className="main-section">
-          {/* <TopBanner />
-          <FileUpload files={files} setFiles={setFiles} /> */}
-          <FileHeader files={files} setFiles={setFiles} />
-          <CanvasArea activeFile={files.find(f => f.active) || null} />
-        </div>
+      <div className="min-h-screen flex bg-[#1e1e1e] text-white font-sans">
+        {/* Sidebar */}
+        <aside className="w-[61px] bg-black/30 border-r border-gray-800 p-4">
+          <Sidebar />
+        </aside>
+
+        {/* Main content */}
+        <main className="flex-1 px-0 py-0 overflow-y-auto">
+          <div className="max-w-none">
+            <FileHeader files={files} setFiles={setFiles} />
+            <CanvasArea activeFile={files.find(f => f.active) || null} />
+          </div>
+        </main>
       </div>
     </DndProvider>
   );

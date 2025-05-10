@@ -2,255 +2,150 @@ import React, { useRef, useState, DragEvent, ChangeEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 interface NiiFile {
-    name: string;
-    active: boolean;
-    file: File;
-    age: number;
+  name: string;
+  active: boolean;
+  file: File;
+  age: number;
 }
 
 interface FileUploadProps {
-    files: NiiFile[];
-    setFiles: React.Dispatch<React.SetStateAction<NiiFile[]>>;
+  files: NiiFile[];
+  setFiles: React.Dispatch<React.SetStateAction<NiiFile[]>>;
 }
 
-function FileUpload({ setFiles }: FileUploadProps) {
-    const navigate = useNavigate();
+const FileUpload: React.FC<FileUploadProps> = ({ setFiles }) => {
+  const navigate = useNavigate();
+  const [isDragging, setIsDragging] = useState(false);
+  const [temporaryFiles, setTemporaryFiles] = useState<NiiFile[]>([]);
+  const inputRef = useRef<HTMLInputElement | null>(null);
 
-    const [isDragging, setIsDragging] = useState(false);
-    const [temporaryFiles, setTemporaryFiles] = useState<NiiFile[]>([]);
-    const inputRef = useRef<HTMLInputElement | null>(null);
+  const isNiiFile = (file: File) => file.name.toLowerCase().endsWith('.nii');
 
-    const isNiiFile = (file: File) => file.name.toLowerCase().endsWith('.nii');
+  const handleDrop = (e: DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const droppedFiles = Array.from(e.dataTransfer.files);
+    const niiFiles: NiiFile[] = droppedFiles
+      .filter(isNiiFile)
+      .map(file => ({ name: file.name, active: false, file, age: 0 }));
+    if (niiFiles.length === 0) {
+      alert('Only .nii files are allowed.');
+      return;
+    }
+    setTemporaryFiles(prev => [...prev, ...niiFiles]);
+  };
 
-    const handleDrop = (e: DragEvent<HTMLDivElement>) => {
-        e.preventDefault();
-        setIsDragging(false);
-        const droppedFiles = Array.from(e.dataTransfer.files);
-        const niiFiles: NiiFile[] = droppedFiles
-            .filter(isNiiFile)
-            .map(file => ({ name: file.name, active: false, file, age: 0, }));
+  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const selectedFiles = Array.from(e.target.files || []);
+    const niiFiles: NiiFile[] = selectedFiles
+      .filter(isNiiFile)
+      .map(file => ({ name: file.name, active: false, file, age: 0 }));
+    if (niiFiles.length === 0) {
+      alert('Only .nii files are allowed.');
+    } else {
+      setTemporaryFiles(prev => [...prev, ...niiFiles]);
+    }
+    e.target.value = "";
+  };
 
-        if (niiFiles.length === 0) {
-            alert('Only .nii files are allowed.');
-            return;
-        }
+  const handleGenerate = () => {
+    setFiles(prev => [...prev, ...temporaryFiles]);
+    setTemporaryFiles([]);
+    navigate('/viewer');
+  };
 
-        setTemporaryFiles(prev => [...prev, ...niiFiles]);
-    };
+  return (
+    <div className="bg-[#1e1e1e] text-white">
+      <div className="max-w-2xl mx-auto px-4 space-y-8">
 
-    const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
-        const selectedFiles = Array.from(e.target.files || []);
-        const niiFiles: NiiFile[] = selectedFiles
-            .filter(isNiiFile)
-            .map(file => ({ name: file.name, active: false, file, age: 0, }));
+        {/* 숨겨진 파일 선택기 */}
+        <input
+          type="file"
+          accept=".nii"
+          multiple
+          ref={inputRef}
+          className="hidden"
+          onChange={handleFileChange}
+        />
 
-        if (niiFiles.length === 0) {
-            alert('Only .nii files are allowed.');
-        } else {
-            setTemporaryFiles(prev => [...prev, ...niiFiles]);
-        }
-
-        e.target.value = "";
-    };
-
-    const handleGenerate = () => {
-        setFiles(prev => [...prev, ...temporaryFiles]);
-        setTemporaryFiles([]);
-        navigate('/viewer');
-    };
-
-    return (
-        <div style={{
-            backgroundColor: '#1e1e1e', 
-            color: 'white', 
-            padding: '20px'
-        }}>
-            <div style={{
-                maxWidth: '900px',
-                margin: '0 auto',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '20px',
-            }}>
-                <input
-                    type="file"
-                    accept=".nii"
-                    multiple
-                    ref={inputRef}
-                    style={{ display: 'none' }}
-                    onChange={handleFileChange}
-                />
-
-                {/* Drag and drop area */}
+        {/* 드래그 앤 드롭 영역 */}
+        <div
+          onClick={() => inputRef.current?.click()}
+          onDrop={handleDrop}
+          onDragOver={(e) => {
+            e.preventDefault();
+            setIsDragging(true);
+          }}
+          onDragLeave={() => setIsDragging(false)}
+          className={`border-2 border-dashed rounded-lg p-6 cursor-pointer transition ${
+            isDragging ? 'border-blue-500 bg-[#2a2a2a]' : 'border-gray-600'
+          }`}
+        >
+          {temporaryFiles.length === 0 ? (
+            <p className="text-center text-gray-400">파일을 이 곳으로 끌어오거나 클릭하여 업로드하세요.</p>
+          ) : (
+            <div className="space-y-4">
+              {temporaryFiles.map((file, idx) => (
                 <div
-                    onClick={() => inputRef.current?.click()}
-                    onDrop={handleDrop}
-                    onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
-                    onDragLeave={() => setIsDragging(false)}
-                    style={{
-                        padding: '30px',
-                        border: '2px dashed',
-                        borderColor: isDragging ? '#007acc' : '#ccc',
-                        backgroundColor: isDragging ? '#2a2a2a' : 'transparent',
-                        color: '#888',
-                        textAlign: 'center',
-                        minHeight: '200px',
-                        cursor: 'pointer',
-                        transition: 'all 0.2s ease',
-                        display: temporaryFiles.length === 0 ? 'flex' : 'block',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                    }}
+                  key={idx}
+                  className="grid grid-cols-[1fr_auto_auto] items-center gap-4 border-b border-gray-700 pb-2 text-sm text-gray-300"
                 >
-                    {temporaryFiles.length === 0 ? (
-                        <p>파일을 이 곳으로 끌어오거나 클릭하여 업로드하세요.</p>
-                    ) : (
-                        temporaryFiles.map((file, idx) => (
-                            <div key={idx} style={{
-                                display: 'flex',
-                                gap: '10px',
-                                alignItems: 'center',
-                                padding: '6px 0',
-                                borderBottom: '1px solid #444',
-                                color: '#ccc'
-                            }}>
-                                <div style={{ flex: '1' }}>{file.name}</div>
+                  <span className="truncate">{file.name}</span>
 
-                                <span style={{ color: '#ccc', fontSize: '14px' }}>MRI age:</span>
+                  <input
+                    type="number"
+                    placeholder="Age"
+                    onClick={(e) => e.stopPropagation()}
+                    className="bg-[#2a2a2a] border border-gray-600 text-white rounded px-2 py-1 w-24 text-sm focus:outline-none focus:ring focus:ring-blue-500"
+                  />
 
-                                <input
-                                    onClick={(e) => e.stopPropagation()}
-                                    type="number"
-                                    placeholder="추가 정보 입력"
-                                    style={{
-                                        padding: '6px',
-                                        fontSize: '14px',
-                                        borderRadius: '4px',
-                                        border: '1px solid #555',
-                                        backgroundColor: '#2a2a2a',
-                                        color: '#fff',
-                                        width: '200px'
-                                    }}
-                                />
-
-                                <button
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        const updated = temporaryFiles.filter((_, i) => i !== idx);
-                                        setTemporaryFiles(updated);
-                                    }}
-                                    style={{
-                                        fontSize: '12px',
-                                        color: 'red',
-                                        background: 'none',
-                                        border: 'none',
-                                        cursor: 'pointer'
-                                    }}
-                                >
-                                    삭제
-                                </button>
-                            </div>
-                        ))
-                    )}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setTemporaryFiles(prev => prev.filter((_, i) => i !== idx));
+                    }}
+                    className="text-red-500 text-xs hover:underline"
+                  >
+                    삭제
+                  </button>
                 </div>
+              ))}
             </div>
-
-            <div
-                style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(8, 1fr)',
-                    gap: '10px',
-                    alignItems: 'center',
-                    marginTop: '10px',
-                    maxWidth: '800px',
-                    marginLeft: 'auto',
-                    marginRight: 'auto'
-                }}
-            >
-                <span style={{ gridColumn: '3 / span 2', color: '#ccc', fontSize: '14px' }}>Sex:</span>
-
-                <select
-                    style={{
-                        gridColumn: '5 / span 2',
-                        padding: '8px',
-                        fontSize: '14px',
-                        borderRadius: '4px',
-                        border: '1px solid #555',
-                        backgroundColor: '#2a2a2a',
-                        color: '#fff',
-                        width: '100%'
-                    }}
-                >
-                    <option value="a">Male</option>
-                    <option value="b">Female</option>
-                </select>
-
-            </div>
-            <div
-                style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(8, 1fr)',
-                    gap: '10px',
-                    alignItems: 'center',
-                    marginTop: '10px',
-                    maxWidth: '800px',
-                    marginLeft: 'auto',
-                    marginRight: 'auto'
-                }}
-            >
-                <span style={{ gridColumn: '3 / span 2', color: '#ccc', fontSize: '14px' }}>Last Cognitive status:</span>
-
-                <select
-                    style={{
-                        gridColumn: '5 / span 2',
-                        padding: '8px',
-                        fontSize: '14px',
-                        borderRadius: '4px',
-                        border: '1px solid #555',
-                        backgroundColor: '#2a2a2a',
-                        color: '#fff',
-                        width: '100%'
-                    }}
-                >
-                    <option value="a">Alzheimer's Disease</option>
-                    <option value="b">Mild Cognitive Impairment</option>
-                    <option value="c">Cognitively Normal</option>
-                </select>
-            </div>
-            <div
-                style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(8, 1fr)',
-                    gap: '10px',
-                    alignItems: 'center',
-                    marginTop: '10px',
-                    maxWidth: '800px',
-                    marginLeft: 'auto',
-                    marginRight: 'auto'
-                }}
-            >
-
-                <button
-                    onClick={handleGenerate}
-                    style={{
-                        gridColumn: '5 / span 2',
-                        padding: '8px',
-                        backgroundColor: '#007acc',
-                        border: 'none',
-                        color: 'white',
-                        cursor: 'pointer',
-                        fontSize: '14px',
-                        borderRadius: '4px',
-                        width: '100%'
-                    }}
-                    // disabled={temporaryFiles.length === 0}
-                >
-                    Generate
-                </button>
-            </div>
-
+          )}
         </div>
-    );
-}
+
+        {/* 입력 필드들 */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label className="block text-sm text-gray-300 mb-1">Sex</label>
+            <select className="w-full bg-[#1e1e1e] border border-gray-700 rounded-md px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm text-gray-300 mb-1">Last Cognitive Status</label>
+            <select className="w-full bg-[#1e1e1e] border border-gray-700 rounded-md px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <option>Alzheimer's Disease</option>
+              <option>Mild Cognitive Impairment</option>
+              <option>Cognitively Normal</option>
+            </select>
+          </div>
+        </div>
+
+        {/* 버튼 */}
+        <div className="flex justify-center pt-2">
+          <button
+            onClick={handleGenerate}
+            className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-md shadow transition"
+          >
+            Generate
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 export default FileUpload;
