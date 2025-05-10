@@ -9,7 +9,7 @@ import {
 import { AnimatePresence } from 'framer-motion';
 import { PageTransition } from './components/PageTransition';
 import LoginPage from './components/LoginPage';
-import SignUpPage from './components/SignupPage';
+import SignUpPage from './components/SignUpPage';
 import MainPage from './components/MainPage';
 import ViewerPage from './components/ViewerPage';
 

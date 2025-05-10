@@ -10,16 +10,34 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        // 간단한 로그인 로직 (실제 앱에서는 인증 API 호출)
-        // if (username === 'admin' && password === '1234') {
-            onLogin();
-            navigate('/generator');
-        // } else {
-        //     alert('Invalid credentials');
-        // }
+        try {
+            const res = await fetch('/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password }),
+            });
+
+
+            const data = await res.json();
+            const jwtToken = data.data.token;
+            const userId = data.data.userId;
+
+            console.log(jwtToken, userId);
+
+            // 로그인 성공 처리
+        } catch (err) {
+            const errorElem = document.getElementById('loginError');
+            if (errorElem) {
+                errorElem.textContent = '로그인에 실패했습니다. 아이디/비밀번호를 확인하세요.';
+            }
+            console.error(err);
+        }
+
+        onLogin();
+        navigate('/generator');
     };
 
     return (
