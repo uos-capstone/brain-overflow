@@ -1,38 +1,69 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
+//@ts-ignore
+import Stomp from 'stompjs';
 
 interface LoginPageProps {
     onLogin: () => void;
 }
 
+type StompFrame = {
+    command: string;
+    headers: Record<string, string>;
+    body: string;
+};
+
+type StompMessage = {
+    body: string;
+    headers: Record<string, string>;
+    command: string;
+    subscription: string;
+    ack: () => void;
+    nack: () => void;
+};
+
 const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
     const navigate = useNavigate();
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+    const stompClientRef = useRef<any>(null);
 
     const connectStomp = (token: string, userId: string) => {
         const socket = new SockJS(`/ws?token=${encodeURIComponent(token)}`);
-        const client = new Client({
-            webSocketFactory: () => socket,
-            reconnectDelay: 5000,
-            onConnect: () => {
-                console.log('STOMP 연결됨, userId =', userId);
-                client.subscribe(`/topic/ai-response.${userId}`, msg => {
-                    const { userId: uid, message } = JSON.parse(msg.body);
-                    console.log(`[${uid}] 메시지 수신: ${message}`);
-                    // TODO: 메시지 상태에 반영
-                });
-            },
-            onStompError: frame => {
-                console.error('STOMP 에러:', frame);
-            },
+        stompClientRef.current = Stomp.over(socket);
+
+        stompClientRef.current.connect({}, (frame: StompFrame) => {
+            console.log('✅ STOMP 연결됨:', frame);
+
+            // 구독 1 - AI 응답
+            stompClientRef.current.subscribe(`/topic/ai-response.${userId}`, (msg: StompMessage) => {
+                const { userId: uid, message } = JSON.parse(msg.body);
+                console.log(`[AI] ${uid}: ${message}`);
+            });
+
+            // 구독 2 - 채팅방 목록
+            stompClientRef.current.subscribe('/user/queue/chatrooms', (msg: StompMessage) => {
+                const { rooms } = JSON.parse(msg.body);
+                console.log('📦 채팅방 목록:', rooms);
+            });
+
+            // 구독 3 - 채팅 목록
+            stompClientRef.current.subscribe(`/topic/room.general`, (msg: StompMessage) => {
+                try {
+                    const { message } = JSON.parse(msg.body);
+                    console.log('💬 채팅 메시지:', message);
+                } catch (e) {
+                    console.error('메시지 파싱 오류:', msg.body);
+                }
+            });
+
+            // 전송 - 채팅방 목록 요청
+            stompClientRef.current.send('/app/chatrooms', {}, JSON.stringify({ userId }));
+        }, (error: string) => {
+            console.error('❌ STOMP 연결 실패:', error);
         });
-
-        client.activate();
     };
-
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
