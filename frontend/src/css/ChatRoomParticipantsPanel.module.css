@@ -1,0 +1,88 @@
+/* src/css/ChatRoomParticipantsPanel.module.css */
+.participantsPanel {
+    position: fixed;
+    background-color: #3a3a3e;
+    border: 1px solid #505053;
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+    color: #e0e0e0;
+    min-width: 200px;
+    max-width: 280px;
+    font-size: 0.85rem;
+    overflow: hidden; /* 내부 요소가 border-radius를 따르도록 */
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    background-color: #4a4a4e;
+    border-bottom: 1px solid #555;
+}
+
+.title {
+    margin: 0;
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+.closeButton {
+    background: none;
+    border: none;
+    color: #aaa;
+    font-size: 1.1rem;
+    cursor: pointer;
+    padding: 2px 4px;
+    line-height: 1;
+}
+.closeButton:hover {
+    color: #fff;
+}
+
+.participantsList {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    max-height: 250px; /* 최대 높이 지정 후 스크롤 */
+    overflow-y: auto;
+}
+/* 스크롤바 스타일 (선택적) */
+.participantsList::-webkit-scrollbar {
+    width: 7px;
+}
+.participantsList::-webkit-scrollbar-track {
+    background: #3a3a3e;
+}
+.participantsList::-webkit-scrollbar-thumb {
+    background: #5a5a5d;
+    border-radius: 3px;
+}
+.participantsList::-webkit-scrollbar-thumb:hover {
+    background: #6a6a6d;
+}
+
+.participantItem {
+    padding: 9px 12px;
+    border-bottom: 1px solid #48484c;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.participantItem:last-child {
+    border-bottom: none;
+}
+/* .participantItem:hover { background-color: #4f4f54; } */ /* 필요 시 호버 효과 */
+
+.meIndicator {
+    color: #88ddff;
+    font-size: 0.9em;
+    margin-left: 4px;
+}
+
+.noParticipants {
+    padding: 20px 15px;
+    text-align: center;
+    color: #999;
+    font-size: 0.9rem;
+}

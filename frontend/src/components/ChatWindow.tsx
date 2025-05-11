@@ -35,7 +35,8 @@ export interface ChatWindowProps {
     onMinimize: (id: number) => void;
     onBringToFront: (id: number) => void;
     onTogglePin: (id: number) => void;
-
+    onOpenSettings: (id: number, buttonElement: HTMLButtonElement) => void;
+    onShowParticipantsPanel: (id: number, buttonElement: HTMLButtonElement) => void;
     children?: React.ReactNode;
 }
 
@@ -51,12 +52,16 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
     onMinimize,
     onBringToFront,
     onTogglePin,
+    onOpenSettings,
+    onShowParticipantsPanel
 }) => {
     const [messages, setMessages] = useState<ChatMessageData[]>(INITIAL_MESSAGES);
     const currentUserId = SAMPLE_CURRENT_USER_ID;
 
     const [inputValue, setInputValue] = useState('');
     const messagesEndRef = useRef<HTMLDivElement>(null);
+    const settingsButtonRef = useRef<HTMLButtonElement>(null);
+    const participantsButtonRef = useRef<HTMLButtonElement>(null);
 
     const [{ isDragging }, drag] = useDrag(() => ({
         type: 'CHAT_WINDOW',
@@ -128,8 +133,32 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
             >
                 <span className={styles.headerTitle}>{title}</span>
                 <div className={styles.headerControls}>
+                    <button
+                        ref={participantsButtonRef}
+                        onClick={(e) => {
+                            e.stopPropagation(); 
+                            if (participantsButtonRef.current) {
+                                onShowParticipantsPanel(id, participantsButtonRef.current);
+                            }
+                        }}
+                        className={styles.controlButton}
+                        title="참여자 보기"
+                    >
+                        👥
+                    </button>
                     <button onClick={(e) => { e.stopPropagation(); onTogglePin(id); }} className={styles.controlButton} title={isPinned ? "고정 해제" : "창 고정"}> {isPinned ? '📍' : '📌'} </button>
                     <button onClick={(e) => { e.stopPropagation(); onMinimize(id); }} className={styles.controlButton} title="최소화"> _ </button>
+                    <button
+                        ref={settingsButtonRef}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            if (settingsButtonRef.current) { 
+                                onOpenSettings(id, settingsButtonRef.current); 
+                            }
+                        }}
+                        className={styles.controlButton}
+                        title="설정"
+                    > ☰ </button>
                     <button onClick={(e) => { e.stopPropagation(); onClose(id); }} className={styles.controlButton} title="닫기"> ✕ </button>
                 </div>
             </div>

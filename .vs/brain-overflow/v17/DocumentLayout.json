@@ -1,26 +1,30 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "C:\\Users\\82109\\Documents\\\uB300\uD559\uACFC\uC81C\\\uCEF4\uC885\uC124\\brain-overflow\\",
+  "WorkspaceRootPath": "C:\\Users\\82109\\Desktop\\project\\brain-overflow\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\82109\\Documents\\\uB300\uD559\uACFC\uC81C\\\uCEF4\uC885\uC124\\brain-overflow\\client\\src\\components\\ChatWindow.tsx||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:client\\src\\components\\ChatWindow.tsx||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}"
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\82109\\Desktop\\project\\brain-overflow\\frontend\\src\\css\\Sidebar.module.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:frontend\\src\\css\\Sidebar.module.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\82109\\Documents\\\uB300\uD559\uACFC\uC81C\\\uCEF4\uC885\uC124\\brain-overflow\\client\\src\\components\\OtherChatMessage.tsx||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:client\\src\\components\\OtherChatMessage.tsx||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}"
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\82109\\Desktop\\project\\brain-overflow\\frontend\\src\\components\\Sidebar.tsx||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:frontend\\src\\components\\Sidebar.tsx||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\82109\\Documents\\\uB300\uD559\uACFC\uC81C\\\uCEF4\uC885\uC124\\brain-overflow\\client\\src\\components\\MyChatMessage.tsx||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:client\\src\\components\\MyChatMessage.tsx||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}"
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\82109\\Desktop\\project\\brain-overflow\\frontend\\src\\components\\ChatWindow.tsx||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:frontend\\src\\components\\ChatWindow.tsx||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\82109\\Documents\\\uB300\uD559\uACFC\uC81C\\\uCEF4\uC885\uC124\\brain-overflow\\client\\src\\components\\Sidebar.tsx||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:client\\src\\components\\Sidebar.tsx||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}"
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\82109\\Desktop\\project\\brain-overflow\\frontend\\src\\components\\ConfirmModal.tsx||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:frontend\\src\\components\\ConfirmModal.tsx||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\82109\\Documents\\\uB300\uD559\uACFC\uC81C\\\uCEF4\uC885\uC124\\brain-overflow\\client\\src\\css\\ChatWindow.module.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:client\\src\\css\\ChatWindow.module.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}"
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\82109\\Desktop\\project\\brain-overflow\\frontend\\src\\css\\ConfirmModal.module.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:frontend\\src\\css\\ConfirmModal.module.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\82109\\Desktop\\project\\brain-overflow\\frontend\\src\\components\\FileUpload.tsx||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:frontend\\src\\components\\FileUpload.tsx||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}"
     }
   ],
   "DocumentGroupContainers": [
@@ -30,75 +34,85 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 5,
+          "SelectedChildIndex": 1,
           "Children": [
-            {
-              "$type": "Bookmark",
-              "Name": "ST:0:0:{1c64b9c2-e352-428e-a56d-0ace190b99a6}"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 4,
-              "Title": "ChatWindow.module.css",
-              "DocumentMoniker": "C:\\Users\\82109\\Documents\\\uB300\uD559\uACFC\uC81C\\\uCEF4\uC885\uC124\\brain-overflow\\client\\src\\css\\ChatWindow.module.css",
-              "RelativeDocumentMoniker": "client\\src\\css\\ChatWindow.module.css",
-              "ToolTip": "C:\\Users\\82109\\Documents\\\uB300\uD559\uACFC\uC81C\\\uCEF4\uC885\uC124\\brain-overflow\\client\\src\\css\\ChatWindow.module.css",
-              "RelativeToolTip": "client\\src\\css\\ChatWindow.module.css",
-              "ViewState": "AgIAAFYAAAAAAAAAAAAcwFYAAAARAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003000|",
-              "WhenOpened": "2025-05-03T16:43:25.457Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "OtherChatMessage.tsx",
-              "DocumentMoniker": "C:\\Users\\82109\\Documents\\\uB300\uD559\uACFC\uC81C\\\uCEF4\uC885\uC124\\brain-overflow\\client\\src\\components\\OtherChatMessage.tsx",
-              "RelativeDocumentMoniker": "client\\src\\components\\OtherChatMessage.tsx",
-              "ToolTip": "C:\\Users\\82109\\Documents\\\uB300\uD559\uACFC\uC81C\\\uCEF4\uC885\uC124\\brain-overflow\\client\\src\\components\\OtherChatMessage.tsx",
-              "RelativeToolTip": "client\\src\\components\\OtherChatMessage.tsx",
-              "ViewState": "AgIAAAcAAAAAAAAAAAAcwBAAAABDAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003213|",
-              "WhenOpened": "2025-05-03T16:39:42.005Z",
-              "EditorCaption": ""
-            },
             {
               "$type": "Document",
               "DocumentIndex": 2,
-              "Title": "MyChatMessage.tsx",
-              "DocumentMoniker": "C:\\Users\\82109\\Documents\\\uB300\uD559\uACFC\uC81C\\\uCEF4\uC885\uC124\\brain-overflow\\client\\src\\components\\MyChatMessage.tsx",
-              "RelativeDocumentMoniker": "client\\src\\components\\MyChatMessage.tsx",
-              "ToolTip": "C:\\Users\\82109\\Documents\\\uB300\uD559\uACFC\uC81C\\\uCEF4\uC885\uC124\\brain-overflow\\client\\src\\components\\MyChatMessage.tsx",
-              "RelativeToolTip": "client\\src\\components\\MyChatMessage.tsx",
-              "ViewState": "AgIAAAYAAAAAAAAAAAAcwBkAAAACAAAAAAAAAA==",
+              "Title": "ChatWindow.tsx",
+              "DocumentMoniker": "C:\\Users\\82109\\Desktop\\project\\brain-overflow\\frontend\\src\\components\\ChatWindow.tsx",
+              "RelativeDocumentMoniker": "frontend\\src\\components\\ChatWindow.tsx",
+              "ToolTip": "C:\\Users\\82109\\Desktop\\project\\brain-overflow\\frontend\\src\\components\\ChatWindow.tsx",
+              "RelativeToolTip": "frontend\\src\\components\\ChatWindow.tsx",
+              "ViewState": "AgIAACgAAAAAAAAAAAAQwBcAAAACAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003213|",
-              "WhenOpened": "2025-05-03T16:39:35.65Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "Sidebar.tsx",
-              "DocumentMoniker": "C:\\Users\\82109\\Documents\\\uB300\uD559\uACFC\uC81C\\\uCEF4\uC885\uC124\\brain-overflow\\client\\src\\components\\Sidebar.tsx",
-              "RelativeDocumentMoniker": "client\\src\\components\\Sidebar.tsx",
-              "ToolTip": "C:\\Users\\82109\\Documents\\\uB300\uD559\uACFC\uC81C\\\uCEF4\uC885\uC124\\brain-overflow\\client\\src\\components\\Sidebar.tsx",
-              "RelativeToolTip": "client\\src\\components\\Sidebar.tsx",
-              "ViewState": "AgIAAAEBAAAAAAAAAAAiwCUAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003213|",
-              "WhenOpened": "2025-05-03T16:00:55.13Z",
+              "WhenOpened": "2025-05-10T10:07:12.476Z",
+              "IsPinned": true,
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 0,
-              "Title": "ChatWindow.tsx",
-              "DocumentMoniker": "C:\\Users\\82109\\Documents\\\uB300\uD559\uACFC\uC81C\\\uCEF4\uC885\uC124\\brain-overflow\\client\\src\\components\\ChatWindow.tsx",
-              "RelativeDocumentMoniker": "client\\src\\components\\ChatWindow.tsx",
-              "ToolTip": "C:\\Users\\82109\\Documents\\\uB300\uD559\uACFC\uC81C\\\uCEF4\uC885\uC124\\brain-overflow\\client\\src\\components\\ChatWindow.tsx",
-              "RelativeToolTip": "client\\src\\components\\ChatWindow.tsx",
-              "ViewState": "AgIAAGMAAAAAAAAAAAAiwG0AAABAAAAAAAAAAA==",
+              "Title": "Sidebar.module.css",
+              "DocumentMoniker": "C:\\Users\\82109\\Desktop\\project\\brain-overflow\\frontend\\src\\css\\Sidebar.module.css",
+              "RelativeDocumentMoniker": "frontend\\src\\css\\Sidebar.module.css",
+              "ToolTip": "C:\\Users\\82109\\Desktop\\project\\brain-overflow\\frontend\\src\\css\\Sidebar.module.css",
+              "RelativeToolTip": "frontend\\src\\css\\Sidebar.module.css",
+              "ViewState": "AgIAAHcAAAAAAAAAAAAcwIkAAAAQAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003000|",
+              "WhenOpened": "2025-05-11T21:36:12.175Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "ConfirmModal.module.css",
+              "DocumentMoniker": "C:\\Users\\82109\\Desktop\\project\\brain-overflow\\frontend\\src\\css\\ConfirmModal.module.css",
+              "RelativeDocumentMoniker": "frontend\\src\\css\\ConfirmModal.module.css",
+              "ToolTip": "C:\\Users\\82109\\Desktop\\project\\brain-overflow\\frontend\\src\\css\\ConfirmModal.module.css",
+              "RelativeToolTip": "frontend\\src\\css\\ConfirmModal.module.css",
+              "ViewState": "AgIAADQAAAAAAAAAAAAAwEsAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003000|",
+              "WhenOpened": "2025-05-11T21:10:52.059Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "ConfirmModal.tsx",
+              "DocumentMoniker": "C:\\Users\\82109\\Desktop\\project\\brain-overflow\\frontend\\src\\components\\ConfirmModal.tsx",
+              "RelativeDocumentMoniker": "frontend\\src\\components\\ConfirmModal.tsx",
+              "ToolTip": "C:\\Users\\82109\\Desktop\\project\\brain-overflow\\frontend\\src\\components\\ConfirmModal.tsx",
+              "RelativeToolTip": "frontend\\src\\components\\ConfirmModal.tsx",
+              "ViewState": "AgIAAA4AAAAAAAAAAAAAwDIAAAACAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003213|",
-              "WhenOpened": "2025-05-03T09:40:42.789Z",
+              "WhenOpened": "2025-05-11T21:10:22.662Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "FileUpload.tsx",
+              "DocumentMoniker": "C:\\Users\\82109\\Desktop\\project\\brain-overflow\\frontend\\src\\components\\FileUpload.tsx",
+              "RelativeDocumentMoniker": "frontend\\src\\components\\FileUpload.tsx",
+              "ToolTip": "C:\\Users\\82109\\Desktop\\project\\brain-overflow\\frontend\\src\\components\\FileUpload.tsx",
+              "RelativeToolTip": "frontend\\src\\components\\FileUpload.tsx",
+              "ViewState": "AgIAAAAAAAAAAAAAAADwvwAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003213|",
+              "WhenOpened": "2025-05-11T21:09:41.617Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "Sidebar.tsx",
+              "DocumentMoniker": "C:\\Users\\82109\\Desktop\\project\\brain-overflow\\frontend\\src\\components\\Sidebar.tsx",
+              "RelativeDocumentMoniker": "frontend\\src\\components\\Sidebar.tsx",
+              "ToolTip": "C:\\Users\\82109\\Desktop\\project\\brain-overflow\\frontend\\src\\components\\Sidebar.tsx",
+              "RelativeToolTip": "frontend\\src\\components\\Sidebar.tsx",
+              "ViewState": "AgIAAMIBAAAAAAAAAAAQwNUBAABoAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003213|",
+              "WhenOpened": "2025-05-11T20:13:54.293Z",
               "EditorCaption": ""
             }
           ]
