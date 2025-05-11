@@ -17,7 +17,7 @@ const ViewerPage: React.FC = () => {
 
   useEffect(() => {
     async function loadExample() {
-      const response = await fetch('/mri/example.nii');
+      const response = await fetch('publicFiles/mri/example.nii');
       const blob = await response.blob();
       const file = new File([blob], 'example.nii');
       setFiles([{
