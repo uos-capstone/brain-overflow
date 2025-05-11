@@ -6,12 +6,11 @@ const SignUpPage: React.FC = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [nickname, setNickname] = useState('');
+    const [role, setRole] = useState<'DOCTOR' | 'PATIENT'>('PATIENT');
     const [emailChecked, setEmailChecked] = useState(false);
     const [emailError, setEmailError] = useState('');
 
-    const validateEmail = (email: string) => {
-        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-    };
+    const validateEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
     const handleCheckEmail = () => {
         if (!validateEmail(email)) {
@@ -19,7 +18,6 @@ const SignUpPage: React.FC = () => {
             return;
         }
 
-        // 가짜 중복 체크 (실제는 API 호출)
         const dummyUsedEmails = ['test@example.com', 'admin@site.com'];
         if (dummyUsedEmails.includes(email.toLowerCase())) {
             setEmailError('이미 사용 중인 이메일입니다.');
@@ -30,7 +28,7 @@ const SignUpPage: React.FC = () => {
         }
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
         if (!emailChecked) {
@@ -38,36 +36,52 @@ const SignUpPage: React.FC = () => {
             return;
         }
 
-        // TODO: 서버에 회원가입 요청
-        console.log({ email, password, nickname });
-        alert('회원가입 완료!');
-        navigate('/login');
+        try {
+            const response = await fetch('/api/signup', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    username: email,
+                    password: password,
+                    nickname: nickname,
+                    role: role,
+                }),
+            });
+
+            if (!response.ok) {
+                const err = await response.json();
+                throw new Error(err.message || '회원가입 실패');
+            }
+
+            alert('회원가입 완료!');
+            navigate('/login');
+        } catch (error: any) {
+            alert(error.message);
+        }
     };
 
     return (
         <div className="min-h-screen bg-[#1e1e1e] flex flex-col items-center justify-center px-4 text-white">
-            <h1 className="text-3xl font-bold mb-6">회원가입</h1>
-
+            <h1 className="text-3xl font-bold mb-6">Sign Up</h1>
             <div className="w-full max-w-md bg-black/60 p-8 rounded-2xl shadow-2xl border border-gray-700 space-y-6">
                 <form onSubmit={handleSubmit} className="space-y-5">
-
                     {/* Email */}
                     <div>
-                        <label className="block mb-1 text-sm">이메일 (ID)</label>
+                        <label className="block mb-1 text-sm">Email (ID)</label>
                         <div className="flex gap-2">
                             <input
                                 type="email"
                                 value={email}
                                 onChange={e => setEmail(e.target.value)}
-                                className="flex-1 px-4 py-2 rounded-lg bg-[#2c2c2c] text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500"
+                                className="flex-1 px-4 py-2 rounded-lg bg-[#2c2c2c] text-white"
                                 placeholder="your@email.com"
                             />
                             <button
                                 type="button"
                                 onClick={handleCheckEmail}
-                                className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm"
+                                className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-sm"
                             >
-                                중복 확인
+                                Check Duplicate
                             </button>
                         </div>
                         {emailError && <p className="text-red-400 text-sm mt-1">{emailError}</p>}
@@ -75,24 +89,37 @@ const SignUpPage: React.FC = () => {
 
                     {/* Password */}
                     <div>
-                        <label className="block mb-1 text-sm">비밀번호</label>
+                        <label className="block mb-1 text-sm">Password</label>
                         <input
                             type="password"
                             value={password}
                             onChange={e => setPassword(e.target.value)}
-                            className="w-full px-4 py-2 rounded-lg bg-[#2c2c2c] text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500"
+                            className="w-full px-4 py-2 rounded-lg bg-[#2c2c2c] text-white"
                         />
                     </div>
 
                     {/* Nickname */}
                     <div>
-                        <label className="block mb-1 text-sm">닉네임</label>
+                        <label className="block mb-1 text-sm">Nickname</label>
                         <input
                             type="text"
                             value={nickname}
                             onChange={e => setNickname(e.target.value)}
-                            className="w-full px-4 py-2 rounded-lg bg-[#2c2c2c] text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500"
+                            className="w-full px-4 py-2 rounded-lg bg-[#2c2c2c] text-white"
                         />
+                    </div>
+
+                    {/* Role */}
+                    <div>
+                        <label className="block mb-1 text-sm">Role</label>
+                        <select
+                            value={role}
+                            onChange={e => setRole(e.target.value as 'DOCTOR' | 'PATIENT')}
+                            className="w-full px-4 py-2 rounded-lg bg-[#2c2c2c] text-white"
+                        >
+                            <option value="DOCTOR">Doctor</option>
+                            <option value="PATIENT">Patient</option>
+                        </select>
                     </div>
 
                     {/* Submit */}
