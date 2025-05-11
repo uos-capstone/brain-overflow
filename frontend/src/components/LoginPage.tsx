@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Client } from '@stomp/stompjs';
+import SockJS from 'sockjs-client';
 
 interface LoginPageProps {
     onLogin: () => void;
@@ -10,6 +12,28 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
 
+    const connectStomp = (token: string, userId: string) => {
+        const socket = new SockJS(`/ws?token=${encodeURIComponent(token)}`);
+        const client = new Client({
+            webSocketFactory: () => socket,
+            reconnectDelay: 5000,
+            onConnect: () => {
+                console.log('STOMP 연결됨, userId =', userId);
+                client.subscribe(`/topic/ai-response.${userId}`, msg => {
+                    const { userId: uid, message } = JSON.parse(msg.body);
+                    console.log(`[${uid}] 메시지 수신: ${message}`);
+                    // TODO: 메시지 상태에 반영
+                });
+            },
+            onStompError: frame => {
+                console.error('STOMP 에러:', frame);
+            },
+        });
+
+        client.activate();
+    };
+
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
@@ -19,16 +43,18 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username: username, password: password }),
             });
-            
+
             if (!res.ok) throw new Error('인증 실패');
 
             const data = await res.json();
             const jwtToken = data.data.token;
             const userId = data.data.userId;
 
-            console.log(jwtToken, userId);
+            // WebSocket 연결 시작
+            connectStomp(jwtToken, userId);
 
-            // 로그인 성공 처리
+            onLogin();
+            navigate('/generator');
         } catch (err) {
             const errorElem = document.getElementById('loginError');
             if (errorElem) {
@@ -36,9 +62,6 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
             }
             console.error(err);
         }
-
-        onLogin();
-        navigate('/generator');
     };
 
     return (
@@ -83,6 +106,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
                     </button>
                 </div>
             </div>
+            <div id="loginError" className="text-red-500 mt-4 text-sm" />
         </div>
     );
 };
