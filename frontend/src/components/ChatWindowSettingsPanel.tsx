@@ -10,6 +10,7 @@ interface ChatWindowSettingsPanelProps {
     onClose: () => void;
     roomId: number;
     onLeaveRoom: (id: number) => void;
+    onOpenInviteModal: (roomId: number) => void;
 }
 
 export const ChatWindowSettingsPanel: React.FC<ChatWindowSettingsPanelProps> = ({
@@ -19,6 +20,7 @@ export const ChatWindowSettingsPanel: React.FC<ChatWindowSettingsPanelProps> = (
     onClose,
     roomId,
     onLeaveRoom,
+    onOpenInviteModal,
 }) => {
     const handlePanelClick = (e: React.MouseEvent) => {
         e.stopPropagation();
@@ -30,7 +32,13 @@ export const ChatWindowSettingsPanel: React.FC<ChatWindowSettingsPanelProps> = (
 
     const menuItems = [
         { label: "알림 설정", action: () => console.log("알림 설정 클릭됨") },
-        { label: "초대하기", action: () => console.log("대화 내용 내보내기 클릭됨") },
+        {
+            label: "초대하기",
+            action: () => {
+                onOpenInviteModal(roomId); // [수정] 초대 모달 열기 함수 호출
+                // onClose(); // 설정 패널은 초대 모달이 열리면 Sidebar에서 닫아줄 수 있음 (openInviteModal 내부에서)
+            }
+        },
         { type: 'divider' as const }, // 구분선 타입
         {
             label: "채팅방 나가기",

@@ -11,7 +11,7 @@ import { ChatRoomParticipantsPanel } from './ChatRoomParticipantsPanel';
 import chatWindowSettingsPanelStyles from '../css/ChatWindowSettingsPanel.module.css'; // 외부 클릭 감지용
 import roomParticipantsPanelStyles from '../css/ChatRoomParticipantsPanel.module.css'; // 외부 클릭 감지용
 import { ConfirmModal } from './ConfirmModal';
-
+import { InviteModal } from './InviteModal';
 
 // [추가] Participant 인터페이스 정의
 export interface Participant {
@@ -24,6 +24,18 @@ interface Chatroom {
     participants: Participant[];
 }
 
+const ALL_AVAILABLE_USERS: Participant[] = [
+    { id: 'user1', userName: 'Alice' },
+    { id: 'user2', userName: 'Bob' },
+    { id: 'user3', userName: 'Charlie' },
+    { id: 'user4', userName: 'David' },
+    { id: 'user5', userName: 'Eve' },
+    { id: 'user6', userName: 'Frank' },
+    { id: 'user7', userName: 'Grace' },
+    { id: 'user8', userName: 'Henry' },
+    { id: 'userMe', userName: '나' }, // '나' 자신은 보통 초대 대상에서 제외됨
+];
+
 const BASE_Z_INDEX = 10000;
 const SIDEBAR_Z_INDEX = 11000;
 const DRAWER_Z_INDEX = 10500;
@@ -32,6 +44,7 @@ const SETTINGS_PANEL_Z_INDEX = SIDEBAR_Z_INDEX + 100;
 const PARTICIPANTS_PANEL_Z_INDEX = SIDEBAR_Z_INDEX + 110; 
 const BACKDROP_Z_INDEX = BASE_Z_INDEX - 1;
 const CONFIRM_MODAL_Z_INDEX = (PARTICIPANTS_PANEL_Z_INDEX || SETTINGS_PANEL_Z_INDEX) + 50;
+const INVITE_MODAL_Z_INDEX = CONFIRM_MODAL_Z_INDEX + 10;
 
 const CURRENT_USER_ID_IN_SIDEBAR = "userMe";
 
@@ -76,6 +89,7 @@ export default function Sidebar() {
     const [participantsPanelPosition, setParticipantsPanelPosition] = useState<{ top: number; left: number } | null>(null);
 
     const [leaveConfirmModalForId, setLeaveConfirmModalForId] = useState<number | null>(null);
+    const [inviteModalForRoomId, setInviteModalForRoomId] = useState<number | null>(null);
 
     // 참가자 창 닫기
     const closeParticipantsPanel = useCallback(() => {
@@ -323,6 +337,40 @@ export default function Sidebar() {
         setLeaveConfirmModalForId(null);
     }, []);
 
+    const openInviteModal = useCallback((roomId: number) => {
+        closeSettingsPanel(); // 다른 패널들은 닫기
+        closeParticipantsPanel();
+        setInviteModalForRoomId(roomId);
+    }, [closeSettingsPanel, closeParticipantsPanel]);
+
+    // [신규] 초대 모달 닫기 함수
+    const closeInviteModal = useCallback(() => {
+        setInviteModalForRoomId(null);
+    }, []);
+
+    // [신규] 선택된 사용자들을 채팅방에 초대하는 함수
+    const handleInviteUsersToRoom = useCallback((roomId: number, usersToInvite: Participant[]) => {
+        setChatrooms(currentChatrooms =>
+            currentChatrooms.map(room => {
+                if (room.id === roomId) {
+                    const existingParticipantIds = new Set(room.participants.map(p => p.id));
+                    const newParticipants = usersToInvite.filter(
+                        user => !existingParticipantIds.has(user.id)
+                    );
+                    if (newParticipants.length > 0) {
+                        return {
+                            ...room,
+                            participants: [...room.participants, ...newParticipants.map(u => ({ id: u.id, userName: u.userName }))],
+                        };
+                    }
+                }
+                return room;
+            })
+        );
+        closeInviteModal(); // 초대 후 모달 닫기
+        // 필요하다면, 초대 성공/실패 알림 등을 추가할 수 있습니다.
+    }, [closeInviteModal]);
+
     // 방 최소화
     const minimizeRoom = useCallback((id: number) => {
         if (settingsOpenForId === id) closeSettingsPanel();
@@ -388,6 +436,9 @@ export default function Sidebar() {
     const roomToLeave = leaveConfirmModalForId !== null
         ? chatrooms.find(room => room.id === leaveConfirmModalForId)
         : null;
+    const roomForInvite = inviteModalForRoomId !== null
+        ? chatrooms.find(r => r.id === inviteModalForRoomId)
+        : null;
 
     return (
         <DndProvider backend={HTML5Backend}>
@@ -446,7 +497,7 @@ export default function Sidebar() {
                         onBringToFront={bringToFront}
                         onTogglePin={togglePin}
                         onOpenSettings={handleOpenSettings}
-                        onShowParticipantsPanel={handleOpenParticipantsPanel} 
+                        onShowParticipantsPanel={handleOpenParticipantsPanel}
                     />
                 );
             })}
@@ -477,6 +528,7 @@ export default function Sidebar() {
                     onLeaveRoom={requestLeaveChatroom}
                     onShowParticipants={handleOpenParticipantsPanel} 
                     triggerElement={settingsTriggerButtonRef}
+                    onOpenInviteModal={openInviteModal}
                 />
             )}
 
@@ -501,6 +553,19 @@ export default function Sidebar() {
                 cancelText="취소"
                 zIndex={CONFIRM_MODAL_Z_INDEX}
             />
+
+            {inviteModalForRoomId !== null && roomForInvite && (
+                <InviteModal
+                    isOpen={true} // inviteModalForRoomId가 null이 아니면 항상 열림
+                    onClose={closeInviteModal}
+                    currentRoomId={inviteModalForRoomId}
+                    currentRoomName={roomForInvite.name}
+                    currentParticipants={roomForInvite.participants}
+                    allUsers={ALL_AVAILABLE_USERS.filter(u => u.id !== CURRENT_USER_ID_IN_SIDEBAR)} // 자신은 초대 목록에서 제외
+                    onInviteConfirm={(usersToInvite) => handleInviteUsersToRoom(inviteModalForRoomId, usersToInvite)}
+                    zIndex={INVITE_MODAL_Z_INDEX}
+                />
+            )}
         </DndProvider>
     );
 }
