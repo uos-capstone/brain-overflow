@@ -3,40 +3,39 @@ import { useDrag } from 'react-dnd';
 import styles from '../css/ChatWindow.module.css';
 import { MyChatMessage } from './MyChatMessage';
 import { OtherChatMessage } from './OtherChatMessage';
+import {
+    fetchChats,
+    ChatMessageData,
+    getCurrentUser,
+    Participant,
+} from '../util/api';
 
+/*
 interface ChatMessageData {
-    messageId: string | number;
+    messageId: string;
     senderName: string;
     senderId: string;
     content: string;
     timestamp: string;
 }
+*/
 
 const SAMPLE_CURRENT_USER_ID = "userMe";
 
-const INITIAL_MESSAGES: ChatMessageData[] = [
-    { messageId: 1, senderId: "12345", senderName: "상대방2", content: "aaaa", timestamp: "오후 2:00" },
-    { messageId: 2, senderId: SAMPLE_CURRENT_USER_ID, senderName: "나", content: "긴메시지ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ", timestamp: "오후 2:01" },
-    { messageId: 3, senderId: "12345", senderName: "상대방1", content: "ㄷㄱㄺㄹㄹㄷㄱㄹ", timestamp: "오후 2:01" },
-    { messageId: 4, senderId: "12345", senderName: "상대방2", content: "aaaa", timestamp: "오후 2:00" },
-    { messageId: 5, senderId: SAMPLE_CURRENT_USER_ID, senderName: "나", content: "긴메시지ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ", timestamp: "오후 2:01" },
-    { messageId: 6, senderId: "12345", senderName: "상대방1", content: "ㄷㄱㄺㄹㄹㄷㄱㄹ", timestamp: "오후 2:01" },
-];
-
 export interface ChatWindowProps {
-    id: number;
+    id: string;
     title: string;
     x: number;
     y: number;
     zIndex: number;
     isPinned: boolean;
-    onMove: (id: number, x: number, y: number) => void;
-    onClose: (id: number) => void;
-    onMinimize: (id: number) => void;
-    onBringToFront: (id: number) => void;
-    onTogglePin: (id: number) => void;
-    onOpenSettings: (id: number, buttonElement: HTMLButtonElement) => void;
-    onShowParticipantsPanel: (id: number, buttonElement: HTMLButtonElement) => void;
+    onMove: (id: string, x: number, y: number) => void;
+    onClose: (id: string) => void;
+    onMinimize: (id: string) => void;
+    onBringToFront: (id: string) => void;
+    onTogglePin: (id: string) => void;
+    onOpenSettings: (id: string, buttonElement: HTMLButtonElement) => void;
+    onShowParticipantsPanel: (id: string, buttonElement: HTMLButtonElement) => void;
     children?: React.ReactNode;
 }
 
@@ -55,13 +54,23 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
     onOpenSettings,
     onShowParticipantsPanel
 }) => {
-    const [messages, setMessages] = useState<ChatMessageData[]>(INITIAL_MESSAGES);
-    const currentUserId = SAMPLE_CURRENT_USER_ID;
+    const [messages, setMessages] = useState<ChatMessageData[]>([]);
+    const [currentUser, setCurrentUser] = useState<Participant | null>(null);
+    const [loading, setLoading] = useState(true);
 
     const [inputValue, setInputValue] = useState('');
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const settingsButtonRef = useRef<HTMLButtonElement>(null);
     const participantsButtonRef = useRef<HTMLButtonElement>(null);
+
+    useEffect(() => {
+        Promise.all([fetchChats(id), getCurrentUser()])
+            .then(([messages, currentUser]) => {
+                setMessages(messages)
+                setCurrentUser(currentUser);
+            })
+            .finally(() => setLoading(false));
+    }, []);
 
     const [{ isDragging }, drag] = useDrag(() => ({
         type: 'CHAT_WINDOW',
@@ -93,8 +102,8 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
         const trimmedMessage = inputValue.trim();
         if (trimmedMessage) {
             const newMessage: ChatMessageData = {
-                messageId: Date.now(),
-                senderId: currentUserId,
+                messageId: Date.now().toString(),
+                senderId: currentUser!.id,
                 senderName: "나",
                 content: trimmedMessage,
                 timestamp: new Date().toLocaleTimeString('ko-KR', { hour: 'numeric', minute: '2-digit', hour12: true })
@@ -165,7 +174,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
 
             <div className={styles.content}>
                 {messages.map((chat) => {
-                    if (chat.senderId === currentUserId) {
+                    if (chat.senderId === currentUser!.id) {
                         return <MyChatMessage key={chat.messageId} chat={chat} />;
                     } else {
                         return <OtherChatMessage key={chat.messageId} chat={chat} />;

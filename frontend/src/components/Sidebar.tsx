@@ -12,29 +12,26 @@ import chatWindowSettingsPanelStyles from '../css/ChatWindowSettingsPanel.module
 import roomParticipantsPanelStyles from '../css/ChatRoomParticipantsPanel.module.css'; // 외부 클릭 감지용
 import { ConfirmModal } from './ConfirmModal';
 import { InviteModal } from './InviteModal';
+import {
+    fetchChatrooms,
+    fetchParticipants,
+    getCurrentUser,
+    Chatroom,
+    Participant
+} from '../util/api';
 
-// [추가] Participant 인터페이스 정의
+/*
 export interface Participant {
     id: string;
     userName: string;
 }
+
 interface Chatroom {
     id: number;
     name: string;
     participants: Participant[];
 }
-
-const ALL_AVAILABLE_USERS: Participant[] = [
-    { id: 'user1', userName: 'Alice' },
-    { id: 'user2', userName: 'Bob' },
-    { id: 'user3', userName: 'Charlie' },
-    { id: 'user4', userName: 'David' },
-    { id: 'user5', userName: 'Eve' },
-    { id: 'user6', userName: 'Frank' },
-    { id: 'user7', userName: 'Grace' },
-    { id: 'user8', userName: 'Henry' },
-    { id: 'userMe', userName: '나' }, // '나' 자신은 보통 초대 대상에서 제외됨
-];
+*/
 
 const BASE_Z_INDEX = 10000;
 const SIDEBAR_Z_INDEX = 11000;
@@ -46,50 +43,40 @@ const BACKDROP_Z_INDEX = BASE_Z_INDEX - 1;
 const CONFIRM_MODAL_Z_INDEX = (PARTICIPANTS_PANEL_Z_INDEX || SETTINGS_PANEL_Z_INDEX) + 50;
 const INVITE_MODAL_Z_INDEX = CONFIRM_MODAL_Z_INDEX + 10;
 
-const CURRENT_USER_ID_IN_SIDEBAR = "userMe";
-
 export default function Sidebar() {
-    const [chatrooms, setChatrooms] = useState<Chatroom[]>([
-        {
-            id: 1, name: '방1', participants: [
-                { id: 'user1', userName: 'Alice' },
-                { id: 'user2', userName: 'Bob' },
-                { id: CURRENT_USER_ID_IN_SIDEBAR, userName: '나' },
-            ]
-        },
-        {
-            id: 2, name: '방2', participants: [
-                { id: 'user3', userName: 'Charlie' },
-                { id: CURRENT_USER_ID_IN_SIDEBAR, userName: '나' },
-            ]
-        },
-        {
-            id: 3, name: '방3333', participants: [
-                { id: 'user1', userName: 'Alice' },
-                { id: 'user4', userName: 'David' },
-                { id: CURRENT_USER_ID_IN_SIDEBAR, userName: '나' },
-            ]
-        },
-    ]);
+    const [chatrooms, setChatrooms] = useState<Chatroom[]>([]);
+    const [allParticipants, setParticipants] = useState<Participant[]>([]);
+    const [currentUser, setCurrentUser] = useState<Participant | null>(null);
+    const [loading, setLoading] = useState(true);
 
     const [drawerOpen, setDrawerOpen] = useState(false);
-    const [openIds, setOpenIds] = useState<number[]>([]);
-    const [minimizedIds, setMinimizedIds] = useState<number[]>([]);
-    const [pos, setPos] = useState<Record<number, { x: number; y: number }>>({});
-    const [zIndices, setZIndices] = useState<Record<number, number>>({});
-    const [activeId, setActiveId] = useState<number | null>(null);
-    const [pinnedIds, setPinnedIds] = useState<number[]>([]);
+    const [openIds, setOpenIds] = useState<string[]>([]);
+    const [minimizedIds, setMinimizedIds] = useState<string[]>([]);
+    const [pos, setPos] = useState<Record<string, { x: number; y: number }>>({});
+    const [zIndices, setZIndices] = useState<Record<string, number>>({});
+    const [activeId, setActiveId] = useState<string | null>(null);
+    const [pinnedIds, setPinnedIds] = useState<string[]>([]);
     const [isAddRoomOpen, setIsAddRoomOpen] = useState(false);
 
-    const [settingsOpenForId, setSettingsOpenForId] = useState<number | null>(null);
+    const [settingsOpenForId, setSettingsOpenForId] = useState<string | null>(null);
     const [settingsPanelPosition, setSettingsPanelPosition] = useState<{ top: number; left: number } | null>(null);
     const [settingsTriggerButtonRef, setSettingsTriggerButtonRef] = useState<HTMLButtonElement | null>(null);
 
-    const [participantsPanelOpenForId, setParticipantsPanelOpenForId] = useState<number | null>(null);
+    const [participantsPanelOpenForId, setParticipantsPanelOpenForId] = useState<string | null>(null);
     const [participantsPanelPosition, setParticipantsPanelPosition] = useState<{ top: number; left: number } | null>(null);
 
-    const [leaveConfirmModalForId, setLeaveConfirmModalForId] = useState<number | null>(null);
-    const [inviteModalForRoomId, setInviteModalForRoomId] = useState<number | null>(null);
+    const [leaveConfirmModalForId, setLeaveConfirmModalForId] = useState<string | null>(null);
+    const [inviteModalForRoomId, setInviteModalForRoomId] = useState<string | null>(null);
+
+    useEffect(() => {
+        Promise.all([fetchChatrooms(), fetchParticipants(), getCurrentUser()])
+            .then(([rooms, participants, currentUser]) => {
+                setChatrooms(rooms);
+                setParticipants(participants);
+                setCurrentUser(currentUser);
+            })
+            .finally(() => setLoading(false));
+    }, []);
 
     // 참가자 창 닫기
     const closeParticipantsPanel = useCallback(() => {
@@ -105,7 +92,7 @@ export default function Sidebar() {
     }, []);
 
     // 채팅참가자 보기
-    const handleOpenParticipantsPanel = useCallback((id: number, buttonElement: HTMLButtonElement) => {
+    const handleOpenParticipantsPanel = useCallback((id: string, buttonElement: HTMLButtonElement) => {
         closeSettingsPanel(); 
 
         if (participantsPanelOpenForId === id) {
@@ -122,18 +109,18 @@ export default function Sidebar() {
 
     // 방 추가
     const handleAddRoom = useCallback((name: string) => {
-        const newId = Date.now();
+        const newId = Date.now().toString();
         const newRoom: Chatroom = {
             id: newId,
             name: name,
-            participants: [{ id: CURRENT_USER_ID_IN_SIDEBAR, userName: '나' }] 
+            participants: [currentUser!]
         };
         setChatrooms(currentRooms => [...currentRooms, newRoom]);
         setIsAddRoomOpen(false); 
     }, [setChatrooms]);
 
     // 설정 열기
-    const handleOpenSettings = useCallback((id: number, buttonElement: HTMLButtonElement) => {
+    const handleOpenSettings = useCallback((id: string, buttonElement: HTMLButtonElement) => {
         closeParticipantsPanel();
         if (settingsOpenForId === id) {
             closeSettingsPanel();
@@ -188,7 +175,7 @@ export default function Sidebar() {
     ]);
 
     // 창을 맨 앞으로
-    const bringToFront = useCallback((id: number) => {
+    const bringToFront = useCallback((id: string) => {
         setActiveId(id);
         setZIndices(currentZIndices => {
             let maxZ = BASE_Z_INDEX;
@@ -204,7 +191,7 @@ export default function Sidebar() {
     }, [openIds, minimizedIds]);
 
     // 채팅방 열기
-    const openRoom = useCallback((id: number) => {
+    const openRoom = useCallback((id: string) => {
         if (!chatrooms.find(room => room.id === id)) {
             console.warn(`Attempted to open non-existent room ID: ${id}`);
             return;
@@ -227,7 +214,7 @@ export default function Sidebar() {
     }, [openIds, minimizedIds, bringToFront, chatrooms]);
 
     // 채팅방 닫기
-    const closeChatWindow = useCallback((idToClose: number) => {
+    const closeChatWindow = useCallback((idToClose: string) => {
         if (settingsOpenForId === idToClose) {
             closeSettingsPanel();
         }
@@ -248,7 +235,7 @@ export default function Sidebar() {
         });
 
         if (activeId === idToClose) {
-            let nextActiveId: number | null = null;
+            let nextActiveId: string | null = null;
             let maxZ = BASE_Z_INDEX - 1;
 
             const remainingOpenIds = openIds.filter(oid => oid !== idToClose && !minimizedIds.includes(oid));
@@ -274,7 +261,7 @@ export default function Sidebar() {
     ]);
 
     // 방 드래그
-    const moveRoom = useCallback((id: number, x: number, y: number) => {
+    const moveRoom = useCallback((id: string, x: number, y: number) => {
         if (settingsOpenForId === id) closeSettingsPanel();
         if (participantsPanelOpenForId === id) closeParticipantsPanel(); 
         setPos(p => ({ ...p, [id]: { x, y } }));
@@ -282,7 +269,7 @@ export default function Sidebar() {
     }, [bringToFront, settingsOpenForId, closeSettingsPanel, participantsPanelOpenForId, closeParticipantsPanel]);
 
     // 방 나가기
-    const performActualLeaveRoom = useCallback((idToRemove: number) => {
+    const performActualLeaveRoom = useCallback((idToRemove: string) => {
         if (settingsOpenForId === idToRemove) closeSettingsPanel();
         if (participantsPanelOpenForId === idToRemove) closeParticipantsPanel();
 
@@ -300,7 +287,7 @@ export default function Sidebar() {
         setChatrooms(currentChatrooms => currentChatrooms.filter(room => room.id !== idToRemove));
 
         if (activeId === idToRemove) {
-            let nextActiveId: number | null = null;
+            let nextActiveId: string | null = null;
             let maxZ = BASE_Z_INDEX - 1;
             const remainingOpenIds = openIds.filter(oid => oid !== idToRemove && !minimizedIds.includes(oid));
             remainingOpenIds.forEach(oid => {
@@ -316,7 +303,7 @@ export default function Sidebar() {
     }, [activeId, chatrooms, openIds, minimizedIds, zIndices, settingsOpenForId, participantsPanelOpenForId, closeSettingsPanel, closeParticipantsPanel]);
 
     // 방 진짜 나갈지 물어봄
-    const requestLeaveChatroom = useCallback((idToRemove: number) => {
+    const requestLeaveChatroom = useCallback((idToRemove: string) => {
         setLeaveConfirmModalForId(idToRemove);
  
         if (settingsOpenForId === idToRemove) {
@@ -337,19 +324,20 @@ export default function Sidebar() {
         setLeaveConfirmModalForId(null);
     }, []);
 
-    const openInviteModal = useCallback((roomId: number) => {
-        closeSettingsPanel(); // 다른 패널들은 닫기
+    // 초대모달 열기
+    const openInviteModal = useCallback((roomId: string) => {
+        closeSettingsPanel();
         closeParticipantsPanel();
         setInviteModalForRoomId(roomId);
     }, [closeSettingsPanel, closeParticipantsPanel]);
 
-    // [신규] 초대 모달 닫기 함수
+    // 초대모달 닫기
     const closeInviteModal = useCallback(() => {
         setInviteModalForRoomId(null);
     }, []);
 
-    // [신규] 선택된 사용자들을 채팅방에 초대하는 함수
-    const handleInviteUsersToRoom = useCallback((roomId: number, usersToInvite: Participant[]) => {
+    // 사용자 초대
+    const handleInviteUsersToRoom = useCallback((roomId: string, usersToInvite: Participant[]) => {
         setChatrooms(currentChatrooms =>
             currentChatrooms.map(room => {
                 if (room.id === roomId) {
@@ -372,13 +360,13 @@ export default function Sidebar() {
     }, [closeInviteModal]);
 
     // 방 최소화
-    const minimizeRoom = useCallback((id: number) => {
+    const minimizeRoom = useCallback((id: string) => {
         if (settingsOpenForId === id) closeSettingsPanel();
         if (participantsPanelOpenForId === id) closeParticipantsPanel(); 
         setMinimizedIds(ids => (ids.includes(id) ? ids : [...ids, id]));
 
         if (activeId === id) {
-            let nextActiveId: number | null = null;
+            let nextActiveId: string | null = null;
             let maxZ = BASE_Z_INDEX - 1;
             const newlyMinimizedIds = [...minimizedIds, id];
             openIds
@@ -395,13 +383,13 @@ export default function Sidebar() {
     }, [activeId, openIds, minimizedIds, zIndices, settingsOpenForId, closeSettingsPanel, participantsPanelOpenForId, closeParticipantsPanel]);
 
     // 최소화 된 방 복구
-    const restoreRoom = useCallback((id: number) => {
+    const restoreRoom = useCallback((id: string) => {
         setMinimizedIds(ids => ids.filter(v => v !== id));
         bringToFront(id);
     }, [bringToFront]);
 
     // 채팅방 고정
-    const togglePin = useCallback((id: number) => {
+    const togglePin = useCallback((id: string) => {
         setPinnedIds(ids =>
             ids.includes(id) ? ids.filter(v => v !== id) : [...ids, id]
         );
@@ -483,14 +471,12 @@ export default function Sidebar() {
                 const isPinned = pinnedIds.includes(id);
                 return (
                     <ChatWindow
-                        key={id}
                         id={id}
                         title={room.name}
                         x={x}
                         y={y}
                         zIndex={zIndex}
                         isPinned={isPinned}
-                        participants={room.participants}
                         onMove={moveRoom}
                         onClose={closeChatWindow}
                         onMinimize={minimizeRoom}
@@ -526,8 +512,6 @@ export default function Sidebar() {
                     zIndex={SETTINGS_PANEL_Z_INDEX}
                     onClose={closeSettingsPanel}
                     onLeaveRoom={requestLeaveChatroom}
-                    onShowParticipants={handleOpenParticipantsPanel} 
-                    triggerElement={settingsTriggerButtonRef}
                     onOpenInviteModal={openInviteModal}
                 />
             )}
@@ -556,12 +540,12 @@ export default function Sidebar() {
 
             {inviteModalForRoomId !== null && roomForInvite && (
                 <InviteModal
-                    isOpen={true} // inviteModalForRoomId가 null이 아니면 항상 열림
+                    isOpen={true}
                     onClose={closeInviteModal}
                     currentRoomId={inviteModalForRoomId}
                     currentRoomName={roomForInvite.name}
                     currentParticipants={roomForInvite.participants}
-                    allUsers={ALL_AVAILABLE_USERS.filter(u => u.id !== CURRENT_USER_ID_IN_SIDEBAR)} // 자신은 초대 목록에서 제외
+                    allUsers={allParticipants} 
                     onInviteConfirm={(usersToInvite) => handleInviteUsersToRoom(inviteModalForRoomId, usersToInvite)}
                     zIndex={INVITE_MODAL_Z_INDEX}
                 />

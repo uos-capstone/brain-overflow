@@ -2,7 +2,7 @@
 
 .settingsPanel {
 	position: absolute; /* 화면 기준으로 위치를 잡기 위해 absolute 사용 */
-	background-color: #333; /* 어두운 배경색 */
+	background-color: #3a3a3e; /* 어두운 배경색 */
 	border: 1px solid #4a4a4a;
 	border-radius: 6px;
 	box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);

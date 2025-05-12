@@ -1,16 +1,16 @@
 // src/components/InviteModal.tsx
 import React, { useState, useMemo, useCallback } from 'react';
 import styles from '../css/InviteModal.module.css';
-import { User, Participant } from './Sidebar'; // Sidebar에서 타입 가져오기
+import { Participant } from '../util/api'; // Sidebar에서 타입 가져오기
 
 interface InviteModalProps {
     isOpen: boolean;
     onClose: () => void;
-    currentRoomId: number;
+    currentRoomId: string;
     currentRoomName: string;
     currentParticipants: Participant[];
-    allUsers: User[]; // 초대 가능한 전체 사용자 목록
-    onInviteConfirm: (usersToInvite: User[]) => void;
+    allUsers: Participant[]; // 초대 가능한 전체 사용자 목록
+    onInviteConfirm: (usersToInvite: Participant[]) => void;
     zIndex?: number;
 }
 
@@ -25,7 +25,7 @@ export const InviteModal: React.FC<InviteModalProps> = ({
     zIndex = 15050, // 기본 z-index
 }) => {
     const [searchTerm, setSearchTerm] = useState('');
-    const [selectedUsers, setSelectedUsers] = useState<User[]>([]);
+    const [selectedUsers, setSelectedUsers] = useState<Participant[]>([]);
 
     const currentParticipantIds = useMemo(() => new Set(currentParticipants.map(p => p.id)), [currentParticipants]);
 
@@ -37,7 +37,7 @@ export const InviteModal: React.FC<InviteModalProps> = ({
         );
     }, [allUsers, currentParticipantIds, selectedUsers, searchTerm]);
 
-    const handleSelectUser = useCallback((user: User) => {
+    const handleSelectUser = useCallback((user: Participant) => {
         setSelectedUsers(prev => [...prev, user]);
     }, []);
 

@@ -1,9 +1,9 @@
 ﻿import React from 'react';
 import styles from '../css/ChatRoomParticipantsPanel.module.css';
-import { Participant } from './Sidebar';
+import { Participant } from '../util/api';
 
 interface ChatRoomParticipantsPanelProps {
-    roomId: number;
+    roomId: string;
     participants: Participant[];
     top: number;
     left: number;

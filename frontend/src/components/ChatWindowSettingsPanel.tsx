@@ -8,9 +8,9 @@ interface ChatWindowSettingsPanelProps {
     left: number;
     zIndex: number;
     onClose: () => void;
-    roomId: number;
-    onLeaveRoom: (id: number) => void;
-    onOpenInviteModal: (roomId: number) => void;
+    roomId: string;
+    onLeaveRoom: (id: string) => void;
+    onOpenInviteModal: (roomId: string) => void;
 }
 
 export const ChatWindowSettingsPanel: React.FC<ChatWindowSettingsPanelProps> = ({
