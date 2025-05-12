@@ -141,12 +141,28 @@ export class BoxRingRenderer {
   }
 
   draw(pass: GPURenderPassEncoder) {
+    const offsets = [
+      [0, 0],
+      [0.5, 0], [-0.5, 0],
+      [0, 0.5], [0, -0.5],
+      [0.35, 0.35], [-0.35, 0.35],
+      [0.35, -0.35], [-0.35, -0.35],
+    ];
+
     for (let i = 0; i < 3; i++) {
       pass.setPipeline(this.pipeline);
       pass.setBindGroup(0, this.bindGroups[i]);
       pass.setVertexBuffer(0, this.vertexBuffers[i]);
-      pass.setViewport(0, 0, this.canvas.width/3*2, this.canvas.height, 0, 1);
-      pass.draw(8, 1, 0, 0); // 8 vertices = 4 lines
+
+      for (const [dx, dy] of offsets) {
+        pass.setViewport(
+          dx, dy,
+          this.canvas.width / 3 * 2,
+          this.canvas.height,
+          0, 1
+        );
+        pass.draw(8, 1, 0, 0);
+      }
     }
   }
 }
