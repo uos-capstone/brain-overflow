@@ -89,24 +89,24 @@ const DUMMY_MESSAGES: ChatMessageData[] = [
     { messageId: "6", senderId: "12345", senderName: "상대방1", content: "ㄷㄱㄺㄹㄹㄷㄱㄹ", timestamp: "오후 2:01" },
 ];
 export async function fetchChats(roomId: string): Promise<ChatMessageData[]> { 
-    console.log("fetchChats");
+    console.log("fetchChats",roomId);
     return new Promise(resolve => {
         setTimeout(() => resolve(DUMMY_MESSAGES), 3);
     });
 }
 
 // 방 추가
-export async function addRoom(participants: Participant[], roomName: string): Promise<void> {
-    console.log("addRoom");
+export async function addRoom(userId:string, roomName: string): Promise<void> {
+    console.log("addRoom", roomName, userId);
     return;
 }
 
-export async function addUserToRoom(participants: Participant[], roomName: string): Promise<void> {
-    console.log("addUserToRoom");
+export async function addUserToRoom(userId: string, roomName: string): Promise<void> {
+    console.log("addUserToRoom", roomName, userId);
     return;
 }
 
-export async function deleteUserFromRoom(participants: Participant[], roomName: string): Promise<void> {
-    console.log("deleteUserFromRoom");
+export async function deleteUserFromRoom(userId: string, roomName: string): Promise<void> {
+    console.log("deleteUserFromRoom", userId, roomName);
     return;
 }

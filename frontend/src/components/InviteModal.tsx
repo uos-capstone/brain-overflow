@@ -17,7 +17,6 @@ interface InviteModalProps {
 export const InviteModal: React.FC<InviteModalProps> = ({
     isOpen,
     onClose,
-    currentRoomId,
     currentRoomName,
     currentParticipants,
     allUsers,

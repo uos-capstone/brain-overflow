@@ -47,7 +47,7 @@ export default function Sidebar() {
     const [chatrooms, setChatrooms] = useState<Chatroom[]>([]);
     const [allParticipants, setParticipants] = useState<Participant[]>([]);
     const [currentUser, setCurrentUser] = useState<Participant | null>(null);
-    const [loading, setLoading] = useState(true);
+    //const [loading, setLoading] = useState(true);
 
     const [drawerOpen, setDrawerOpen] = useState(false);
     const [openIds, setOpenIds] = useState<string[]>([]);
@@ -60,7 +60,7 @@ export default function Sidebar() {
 
     const [settingsOpenForId, setSettingsOpenForId] = useState<string | null>(null);
     const [settingsPanelPosition, setSettingsPanelPosition] = useState<{ top: number; left: number } | null>(null);
-    const [settingsTriggerButtonRef, setSettingsTriggerButtonRef] = useState<HTMLButtonElement | null>(null);
+    //const [settingsTriggerButtonRef, setSettingsTriggerButtonRef] = useState<HTMLButtonElement | null>(null);
 
     const [participantsPanelOpenForId, setParticipantsPanelOpenForId] = useState<string | null>(null);
     const [participantsPanelPosition, setParticipantsPanelPosition] = useState<{ top: number; left: number } | null>(null);
@@ -75,7 +75,7 @@ export default function Sidebar() {
                 setParticipants(participants);
                 setCurrentUser(currentUser);
             })
-            .finally(() => setLoading(false));
+            //.finally(() => setLoading(false));
     }, []);
 
     // 참가자 창 닫기
@@ -88,7 +88,7 @@ export default function Sidebar() {
     const closeSettingsPanel = useCallback(() => {
         setSettingsOpenForId(null);
         setSettingsPanelPosition(null);
-        setSettingsTriggerButtonRef(null);
+        //setSettingsTriggerButtonRef(null);
     }, []);
 
     // 채팅참가자 보기
@@ -117,7 +117,7 @@ export default function Sidebar() {
         };
         setChatrooms(currentRooms => [...currentRooms, newRoom]);
         setIsAddRoomOpen(false); 
-    }, [setChatrooms]);
+    }, [setChatrooms, currentUser]);
 
     // 설정 열기
     const handleOpenSettings = useCallback((id: string, buttonElement: HTMLButtonElement) => {
@@ -131,7 +131,7 @@ export default function Sidebar() {
                 top: rect.bottom + window.scrollY + 2,
                 left: rect.left + window.scrollX,
             });
-            setSettingsTriggerButtonRef(buttonElement); 
+            //setSettingsTriggerButtonRef(buttonElement); 
         }
     }, [settingsOpenForId, closeSettingsPanel, closeParticipantsPanel]);
 
@@ -167,11 +167,10 @@ export default function Sidebar() {
             document.removeEventListener('mousedown', handleClickOutsideFloatingPanels);
         };
     }, [
-        settingsOpenForId, closeSettingsPanel,
-        participantsPanelOpenForId, closeParticipantsPanel,
-        chatWindowStyles.controlButton,
-        chatWindowSettingsPanelStyles.settingsPanel,
-        roomParticipantsPanelStyles.participantsPanel
+        settingsOpenForId,
+        closeSettingsPanel,
+        participantsPanelOpenForId,
+        closeParticipantsPanel
     ]);
 
     // 창을 맨 앞으로
@@ -226,10 +225,12 @@ export default function Sidebar() {
         setMinimizedIds(ids => ids.filter(v => v !== idToClose)); 
         setPinnedIds(ids => ids.filter(v => v !== idToClose));   
         setPos(currentPos => {
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
             const { [idToClose]: _, ...rest } = currentPos;
             return rest;
         });
         setZIndices(currentZIndices => {
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
             const { [idToClose]: _, ...rest } = currentZIndices;
             return rest;
         });
@@ -277,10 +278,12 @@ export default function Sidebar() {
         setMinimizedIds(ids => ids.filter(v => v !== idToRemove));
         setPinnedIds(ids => ids.filter(v => v !== idToRemove));
         setPos(currentPos => {
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
             const { [idToRemove]: _, ...rest } = currentPos;
             return rest;
         });
         setZIndices(currentZIndices => {
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
             const { [idToRemove]: _, ...rest } = currentZIndices;
             return rest;
         });
@@ -300,7 +303,7 @@ export default function Sidebar() {
             setActiveId(nextActiveId);
         }
         console.log(`Chatroom with ID ${idToRemove} was permanently left and removed.`);
-    }, [activeId, chatrooms, openIds, minimizedIds, zIndices, settingsOpenForId, participantsPanelOpenForId, closeSettingsPanel, closeParticipantsPanel]);
+    }, [activeId, openIds, minimizedIds, zIndices, settingsOpenForId, participantsPanelOpenForId, closeSettingsPanel, closeParticipantsPanel]);
 
     // 방 진짜 나갈지 물어봄
     const requestLeaveChatroom = useCallback((idToRemove: string) => {
@@ -428,6 +431,7 @@ export default function Sidebar() {
         ? chatrooms.find(r => r.id === inviteModalForRoomId)
         : null;
 
+
     return (
         <DndProvider backend={HTML5Backend}>
             {(activeWindows.some(id => !pinnedIds.includes(id)) || settingsOpenForId !== null || participantsPanelOpenForId !== null) && (
@@ -518,7 +522,7 @@ export default function Sidebar() {
 
             {participantsPanelOpenForId !== null && participantsPanelPosition !== null && currentRoomForParticipants && (
                 <ChatRoomParticipantsPanel
-                    roomId={participantsPanelOpenForId}
+                    //roomId={participantsPanelOpenForId}
                     participants={currentRoomForParticipants.participants}
                     top={participantsPanelPosition.top}
                     left={participantsPanelPosition.left}

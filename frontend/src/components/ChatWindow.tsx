@@ -20,8 +20,6 @@ interface ChatMessageData {
 }
 */
 
-const SAMPLE_CURRENT_USER_ID = "userMe";
-
 export interface ChatWindowProps {
     id: string;
     title: string;
@@ -56,7 +54,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
 }) => {
     const [messages, setMessages] = useState<ChatMessageData[]>([]);
     const [currentUser, setCurrentUser] = useState<Participant | null>(null);
-    const [loading, setLoading] = useState(true);
+    //const [loading, setLoading] = useState(true);
 
     const [inputValue, setInputValue] = useState('');
     const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -69,8 +67,8 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
                 setMessages(messages)
                 setCurrentUser(currentUser);
             })
-            .finally(() => setLoading(false));
-    }, []);
+            //.finally(() => setLoading(false));
+    }, [id]);
 
     const [{ isDragging }, drag] = useDrag(() => ({
         type: 'CHAT_WINDOW',

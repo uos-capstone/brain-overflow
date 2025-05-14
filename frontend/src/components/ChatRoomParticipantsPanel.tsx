@@ -3,7 +3,7 @@ import styles from '../css/ChatRoomParticipantsPanel.module.css';
 import { Participant } from '../util/api';
 
 interface ChatRoomParticipantsPanelProps {
-    roomId: string;
+    //roomId: string;
     participants: Participant[];
     top: number;
     left: number;
@@ -12,7 +12,7 @@ interface ChatRoomParticipantsPanelProps {
 }
 
 export const ChatRoomParticipantsPanel: React.FC<ChatRoomParticipantsPanelProps> = ({
-    roomId,
+    //roomId,
     participants,
     top,
     left,
