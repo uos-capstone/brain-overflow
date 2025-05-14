@@ -1,17 +1,17 @@
-import React from 'react';
+import React from "react";
 import {
   BrowserRouter as Router,
   Routes,
   Route,
   Navigate,
-  useLocation
-} from 'react-router-dom';
-import { AnimatePresence } from 'framer-motion';
-import { PageTransition } from './components/PageTransition';
-import LoginPage from './components/LoginPage';
-import SignUpPage from './components/SignUpPage';
-import MainPage from './components/MainPage';
-import ViewerPage from './components/ViewerPage';
+  useLocation,
+} from "react-router-dom";
+import { AnimatePresence } from "framer-motion";
+import { PageTransition } from "./components/PageTransition";
+import LoginPage from "./components/LoginPage";
+import SignUpPage from "./components/SignUpPage";
+import MainPage from "./components/MainPage";
+import ViewerPage from "./components/ViewerPage";
 
 function AnimatedRoutes({ isAuthenticated }: { isAuthenticated: boolean }) {
   const location = useLocation();
@@ -24,7 +24,7 @@ function AnimatedRoutes({ isAuthenticated }: { isAuthenticated: boolean }) {
             path="/login"
             element={
               <PageTransition>
-                <LoginPage onLogin={() => { }} />
+                <LoginPage onLogin={() => {}} />
               </PageTransition>
             }
           />
