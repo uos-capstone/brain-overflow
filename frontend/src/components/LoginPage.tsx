@@ -30,7 +30,11 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
   const stompClientRef = useRef<any>(null);
 
   const connectStomp = (token: string, userId: string) => {
-    const socket = new SockJS(`/ws?token=${encodeURIComponent(token)}`);
+    const socket = new SockJS(
+      `https://api-brain-overflow.unknownpgr.com/ws?token=${encodeURIComponent(
+        token
+      )}`
+    );
     stompClientRef.current = Stomp.over(socket);
 
     stompClientRef.current.connect(
@@ -135,8 +139,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
 
           <button
             type="submit"
-            className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 rounded-lg shadow-md hover:from-blue-700 hover:to-purple-700 transition"
-          >
+            className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 rounded-lg shadow-md hover:from-blue-700 hover:to-purple-700 transition">
             Log In
           </button>
         </form>
@@ -145,8 +148,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
           Don't have an account?{" "}
           <button
             className="text-blue-400 hover:underline ml-1"
-            onClick={() => navigate("/signup")}
-          >
+            onClick={() => navigate("/signup")}>
             Sign up
           </button>
         </div>
