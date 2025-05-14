@@ -14,6 +14,8 @@ import org.springframework.messaging.handler.annotation.MessageMapping
 import org.springframework.messaging.handler.annotation.Payload
 import org.springframework.messaging.simp.SimpMessagingTemplate
 import org.springframework.messaging.simp.annotation.SendToUser
+import org.springframework.security.core.annotation.AuthenticationPrincipal
+import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestParam
@@ -33,24 +35,33 @@ class ChatController(
     private val log =
         LoggerFactory.getLogger(ChatController::class.java)
 
-    @MessageMapping("/chatrooms")
-    @SendToUser("/queue/chatrooms")
-    fun getChatRooms(principal: Principal): ChatRoomsResponse {
-        val userId = UUID.fromString(principal.name)
+//    @MessageMapping("/chatrooms")
+//    @SendToUser("/queue/chatrooms")
+//    fun getChatRooms(principal: Principal): ChatRoomsResponse {
+//        val userId = UUID.fromString(principal.name)
+//        val userChatRooms = charRoomService.getAllUserChatRooms(userId)
+//        println("userChatRooms = ${userChatRooms.size}")
+//        return ChatRoomsResponse(userChatRooms)
+//    }
+
+    @GetMapping("/chatrooms")
+    fun getChatRoomList(
+        @AuthenticationPrincipal user: UserDetails,
+    ): ChatRoomsResponse {
+        val userId = UUID.fromString(user.username)
         val userChatRooms = charRoomService.getAllUserChatRooms(userId)
-        println("userChatRooms = ${userChatRooms.size}")
         return ChatRoomsResponse(userChatRooms)
     }
 
-    @GetMapping("/chatroom")
-    fun pushChatRoomsUpdate() {
-        // user 파라미터에는 Principal.name 과 매칭되는 문자열(여기선 UUID 문자열)을 넣습니다.
-        messagingTemplate.convertAndSendToUser(
-            "abcf6df3-73e9-4bbb-986d-354c11dd0049",
-            "/queue/chatrooms",
-            "Hello NEW Message"
-        )
-    }
+//    @GetMapping("/chatroom")
+//    fun pushChatRoomsUpdate() {
+//        // user 파라미터에는 Principal.name 과 매칭되는 문자열(여기선 UUID 문자열)을 넣습니다.
+//        messagingTemplate.convertAndSendToUser(
+//            "abcf6df3-73e9-4bbb-986d-354c11dd0049",
+//            "/queue/chatrooms",
+//            "Hello NEW Message"
+//        )
+//    }
 
     @GetMapping("/chatroom/{roomId}")
     fun getChatroomMessages(

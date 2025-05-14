@@ -22,6 +22,6 @@ class ChatMessageDocument(
     val roomId: Long = roomId
     val senderId: UUID = senderId
     val message: String? = message
-    val type: MessageType = messageType
+    val messageType: MessageType = messageType
     val createdAt: LocalDateTime = createdAt
 }

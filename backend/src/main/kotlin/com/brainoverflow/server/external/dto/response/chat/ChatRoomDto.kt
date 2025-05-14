@@ -14,8 +14,8 @@ data class ChatRoomDto(
             return ChatRoomDto(
                 chatRoom.id,
                 chatRoom.name,
-                content.firstOrNull()?.content ?: " ",
-                content.firstOrNull()?.timestamp ?: LocalDateTime.now(),
+                content.lastOrNull()?.content ?: " ",
+                content.lastOrNull()?.timestamp ?: LocalDateTime.now(),
             )
         }
     }

@@ -54,6 +54,7 @@ class DynamicRabbitListenerRegistrar(
                 val json = objectMapper.readTree(String(message.body))
                 val userId = json["userId"].asText()
                 val resultId = json["resultId"].asText()
+                println("userID = $userId")
                 val fromAiResponse = SocketMessageResponse.fromAiResponse(resultId)
                 messagingTemplate.convertAndSendToUser(userId, "/queue/chat", fromAiResponse)
             }

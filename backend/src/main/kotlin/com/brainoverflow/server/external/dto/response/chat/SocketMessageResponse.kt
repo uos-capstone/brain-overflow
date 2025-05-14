@@ -19,7 +19,7 @@ data class SocketMessageResponse(
                 senderId = chatMessageDocument.senderId,
                 content = chatMessageDocument.message,
                 timestamp = chatMessageDocument.createdAt,
-                type = chatMessageDocument.type
+                type = chatMessageDocument.messageType
             )
         }
 
