@@ -59,7 +59,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
             });
 
             // 전송 - 채팅방 목록 요청
-            // stompClientRef.current.send('/app/chatrooms', {});
+            stompClientRef.current.send('/app/chatrooms', {});
         }, (error: string) => {
             console.error('❌ STOMP 연결 실패:', error);
         });

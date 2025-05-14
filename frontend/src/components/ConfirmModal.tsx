@@ -5,7 +5,7 @@ import styles from '../css/ConfirmModal.module.css';
 interface ConfirmModalProps {
     isOpen: boolean;
     title: string;
-    message: React.ReactNode; // ¸Þ½ÃÁö¿¡ JSX Æ÷ÇÔ °¡´ÉÇÏµµ·Ï React.ReactNode »ç¿ë
+    message: React.ReactNode; // ï¿½Þ½ï¿½ï¿½ï¿½ï¿½ï¿½ JSX ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ïµï¿½ï¿½ï¿½ React.ReactNode ï¿½ï¿½ï¿½
     onConfirm: () => void;
     onCancel: () => void;
     confirmText?: string;
@@ -19,15 +19,15 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
     message,
     onConfirm,
     onCancel,
-    confirmText = "È®ÀÎ",
-    cancelText = "Ãë¼Ò",
-    zIndex = 15000, // ±âº» z-index (´Ù¸¥ ÆÐ³Îµéº¸´Ù ³ô°Ô)
+    confirmText = "È®ï¿½ï¿½",
+    cancelText = "ï¿½ï¿½ï¿½",
+    zIndex = 15000, // ï¿½âº» z-index (ï¿½Ù¸ï¿½ ï¿½Ð³Îµéº¸ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½)
 }) => {
     if (!isOpen) {
         return null;
     }
 
-    // ¸ð´Þ ³»ºÎ Å¬¸¯ ½Ã ÀÌº¥Æ® ÀüÆÄ Áß´Ü (¹éµå·Ó Å¬¸¯ ¹æÁö)
+    // ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ Å¬ï¿½ï¿½ ï¿½ï¿½ ï¿½Ìºï¿½Æ® ï¿½ï¿½ï¿½ï¿½ ï¿½ß´ï¿½ (ï¿½ï¿½ï¿½ï¿½ Å¬ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½)
     const handleModalContentClick = (e: React.MouseEvent) => {
         e.stopPropagation();
     };
