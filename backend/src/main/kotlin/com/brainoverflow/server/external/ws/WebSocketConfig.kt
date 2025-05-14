@@ -20,8 +20,6 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 @EnableWebSocketMessageBroker
 class WebSocketConfig(
     private val jwtProvider: JwtProvider,
-    private val redisTemplate: StringRedisTemplate,
-    private val serverIdProvider: ServerIdProvider,
     @Value("\${spring.rabbitmq.host}") private val host: String,
     private val stompSessionInterceptor: StompSessionInterceptor
 ) : WebSocketMessageBrokerConfigurer {
@@ -44,6 +42,7 @@ class WebSocketConfig(
     override fun registerStompEndpoints(registry: StompEndpointRegistry) {
         // SockJS fallback 지원하는 엔드포인트 등록. 모든 클라이언트는 '/ws-chat' 엔드포인트를 사용합니다.
         registry.addEndpoint("/ws")
+            .setAllowedOrigins("*")
             .addInterceptors(JwtHandshakeInterceptor(jwtProvider))
             .setHandshakeHandler(CustomHandshakeHandler())
             .withSockJS()

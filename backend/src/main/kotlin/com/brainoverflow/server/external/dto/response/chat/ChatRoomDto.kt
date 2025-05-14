@@ -10,12 +10,12 @@ data class ChatRoomDto(
     val lastMessageTime: LocalDateTime
 ) {
     companion object {
-        fun from(chatRoom: ChatRoom): ChatRoomDto {
+        fun from(chatRoom: ChatRoom, content: List<SocketMessageResponse>): ChatRoomDto {
             return ChatRoomDto(
                 chatRoom.id,
                 chatRoom.name,
-                "hello?",
-                LocalDateTime.now()
+                content.lastOrNull()?.content ?: " ",
+                content.lastOrNull()?.timestamp ?: LocalDateTime.now(),
             )
         }
     }

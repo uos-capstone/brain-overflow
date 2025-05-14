@@ -63,7 +63,8 @@ class SecurityConfig(
         val config = CorsConfiguration()
 
         config.allowCredentials = true
-        config.allowedOrigins = listOf("http://localhost:5173")
+        config.allowedOrigins =
+            listOf("http://localhost:5173", "https://brain-overflow.unknownpgr.com")
         config.allowedMethods = listOf("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
         config.allowedHeaders = listOf("*")
         config.exposedHeaders = listOf("*")

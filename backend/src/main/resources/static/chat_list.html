@@ -98,8 +98,6 @@
     const socket = new SockJS(`/ws?token=${encodeURIComponent(jwtToken)}`);
     stompClient = Stomp.over(socket);
     stompClient.connect({}, frame => {
-      // 방 목록 요청
-      stompClient.send('/app/chatrooms', {}, JSON.stringify({userId}));
       // 방 목록 수신
       stompClient.subscribe('/user/queue/chatrooms', msg => {
         const {rooms} = JSON.parse(msg.body);
