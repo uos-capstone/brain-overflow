@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>채팅방</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.1/sockjs.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+  <style>
+    body {
+      font-family: Arial;
+      background: #f5f5f5;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+    }
+
+    #messageContainer {
+      height: 400px;
+      overflow-y: auto;
+      border: 1px solid #ddd;
+      padding: 10px;
+    }
+
+    .msg {
+      margin: 5px 0;
+    }
+
+    .msg .meta {
+      font-size: 12px;
+      color: #999;
+    }
+
+    #inputContainer {
+      display: flex;
+      margin-top: 10px;
+    }
+
+    #messageInput {
+      flex: 1;
+      padding: 10px;
+    }
+
+    #sendBtn {
+      padding: 10px;
+    }
+
+    #backBtn {
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+<div class="container" id="chatWindow">
+  <button id="backBtn">← 목록으로</button>
+  <h3 id="roomTitle">Chat Room</h3>
+  <div id="messageContainer"></div>
+  <div id="inputContainer">
+    <input type="text" id="messageInput" placeholder="메시지 입력…"/>
+    <button id="sendBtn" disabled>전송</button>
+  </div>
+</div>
+
+<script>
+  // URL에서 roomId 가져오기
+  const params = new URLSearchParams(location.search);
+  const roomId = params.get('roomId');
+  const jwtToken = localStorage.getItem('jwtToken');
+  if (!jwtToken || !roomId) {
+    alert('접근 정보가 없습니다. 목록에서 다시 들어오세요.');
+    location.href = 'chat_list.html';
+  }
+
+  let stompClient, currentPage = 0;
+  const container = document.getElementById('messageContainer');
+  const input = document.getElementById('messageInput');
+  const sendBtn = document.getElementById('sendBtn');
+
+  // 1) SockJS/STOMP 연결 & 단일 구독
+  const socket = new SockJS(`/ws?token=${encodeURIComponent(jwtToken)}`);
+  stompClient = Stomp.over(socket);
+  stompClient.connect({token: jwtToken}, () => {
+    // 유저-기반 구독: 한 번만
+    stompClient.subscribe('/user/queue/chat', ({body}) => {
+      const msg = JSON.parse(body);
+      // 현재 보고 있는 방 메시지면 append, 아니면 무시(뱃지 업데이트 등은 chat_list 쪽에서)
+      if (msg.roomId === roomId) {
+        appendMessage(msg);
+      }
+    });
+
+    // JOIN 이벤트
+    stompClient.send('/app/chat', {}, JSON.stringify({
+      type: 'JOIN', roomId, content: null
+    }));
+
+    // 과거 메시지 첫 로드
+    loadMessages(0);
+    sendBtn.disabled = false;
+  }, err => console.error('WS 연결 실패:', err));
+
+  // 2) REST API로 과거 메시지 페이지별 로드
+  function loadMessages(page) {
+    fetch(`/chatroom/${roomId}?page=${page}`, {
+      headers: {'Authorization': `Bearer ${jwtToken}`}
+    })
+    .then(res => res.json())
+    .then(data => {
+      const chats = data.content; // spring data page.content
+      chats.reverse().forEach(m => appendMessage({
+        type: m.type,
+        roomId: m.roomId.toString(),
+        sender: m.senderId,
+        content: m.content,
+        timestamp: new Date(m.timestamp).getTime()
+      }, true));
+      if (page === 0) {
+        scrollToBottom();
+      }
+    })
+    .catch(console.error);
+  }
+
+  // 3) 메시지 렌더링
+  function appendMessage(msg, prepend = false) {
+    const el = document.createElement('div');
+    el.className = 'msg';
+    let text;
+    if (msg.type === 'JOIN') {
+      text = `<em>${msg.sender}님이 입장했습니다.</em>`;
+    } else if (msg.type === 'LEAVE') {
+      text = `<em>${msg.sender}님이 나갔습니다.</em>`;
+    } else {
+      text = `<strong>${msg.sender}:</strong> ${msg.content}`;
+    }
+    const time = new Date(msg.timestamp).toLocaleTimeString();
+    el.innerHTML = `<div>${text}</div><div class="meta">${time}</div>`;
+    prepend ? container.prepend(el) : container.appendChild(el);
+    if (!prepend) {
+      scrollToBottom();
+    }
+  }
+
+  function scrollToBottom() {
+    container.scrollTop = container.scrollHeight;
+  }
+
+  // 무한 스크롤
+  container.addEventListener('scroll', () => {
+    if (container.scrollTop === 0) {
+      loadMessages(++currentPage);
+    }
+  });
+
+  // 4) 채팅 보내기
+  input.addEventListener('input', () => {
+    sendBtn.disabled = input.value.trim().length === 0;
+  });
+  sendBtn.addEventListener('click', () => {
+    const content = input.value.trim();
+    if (!content) {
+      return;
+    }
+    stompClient.send('/app/chat', {}, JSON.stringify({
+      type: 'CHAT', roomId, content
+    }));
+    input.value = '';
+    sendBtn.disabled = true;
+  });
+
+  // 5) 뒤로가기(LEAVE)
+  document.getElementById('backBtn').addEventListener('click', () => {
+    stompClient.send('/app/chat', {}, JSON.stringify({
+      type: 'LEAVE', roomId, content: null
+    }));
+    // user-queue 패턴에선 unsubscribe 대상이 없으므로 바로 이동
+    location.href = 'chat_list.html';
+  });
+</script>
+</body>
+</html>

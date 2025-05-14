@@ -25,6 +25,8 @@
       border-bottom: 1px solid #ddd;
       padding: 10px 0;
       cursor: pointer;
+      display: flex;
+      flex-direction: column;
     }
 
     .chatroom:last-child {
@@ -39,6 +41,12 @@
     .chatroom-lastmessage {
       color: #555;
       margin-top: 5px;
+    }
+
+    .chatroom-time {
+      color: gray;
+      font-size: 12px;
+      margin-top: 2px;
     }
 
     input, button {
@@ -85,7 +93,6 @@
       const data = await res.json();
       jwtToken = data.data.token;
       userId = data.data.userId;
-      // JWT 저장
       localStorage.setItem('jwtToken', jwtToken);
       localStorage.setItem('userId', userId);
       connectWebSocket();
@@ -97,13 +104,18 @@
   function connectWebSocket() {
     const socket = new SockJS(`/ws?token=${encodeURIComponent(jwtToken)}`);
     stompClient = Stomp.over(socket);
-    stompClient.connect({}, frame => {
-      // 방 목록 요청
+    stompClient.connect({token: jwtToken}, () => {
+      // 1) 방 목록 요청/수신
       stompClient.send('/app/chatrooms', {}, JSON.stringify({userId}));
-      // 방 목록 수신
       stompClient.subscribe('/user/queue/chatrooms', msg => {
         const {rooms} = JSON.parse(msg.body);
         displayChatRooms(rooms);
+      });
+
+      // 2) 새 채팅 메시지 수신 구독
+      stompClient.subscribe('/user/queue/chat', msg => {
+        const chat = JSON.parse(msg.body);
+        refreshRoomItem(chat);
       });
     }, err => console.error('WS 연결 실패:', err));
   }
@@ -115,18 +127,34 @@
     rooms.forEach(room => {
       const div = document.createElement('div');
       div.className = 'chatroom';
+      div.dataset.roomId = room.roomId;
       div.innerHTML = `
-          <div class="chatroom-title">${room.roomName}</div>
-          <div class="chatroom-lastmessage">${room.lastMessage || '메시지가 없습니다.'}</div>
-          <div style="color:gray; font-size:12px;">${new Date(
-          room.lastMessageTime).toLocaleString()}</div>
-        `;
+        <div class="chatroom-title">${room.roomName}</div>
+        <div class="chatroom-lastmessage">${room.lastMessage || '메시지가 없습니다.'}</div>
+        <div class="chatroom-time">${new Date(room.lastMessageTime).toLocaleString()}</div>
+      `;
       div.addEventListener('click', () => {
-        // 선택된 방으로 이동
         window.location.href = `chat_room.html?roomId=${room.roomId}`;
       });
       container.appendChild(div);
     });
+  }
+
+  // 채팅 메시지 오면 해당 방 아이템 갱신 및 맨 위로 이동
+  function refreshRoomItem(chat) {
+    const {roomId, content, timestamp} = chat;
+    const container = document.getElementById('rooms');
+    const existing = container.querySelector(`.chatroom[data-room-id="${roomId}"]`);
+    if (existing) {
+      // 1) 내용·시간 업데이트
+      existing.querySelector('.chatroom-lastmessage').textContent = content;
+      existing.querySelector('.chatroom-time').textContent = new Date(timestamp).toLocaleString();
+      // 2) 맨 위로 이동
+      container.prepend(existing);
+      // 3) 잠깐 배경 하이라이트 (선택)
+      existing.style.background = '#fffae6';
+      setTimeout(() => existing.style.background = '', 500);
+    }
   }
 </script>
 </body>

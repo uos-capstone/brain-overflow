@@ -36,7 +36,7 @@ class SecurityConfig(
                     "/auth/signup", "/mri/**",
                     "/chat/**", "/**.html",
                     "/ws/**", "/swagger-ui/**",
-                    "/v3/api-docs",        // <-- 추가!
+                    "/v3/api-docs",
                     "/v3/api-docs/**",
                     "/chatroom"
                 ).permitAll()

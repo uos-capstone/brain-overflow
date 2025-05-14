@@ -1,6 +1,8 @@
 package com.brainoverflow.server.external.controller.mri
 
+import com.brainoverflow.server.external.controller.response.ApiResponse
 import com.brainoverflow.server.external.dto.request.mri.MriResultDto
+import com.brainoverflow.server.external.dto.response.mri.MriImageDto
 import com.brainoverflow.server.service.mri.MriService
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
@@ -15,13 +17,27 @@ import java.util.*
 class MriController(
     private val mriService: MriService
 ) {
+    @GetMapping
+    fun getUserMRI(
+        @AuthenticationPrincipal user: UserDetails,
+    ): ApiResponse<List<MriImageDto>> {
+        val response = mriService.findUserMRIImage(UUID.fromString(user.username))
+        return ApiResponse.success(response)
+    }
+
+    @GetMapping("{mriId}")
+    fun getMRIData(@PathVariable mriId: UUID): ApiResponse<MriImageDto> {
+        val response = mriService.findMriImage(mriId)
+        return ApiResponse.success(response)
+    }
+
     @PostMapping(consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     fun registerMRI(
         @AuthenticationPrincipal user: UserDetails,
         @RequestPart("file") file: MultipartFile
-    ): ResponseEntity<String> {
+    ): ApiResponse<String> {
         mriService.registerMRIImage(file, UUID.fromString(user.username))
-        return ResponseEntity.ok("MRI 이미지 업로드 성공")
+        return ApiResponse.success("이미지 저장 성공")
     }
 
     @PostMapping("/check-ad")
@@ -33,7 +49,7 @@ class MriController(
 
     @PostMapping("/check/complete")
     fun completeMRI(
-        @RequestBody mriResultDto: com.brainoverflow.server.external.dto.request.mri.MriResultDto
+        @RequestBody mriResultDto: MriResultDto
     ) {
         mriService.receiveResult(mriResultDto)
     }

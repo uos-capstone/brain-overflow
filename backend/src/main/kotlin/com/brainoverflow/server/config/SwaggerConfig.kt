@@ -31,7 +31,7 @@ class SwaggerConfig {
         // API 기본 정보
         val info = Info()
             .title("BrainOverflow API")
-            .version("v1")
+            .version("v2")
             .description("BrainOverflow 서버 API 문서")
 
         // Components에 SecurityScheme 등록

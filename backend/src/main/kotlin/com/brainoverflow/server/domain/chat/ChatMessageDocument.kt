@@ -1,27 +1,23 @@
 package com.brainoverflow.server.domain.chat
 
-import jakarta.persistence.Id
+import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
 import java.time.Instant
 import java.util.*
 
 @Document("chat_messages")
 class ChatMessageDocument(
+    id: UUID,
     roomId: Long,
     senderId: UUID,
     message: String?,
+    createdAt: Instant,
 ) {
     @Id
-    val id: UUID = UUID.randomUUID()
+    var id: UUID? = id
     val roomId: Long = roomId
     val senderId: UUID = senderId
-    val message: String
+    val message: String? = message
     val type: MessageType = MessageType.TEXT
-    val createdAt: Instant = Instant.now()
-
-
-    init {
-        require(!message.isNullOrBlank()) { "message must not be null or blank" }
-        this.message = message
-    }
+    val createdAt: Instant = createdAt
 }

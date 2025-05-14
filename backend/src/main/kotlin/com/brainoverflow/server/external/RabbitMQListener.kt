@@ -11,7 +11,7 @@ class RabbitMQListener(
     private val mriService: MriService
 ) {
     @RabbitListener(queues = ["aiCompleteQueue"])
-    fun receiveResult(mriResultDto: com.brainoverflow.server.external.dto.request.mri.MriResultDto) {
+    fun receiveResult(mriResultDto: MriResultDto) {
         mriService.receiveResult(mriResultDto)
     }
 

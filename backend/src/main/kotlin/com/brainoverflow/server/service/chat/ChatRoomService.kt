@@ -1,14 +1,15 @@
 package com.brainoverflow.server.service.chat
 
+import com.brainoverflow.server.domain.chat.*
 import com.brainoverflow.server.domain.exception.ReturnCode
 import com.brainoverflow.server.domain.exception.BOException
-import com.brainoverflow.server.domain.chat.ChatRoom
-import com.brainoverflow.server.domain.chat.ChatRoomUser
-import com.brainoverflow.server.domain.chat.ChatRoomUserRepository
-import com.brainoverflow.server.domain.chat.ChatRoomRepository
 import com.brainoverflow.server.domain.user.User
 import com.brainoverflow.server.external.dto.request.chat.CreateRoomDto
+import com.brainoverflow.server.external.dto.response.chat.ChatMessageResponse
+import com.brainoverflow.server.external.dto.response.chat.ChatRoomDto
 import com.brainoverflow.server.service.UserService
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageRequest
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -19,7 +20,8 @@ import java.util.*
 class ChatRoomService(
     private val chatRoomRepository: ChatRoomRepository,
     private val chatRoomUserRepository: ChatRoomUserRepository,
-    private val userService: UserService
+    private val userService: UserService,
+    private val chatMessageRepository: ChatMessageRepository
 ) {
     @Transactional
     fun create(createRoomDto: CreateRoomDto, userId: UUID) {
@@ -48,11 +50,17 @@ class ChatRoomService(
             ?: throw BOException(ReturnCode.USER_NOT_IN_ROOM)
     }
 
-    fun getAllUserChatRooms(userId: UUID): List<com.brainoverflow.server.external.dto.response.chat.ChatRoomDto> {
+    fun getAllUserChatRooms(userId: UUID): List<ChatRoomDto> {
         val user = userService.getByUserId(userId)
         val roomUsers = chatRoomUserRepository.findByUser(user)
         return roomUsers.map { it.chatRoom }
-            .map { com.brainoverflow.server.external.dto.response.chat.ChatRoomDto.from(it) }
+            .map { ChatRoomDto.from(it) }
     }
+
+    fun getMessagesFromRoom(pageable: PageRequest, roomId: Long): Page<ChatMessageResponse> {
+        val documents = chatMessageRepository.findByRoomId(roomId = roomId, pageable = pageable)
+        return documents.map { ChatMessageResponse.from(it) }
+    }
+
 
 }

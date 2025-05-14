@@ -1,12 +1,13 @@
 spring:
   data:
     mongodb:
-      host: localhost
-      port: 27017
-      database: brainoverflow
-      username: user
-      password: password
-      authentication-database: brainoverflow
+      uri: ${SPRING_DATA_MONGODB_URI}
+    #      host: localhost
+    #      port: 27017
+    #      database: brainoverflow
+    #      username: user
+    #      password: password
+    #      authentication-database: brainoverflow
     redis:
       host: ${REDIS_HOST}
       port: ${REDIS_PORT}
@@ -21,7 +22,7 @@ spring:
   jpa:
     open-in-view: true
     hibernate:
-      ddl-auto: create
+      ddl-auto: update
       naming:
         physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
     show-sql: true
@@ -47,10 +48,11 @@ logging:
     org.springframework.messaging: DEBUG
     org.springframework.web.socket: DEBUG
     org.springframework.web.socket.messaging: DEBUG
+    org.springframework.data.mongodb.core.MongoTemplate: DEBUG
+    org.springframework.data.mongodb.core: DEBUG
 
 jwt:
   secret: 823e399822c5170927c9802b3feb60b1fe54debefb406ca5f4eaf05e0014ea63
   expiration-ms: 6000000
-
 
 

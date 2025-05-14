@@ -19,14 +19,14 @@ class MriResult(
     var predictionStatus: PredictionStatus = predictionStatus
         protected set
 
-    var comment: String? = null
+    var resultFilePath: String? = null
 
     fun changeStatus(predictionStatus: PredictionStatus) {
         this.predictionStatus = predictionStatus
     }
 
     fun addComment(comment: String) {
-        this.comment = comment
+        this.resultFilePath = comment
     }
 
 }
