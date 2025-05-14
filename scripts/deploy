@@ -96,9 +96,14 @@ def build_service(directory):
 
     # Build the service
     tag = f"harbor.unknownpgr.com/brain-overflow/{directory}:{hash}"
-    subprocess.run(
-        ["docker", "build", "--platform", "linux/amd64", "-t", tag, directory]
-    )
+    try:
+        subprocess.run(
+            ["docker", "build", "--platform", "linux/amd64", "-t", tag, directory],
+            check=True,
+        )
+    except subprocess.CalledProcessError:
+        print(f"\033[1;91mError: Failed to build Docker image for {directory}\033[0m")
+        exit(1)
 
     # Push the service
     subprocess.run(["docker", "push", tag])
