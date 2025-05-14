@@ -5,7 +5,7 @@ import com.brainoverflow.server.domain.exception.ReturnCode
 import com.brainoverflow.server.domain.exception.BOException
 import com.brainoverflow.server.domain.user.User
 import com.brainoverflow.server.external.dto.request.chat.CreateRoomDto
-import com.brainoverflow.server.external.dto.response.chat.ChatMessageResponse
+import com.brainoverflow.server.external.dto.response.chat.SocketMessageResponse
 import com.brainoverflow.server.external.dto.response.chat.ChatRoomDto
 import com.brainoverflow.server.service.UserService
 import org.springframework.data.domain.Page
@@ -54,12 +54,15 @@ class ChatRoomService(
         val user = userService.getByUserId(userId)
         val roomUsers = chatRoomUserRepository.findByUser(user)
         return roomUsers.map { it.chatRoom }
-            .map { ChatRoomDto.from(it) }
+            .map {
+                val messagesFromRoom = getMessagesFromRoom(PageRequest.of(0, 1), it.id)
+                ChatRoomDto.from(it, messagesFromRoom.content)
+            }
     }
 
-    fun getMessagesFromRoom(pageable: PageRequest, roomId: Long): Page<ChatMessageResponse> {
+    fun getMessagesFromRoom(pageable: PageRequest, roomId: Long): Page<SocketMessageResponse> {
         val documents = chatMessageRepository.findByRoomId(roomId = roomId, pageable = pageable)
-        return documents.map { ChatMessageResponse.from(it) }
+        return documents.map { SocketMessageResponse.fromChat(it) }
     }
 
 

@@ -1,5 +1,6 @@
 package com.brainoverflow.server.external
 
+import com.brainoverflow.server.external.dto.response.chat.SocketMessageResponse
 import com.brainoverflow.server.external.ws.ServerIdProvider
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.amqp.core.AmqpAdmin
@@ -13,7 +14,6 @@ import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.context.event.EventListener
 import org.springframework.messaging.simp.SimpMessagingTemplate
 import org.springframework.stereotype.Component
-import org.springframework.web.socket.TextMessage
 
 @Component
 class DynamicRabbitListenerRegistrar(
@@ -53,12 +53,9 @@ class DynamicRabbitListenerRegistrar(
             setMessageListener { message ->
                 val json = objectMapper.readTree(String(message.body))
                 val userId = json["userId"].asText()
-                val msg = json["message"].asText()
-                val payload = mapOf(
-                    "userId" to userId,
-                    "message" to msg
-                )
-                messagingTemplate.convertAndSend("/topic/ai-response.$userId", payload)
+                val resultId = json["resultId"].asText()
+                val fromAiResponse = SocketMessageResponse.fromAiResponse(resultId)
+                messagingTemplate.convertAndSendToUser(userId, "/queue/chat", fromAiResponse)
             }
         }
         listenerRegistry.registerListenerContainer(endpoint, containerFactory, true)

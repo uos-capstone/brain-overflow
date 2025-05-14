@@ -20,8 +20,6 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 @EnableWebSocketMessageBroker
 class WebSocketConfig(
     private val jwtProvider: JwtProvider,
-    private val redisTemplate: StringRedisTemplate,
-    private val serverIdProvider: ServerIdProvider,
     @Value("\${spring.rabbitmq.host}") private val host: String,
     private val stompSessionInterceptor: StompSessionInterceptor
 ) : WebSocketMessageBrokerConfigurer {

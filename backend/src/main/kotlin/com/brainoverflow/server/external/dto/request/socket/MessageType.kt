@@ -1,5 +1,5 @@
 package com.brainoverflow.server.external.dto.request.socket
 
 enum class MessageType {
-    CHAT, AI;
+    CHAT, MRI_CHAT, AI;
 }

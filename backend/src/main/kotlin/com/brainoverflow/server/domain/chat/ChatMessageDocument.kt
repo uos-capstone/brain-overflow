@@ -1,8 +1,11 @@
 package com.brainoverflow.server.domain.chat
 
+import com.brainoverflow.server.external.dto.request.socket.MessageType
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
 import java.time.Instant
+import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.*
 
 @Document("chat_messages")
@@ -11,13 +14,14 @@ class ChatMessageDocument(
     roomId: Long,
     senderId: UUID,
     message: String?,
-    createdAt: Instant,
+    createdAt: LocalDateTime,
+    messageType: MessageType,
 ) {
     @Id
     var id: UUID? = id
     val roomId: Long = roomId
     val senderId: UUID = senderId
     val message: String? = message
-    val type: MessageType = MessageType.TEXT
-    val createdAt: Instant = createdAt
+    val type: MessageType = messageType
+    val createdAt: LocalDateTime = createdAt
 }
