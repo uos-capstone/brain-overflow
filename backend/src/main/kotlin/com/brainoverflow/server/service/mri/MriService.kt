@@ -7,7 +7,9 @@ import com.brainoverflow.server.domain.mri.MriImage
 import com.brainoverflow.server.domain.mri.MriImageRepository
 import com.brainoverflow.server.domain.mri.MriResult
 import com.brainoverflow.server.domain.mri.MriResultRepository
+import com.brainoverflow.server.external.dto.response.mri.MriImageDto
 import com.brainoverflow.server.service.UserService
+import com.brainoverflow.server.service.port.FileRepository
 import com.brainoverflow.server.service.port.Message
 import com.brainoverflow.server.service.port.MessageQueue
 import org.slf4j.LoggerFactory
@@ -29,6 +31,7 @@ class MriService(
     private val mriResultRepository: MriResultRepository,
     private val messageQueue: MessageQueue,
     private val userService: UserService,
+    private val fileRepository: FileRepository
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -80,30 +83,27 @@ class MriService(
         )
     }
 
-    private val uploadDir = Paths.get("mri-uploads")  // 상대 경로 or 절대 경로
-
-    init {
-        // 디렉토리가 없으면 생성
-        if (!Files.exists(uploadDir)) {
-            Files.createDirectories(uploadDir)
-        }
-    }
-
 
     @Transactional
     fun registerMRIImage(file: MultipartFile, userId: UUID) {
         // 유저 조회
         val user = userService.getByUserId(userId)
-        // 파일명 생성 및 저장
-        val extension = file.originalFilename?.substringAfterLast('.', "") ?: "dat"
-        val fileName = "${UUID.randomUUID()}_${userId}.$extension"
-        val filePath = uploadDir.resolve(fileName)
-
-        Files.copy(file.inputStream, filePath, StandardCopyOption.REPLACE_EXISTING)
-
+        // 파일 저장
+        val filePath = fileRepository.save(file)
         // 엔티티 저장
-        val mriImage = MriImage(user, filePath.toString())
+        val mriImage = MriImage(user, filePath)
         mriImageRepository.save(mriImage)
+    }
+
+    fun findUserMRIImage(userId: UUID): List<MriImageDto> {
+        val user = userService.getByUserId(userId)
+        return user.mriImages.map(MriImageDto::from)
+    }
+
+    fun findMriImage(mriId: UUID): MriImageDto {
+        val mriImage = mriImageRepository.findByIdOrNull(mriId)
+            ?: throw BOException(ReturnCode.NOT_EXIST_IMAGE)
+        return MriImageDto.from(mriImage)
     }
 
 }

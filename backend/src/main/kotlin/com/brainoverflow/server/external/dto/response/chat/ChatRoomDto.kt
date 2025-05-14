@@ -10,8 +10,8 @@ data class ChatRoomDto(
     val lastMessageTime: LocalDateTime
 ) {
     companion object {
-        fun from(chatRoom: ChatRoom): com.brainoverflow.server.external.dto.response.chat.ChatRoomDto {
-            return com.brainoverflow.server.external.dto.response.chat.ChatRoomDto(
+        fun from(chatRoom: ChatRoom): ChatRoomDto {
+            return ChatRoomDto(
                 chatRoom.id,
                 chatRoom.name,
                 "hello?",

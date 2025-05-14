@@ -34,7 +34,7 @@ class DynamicRabbitListenerRegistrar(
         val serverId = serverIdProvider.get()
         val queueName = "ai.response.queue.$serverId"
 
-        val queue = Queue(queueName, true)
+        val queue = Queue(queueName, false, true, true)
         amqpAdmin.declareQueue(queue)
 
         val exchange = TopicExchange(EXCHANGE_NAME, true, true)
