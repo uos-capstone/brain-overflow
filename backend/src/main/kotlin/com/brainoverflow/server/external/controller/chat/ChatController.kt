@@ -27,7 +27,6 @@ import java.util.*
 @RestController
 class ChatController(
     private val messagingTemplate: SimpMessagingTemplate,
-    private val charRoomService: ChatRoomService,
     private val chatMessageRepository: ChatMessageRepository,
     private val redis: StringRedisTemplate
 ) {
@@ -43,34 +42,6 @@ class ChatController(
 //        println("userChatRooms = ${userChatRooms.size}")
 //        return ChatRoomsResponse(userChatRooms)
 //    }
-
-    @GetMapping("/chatrooms")
-    fun getChatRoomList(
-        @AuthenticationPrincipal user: UserDetails,
-    ): ChatRoomsResponse {
-        val userId = UUID.fromString(user.username)
-        val userChatRooms = charRoomService.getAllUserChatRooms(userId)
-        return ChatRoomsResponse(userChatRooms)
-    }
-
-//    @GetMapping("/chatroom")
-//    fun pushChatRoomsUpdate() {
-//        // user 파라미터에는 Principal.name 과 매칭되는 문자열(여기선 UUID 문자열)을 넣습니다.
-//        messagingTemplate.convertAndSendToUser(
-//            "abcf6df3-73e9-4bbb-986d-354c11dd0049",
-//            "/queue/chatrooms",
-//            "Hello NEW Message"
-//        )
-//    }
-
-    @GetMapping("/chatroom/{roomId}")
-    fun getChatroomMessages(
-        @PathVariable roomId: Long,
-        @RequestParam page: Int
-    ): Page<SocketMessageResponse> {
-        val pageable = PageRequest.of(page, 100)
-        return charRoomService.getMessagesFromRoom(pageable, roomId)
-    }
 
     @MessageMapping("/chat")
     fun handleChat(
@@ -91,7 +62,6 @@ class ChatController(
         )
         val socketMessageResponse = SocketMessageResponse.fromChat(save)
 
-        // 2) User-Queue 패턴: all members except sender
         val members = redis.opsForSet().members("room:${msg.roomId}:users") ?: emptySet()
         members.forEach { user ->
             // msg 안에 roomId 있으므로 클라이언트는 이걸 보고 UI 분기 가능

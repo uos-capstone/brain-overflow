@@ -10,8 +10,6 @@ enum class ReturnCode(val code: String, val message: String) {
     EXPIRED_JWT_TOKEN("1102", "만료된 jwt 토큰입니다"),
 
     // 유저 관련
-    WRONG_PROVIDER("1200", "잘못된 인증 제공자 입니다."),
-    DUPLICATE_SIGN_UP("1201", "중복된 회원가입 입니다."),
     NOT_EXIST_USER("1202", "존재하지 않는 회원 입니다."),
     WRONG_PASSWORD("1203", "잘못된 패스워드 입니다."),
 
@@ -21,6 +19,7 @@ enum class ReturnCode(val code: String, val message: String) {
 
     // 채팅 관련
     USER_NOT_IN_ROOM("1400", "채팅방에 속하지 않은 유저는 초대할 수 없습니다."),
+    ROOM_NOT_EXIST("1401", "채팅방이 존재하지 않습니다."),
 
     // 프로필 관련
     NOT_EXIST_PROFILE("1250", "존재하지 않는 프로필입니다."),

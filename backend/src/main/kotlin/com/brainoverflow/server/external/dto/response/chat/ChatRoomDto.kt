@@ -6,6 +6,7 @@ import java.time.LocalDateTime
 data class ChatRoomDto(
     val roomId: Long,
     val roomName: String,
+    val roomUserNumber: Int,
     val lastMessage: String?,
     val lastMessageTime: LocalDateTime
 ) {
@@ -14,6 +15,7 @@ data class ChatRoomDto(
             return ChatRoomDto(
                 chatRoom.id,
                 chatRoom.name,
+                chatRoom.chatRoomUser.size,
                 content.lastOrNull()?.content ?: " ",
                 content.lastOrNull()?.timestamp ?: LocalDateTime.now(),
             )

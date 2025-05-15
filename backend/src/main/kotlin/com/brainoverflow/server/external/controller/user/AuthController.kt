@@ -5,11 +5,15 @@ import com.brainoverflow.server.external.dto.request.user.SignupRequest
 import com.brainoverflow.server.external.dto.response.user.TokenResponse
 import com.brainoverflow.server.external.controller.auth.JwtProvider
 import com.brainoverflow.server.external.controller.response.ApiResponse
+import com.brainoverflow.server.external.dto.response.user.UserInfo
 import com.brainoverflow.server.service.auth.AuthService
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.Authentication
+import org.springframework.security.core.annotation.AuthenticationPrincipal
+import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.web.bind.annotation.*
+import java.util.*
 
 @RestController
 @RequestMapping("/auth")
@@ -23,8 +27,17 @@ class AuthController(
     }
 
     @PostMapping("/signup")
-    fun signup(@RequestBody signupRequest: com.brainoverflow.server.external.dto.request.user.SignupRequest): ApiResponse<Void> {
+    fun signup(@RequestBody signupRequest: SignupRequest): ApiResponse<Void> {
         authService.signup(signupRequest)
         return ApiResponse.success()
+    }
+
+    @GetMapping("/me")
+    fun getUserInfo(
+        @AuthenticationPrincipal userDetails: UserDetails
+    ): ApiResponse<UserInfo> {
+        val userId = UUID.fromString(userDetails.username)
+        val userInfo = authService.getUserInfo(userId)
+        return ApiResponse.success(userInfo)
     }
 }
