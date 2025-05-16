@@ -1,108 +1,34 @@
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import SockJS from "sockjs-client";
-//@ts-ignore
-import Stomp from "stompjs";
+import { login } from "./../util/auth";
+import { connectStomp } from "./../util/socket";
 
 interface LoginPageProps {
   onLogin: () => void;
 }
 
-type StompFrame = {
-  command: string;
-  headers: Record<string, string>;
-  body: string;
-};
-
-type StompMessage = {
-  body: string;
-  headers: Record<string, string>;
-  command: string;
-  subscription: string;
-  ack: () => void;
-  nack: () => void;
-};
-
 const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
   const navigate = useNavigate();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const stompClientRef = useRef<any>(null);
-
-  const connectStomp = (token: string, userId: string) => {
-    const socket = new SockJS(
-      `https://api-brain-overflow.unknownpgr.com/ws?token=${encodeURIComponent(
-        token
-      )}`
-    );
-    stompClientRef.current = Stomp.over(socket);
-
-    stompClientRef.current.connect(
-      {},
-      (frame: StompFrame) => {
-        console.log("✅ STOMP 연결됨:", frame);
-
-        // 구독 1 - AI 응답
-        stompClientRef.current.subscribe(
-          `/topic/ai-response.${userId}`,
-          (msg: StompMessage) => {
-            const { userId: uid, message } = JSON.parse(msg.body);
-            console.log(`[AI] ${uid}: ${message}`);
-          }
-        );
-
-        // 구독 2 - 채팅방 목록
-        stompClientRef.current.subscribe(
-          "/user/queue/chatrooms",
-          (msg: StompMessage) => {
-            const { rooms } = JSON.parse(msg.body);
-            console.log("📦 채팅방 목록:", rooms);
-          }
-        );
-
-        // 구독 3 - 채팅 목록
-        stompClientRef.current.subscribe(
-          `/topic/room.general`,
-          (msg: StompMessage) => {
-            try {
-              const { message } = JSON.parse(msg.body);
-              console.log("💬 채팅 메시지:", message);
-            } catch (e) {
-              console.error("메시지 파싱 오류:", msg.body);
-            }
-          }
-        );
-
-        // 전송 - 채팅방 목록 요청
-        stompClientRef.current.send("/app/chatrooms", {});
-      },
-      (error: string) => {
-        console.error("❌ STOMP 연결 실패:", error);
-      }
-    );
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     try {
-      const res = await fetch("/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username: username, password: password }),
-      });
+      const { token, userId } = await login(username, password);
 
-      if (!res.ok) throw new Error("인증 실패");
-
-      const data = await res.json();
-      const jwtToken = data.data.token;
-      const userId = data.data.userId;
-
-      // WebSocket 연결 시작
-      connectStomp(jwtToken, userId);
-
-      onLogin();
-      navigate("/generator");
+      connectStomp(
+        token,
+        userId,
+        () => {
+          onLogin();
+          navigate("/generator");
+        },
+        (error) => {
+          console.error("❌ STOMP 연결 실패:", error);
+        }
+      );
     } catch (err) {
       const errorElem = document.getElementById("loginError");
       if (errorElem) {
@@ -139,7 +65,8 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
 
           <button
             type="submit"
-            className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 rounded-lg shadow-md hover:from-blue-700 hover:to-purple-700 transition">
+            className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 rounded-lg shadow-md hover:from-blue-700 hover:to-purple-700 transition"
+          >
             Log In
           </button>
         </form>
@@ -148,7 +75,8 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
           Don't have an account?{" "}
           <button
             className="text-blue-400 hover:underline ml-1"
-            onClick={() => navigate("/signup")}>
+            onClick={() => navigate("/signup")}
+          >
             Sign up
           </button>
         </div>
