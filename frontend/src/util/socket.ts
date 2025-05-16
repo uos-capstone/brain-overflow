@@ -25,7 +25,11 @@ export function connectStomp(
   onConnect: () => void,
   onError: (error: string) => void
 ) {
-  const socket = new window.SockJS(`/ws?token=${encodeURIComponent(token)}`);
+  const socket = new window.SockJS(
+    `https://api-brain-overflow.unknownpgr.com/ws?token=${encodeURIComponent(
+      token
+    )}`
+  );
 
   stompClient = Stomp.over(socket);
   Stomp.debug = (str: string) => console.log(`[STOMP] ${str}`);
