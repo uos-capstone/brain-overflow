@@ -35,7 +35,7 @@ class StompSessionInterceptor(
                     .set(USER_SERVER_KEY.format(userId), serverId, Duration.ofMinutes(60))
 
                 // 2) 내가 속한 모든 방을 DB에서 꺼내와서 Redis에 저장
-                chatRoomService.getAllUserChatRooms(userId)
+                chatRoomService.getUsersChatList(userId)
                     .forEach { roomDto ->
                         println(roomDto.roomId)
                         redis.opsForSet()
