@@ -23,10 +23,10 @@ class ChatRoomController(
     fun create(
         @RequestBody createRoomDto: CreateRoomDto,
         @AuthenticationPrincipal user: UserDetails
-    ): ApiResponse<Void> {
+    ): ApiResponse<Long> {
         val userId = UUID.fromString(user.username)
-        chatRoomService.create(createRoomDto, userId)
-        return ApiResponse.success()
+        val roomId = chatRoomService.create(createRoomDto, userId)
+        return ApiResponse.success(roomId)
     }
 
     @PostMapping("/{roomId}/invite")

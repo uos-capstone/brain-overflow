@@ -85,14 +85,15 @@ class MriService(
 
 
     @Transactional
-    fun registerMRIImage(file: MultipartFile, userId: UUID) {
+    fun registerMRIImage(file: MultipartFile, userId: UUID): UUID {
         // 유저 조회
         val user = userService.getByUserId(userId)
         // 파일 저장
         val filePath = fileRepository.save(file)
         // 엔티티 저장
         val mriImage = MriImage(user, filePath)
-        mriImageRepository.save(mriImage)
+        val imageSaved = mriImageRepository.save(mriImage)
+        return imageSaved.id!!
     }
 
     fun findUserMRIImage(userId: UUID): List<MriImageDto> {

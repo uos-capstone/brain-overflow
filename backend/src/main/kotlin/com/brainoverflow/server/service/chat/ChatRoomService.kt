@@ -25,13 +25,14 @@ class ChatRoomService(
     private val chatMessageRepository: ChatMessageRepository
 ) {
     @Transactional
-    fun create(createRoomDto: CreateRoomDto, userId: UUID) {
+    fun create(createRoomDto: CreateRoomDto, userId: UUID): Long {
         val user = userService.getByUserId(userId)
         val chatRoom = createRoomDto.toChatRoom(user)
         chatRoomRepository.save(chatRoom)
 
         val roomUser = ChatRoomUser(chatRoom = chatRoom, user = user)
-        chatRoomUserRepository.save(roomUser)
+        val newRoom = chatRoomUserRepository.save(roomUser)
+        return newRoom.id
     }
 
     @Transactional
