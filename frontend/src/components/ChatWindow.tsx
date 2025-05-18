@@ -6,7 +6,6 @@ import { OtherChatMessage } from './OtherChatMessage';
 import {
     fetchChats,
     ChatMessageData,
-    getCurrentUser,
     Participant,
 } from '../util/api';
 
@@ -27,6 +26,7 @@ export interface ChatWindowProps {
     y: number;
     zIndex: number;
     isPinned: boolean;
+    currentUser: Participant;
     onMove: (id: string, x: number, y: number) => void;
     onClose: (id: string) => void;
     onMinimize: (id: string) => void;
@@ -44,6 +44,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
     y,
     zIndex,
     isPinned,
+    currentUser,
     onMove,
     onClose,
     onMinimize,
@@ -53,7 +54,6 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
     onShowParticipantsPanel
 }) => {
     const [messages, setMessages] = useState<ChatMessageData[]>([]);
-    const [currentUser, setCurrentUser] = useState<Participant | null>(null);
     //const [loading, setLoading] = useState(true);
 
     const [inputValue, setInputValue] = useState('');
@@ -62,10 +62,9 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
     const participantsButtonRef = useRef<HTMLButtonElement>(null);
 
     useEffect(() => {
-        Promise.all([fetchChats(id), getCurrentUser()])
-            .then(([messages, currentUser]) => {
+        Promise.all([fetchChats(id)])
+            .then(([messages]) => {
                 setMessages(messages)
-                setCurrentUser(currentUser);
             })
             //.finally(() => setLoading(false));
     }, [id]);
@@ -172,7 +171,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
 
             <div className={styles.content}>
                 {messages.map((chat) => {
-                    if (chat.senderId === currentUser!.id) {
+                    if (chat.senderName === currentUser!.userName) {
                         return <MyChatMessage key={chat.messageId} chat={chat} />;
                     } else {
                         return <OtherChatMessage key={chat.messageId} chat={chat} />;

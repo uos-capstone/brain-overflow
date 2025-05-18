@@ -18,6 +18,9 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
     try {
       const { token, userId } = await login(username, password);
 
+      localStorage.setItem('accessToken', token);
+      localStorage.setItem('userId', userId);
+
       connectStomp(
         token,
         userId,

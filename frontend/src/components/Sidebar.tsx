@@ -17,7 +17,8 @@ import {
     fetchParticipants,
     getCurrentUser,
     Chatroom,
-    Participant
+    Participant,
+    addRoom
 } from '../util/api';
 
 /*
@@ -108,16 +109,20 @@ export default function Sidebar() {
     }, [participantsPanelOpenForId, closeParticipantsPanel, closeSettingsPanel]); 
 
     // 방 추가
-    const handleAddRoom = useCallback((name: string) => {
-        const newId = Date.now().toString();
-        const newRoom: Chatroom = {
-            id: newId,
-            name: name,
-            participants: [currentUser!]
-        };
-        setChatrooms(currentRooms => [...currentRooms, newRoom]);
-        setIsAddRoomOpen(false); 
-    }, [setChatrooms, currentUser]);
+    const handleAddRoom = useCallback(async (name: string) => {
+        try {
+            const newId = await addRoom(name);   // string
+            setChatrooms(prev => [
+                ...prev,
+                { id: newId, name, participants: [] }
+            ]);
+        } catch (err) {
+            console.error('방 생성 오류:', err);
+        } finally {
+            setIsAddRoomOpen(false);
+        }
+    }, []);
+
 
     // 설정 열기
     const handleOpenSettings = useCallback((id: string, buttonElement: HTMLButtonElement) => {
@@ -467,20 +472,22 @@ export default function Sidebar() {
                 </ul>
             </div>
 
-            {activeWindows.map(id => {
-                const room = chatrooms.find(r => r.id === id);
-                if (!room) return null;
+            {currentUser && activeWindows.map(id => {
+                const room = chatrooms.find(r => r.id === id)!;
                 const { x, y } = pos[id] || { x: 250, y: 70 };
                 const zIndex = zIndices[id] || BASE_Z_INDEX;
                 const isPinned = pinnedIds.includes(id);
+
                 return (
                     <ChatWindow
+                        key={id}
                         id={id}
                         title={room.name}
                         x={x}
                         y={y}
                         zIndex={zIndex}
                         isPinned={isPinned}
+                        currentUser={currentUser}
                         onMove={moveRoom}
                         onClose={closeChatWindow}
                         onMinimize={minimizeRoom}
@@ -520,10 +527,11 @@ export default function Sidebar() {
                 />
             )}
 
-            {participantsPanelOpenForId !== null && participantsPanelPosition !== null && currentRoomForParticipants && (
+            {participantsPanelOpenForId !== null && participantsPanelPosition !== null && currentRoomForParticipants && currentUser && (
                 <ChatRoomParticipantsPanel
                     //roomId={participantsPanelOpenForId}
                     participants={currentRoomForParticipants.participants}
+                    currentUser={currentUser}
                     top={participantsPanelPosition.top}
                     left={participantsPanelPosition.left}
                     zIndex={PARTICIPANTS_PANEL_Z_INDEX}

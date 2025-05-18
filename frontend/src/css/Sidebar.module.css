@@ -29,31 +29,35 @@
 
 .drawer {
 	position: fixed;
-	top: 0;
+	top: 0; /* 드로어 자체는 뷰포트 상단에 위치 */
+	/* left: 인라인 스타일로 관리됨 */
 	width: 240px;
-	height: 100vh;
+	height: calc(100vh - 40px); /* 하단 바 높이를 제외한 전체 높이 */
 	background: #2e2e2e;
 	color: #fff;
 	transition: left 0.3s ease;
-	box-sizing: border-box;
+	box-sizing: border-box; 
 	padding-top: 60px;
-	overflow-y: auto;
-}
 
-.drawerHeader {
-	padding: 10px 20px;
-	margin: 0;
-	color: #fff; 
+	display: flex;
+	flex-direction: column;
 }
 
 .drawerHeaderContainer {
-	display: flex; 
-	align-items: center; 
-	padding: 0 15px 0 20px; 
+	display: flex;
+	align-items: center;
+	padding: 0 20px 0 20px;
 	height: 50px; 
 	border-bottom: 1px solid #444;
 	box-sizing: border-box;
 	flex-shrink: 0;
+}
+
+.drawerHeader {
+	padding: 10px 0;
+	margin: 0;
+	color: #fff;
+	flex-grow: 1; 
 }
 
 .addRoomButton {
@@ -73,20 +77,15 @@
 	font-weight: 300;
 	cursor: pointer;
 	transition: background-color .2s;
-}
-
-	.addRoomButton:hover {
-		background: #444;
-	}
-
-.addRoomButton:focus {
-  outline: none;
+	flex-shrink: 0; 
 }
 
 .drawerList {
 	list-style: none;
 	margin: 0;
-	padding: 10px 0;
+	padding: 10px 0; 
+	flex-grow: 1; 
+	overflow-y: auto;
 }
 
 .drawerListItem {

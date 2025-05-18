@@ -1,4 +1,6 @@
 // src/util/api.ts
+
+const API_BASE = import.meta.env.VITE_API_BASE ?? 'https://api-brain-overflow.unknownpgr.com';
 export interface Participant {
   id: string;
   userName: string;
@@ -11,6 +13,7 @@ export interface Chatroom {
 }
 
 // 더미 데이터 리턴
+/*
 const DUMMY_CHATROOMS: Chatroom[] = [
   {
     id: "1",
@@ -39,11 +42,86 @@ const DUMMY_CHATROOMS: Chatroom[] = [
     ],
   },
 ];
-export async function fetchChatrooms(): Promise<Chatroom[]> {
-  return new Promise((resolve) => {
-    setTimeout(() => resolve(DUMMY_CHATROOMS), 50);
-  });
+*/
+
+// util/api.ts
+
+export interface Participant {
+    id: string;
+    userName: string;
 }
+
+export interface Chatroom {
+    id: string;
+    name: string;
+    participants: Participant[];
+}
+
+export async function fetchChatrooms(): Promise<Chatroom[]> {
+    const token = localStorage.getItem('accessToken');
+    if (!token) throw new Error('토큰이 없습니다. 로그인부터 해주세요.');
+
+    const res = await fetch(`${API_BASE}/rooms/chatroom`, {
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+        },
+    });
+    if (!res.ok) {
+        throw new Error(`채팅방 조회 실패: ${res.status} ${res.statusText}`);
+    }
+
+    const { rooms } = await res.json() as {
+        rooms: Array<{
+            roomId: number;
+            roomName: string;
+            lastMessage?: string;
+            lastMessageTime?: string;
+        }>;
+    };
+
+    const chatrooms = await Promise.all(
+        rooms.map(async r => {
+            const memRes = await fetch(
+                `${API_BASE}/rooms/chatroom/${r.roomId}/members`,
+                {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`,
+                    },
+                }
+            );
+            if (!memRes.ok) {
+                return {
+                    id: r.roomId.toString(),
+                    name: r.roomName,
+                    participants: [] as Participant[],
+                };
+            }
+            const json = await memRes.json() as {
+                code: string;
+                message: string;
+                data: Array<{ userId: string; nickname: string }>;
+            };
+
+            return {
+                id: r.roomId.toString(),
+                name: r.roomName,
+                participants: json.data.map(u => ({
+                    id: u.userId,
+                    userName: u.nickname,
+                })),
+            };
+        })
+    );
+
+    return chatrooms;
+}
+
 
 const DUMMY_PARTICIPANTS: Participant[] = [
   { id: "user1", userName: "Alice" },
@@ -67,10 +145,42 @@ export const CUR_USER: Participant = {
   id: "userMe",
   userName: "나",
 };
+interface MeResponse {
+    code: string;
+    message: string;
+    data: {
+        nickname: string;
+        role: string;
+        username: string;
+    };
+}
+
 export async function getCurrentUser(): Promise<Participant> {
-  return new Promise((resolve) => {
-    setTimeout(() => resolve(CUR_USER), 3);
-  });
+    const token = localStorage.getItem('accessToken');
+    if (!token) {
+        throw new Error('로그인이 필요합니다.');
+    }
+
+    const res = await fetch(`${API_BASE}/auth/me`, {
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+        },
+    });
+
+    if (!res.ok) {
+        const err = await res.json().catch(() => null);
+        throw new Error(err?.message || `유저 조회 실패: ${res.status}`);
+    }
+
+    const body = await res.json() as MeResponse;
+
+    return {
+        id: "user_id",
+        userName: body.data.nickname,
+    };
 }
 export interface ChatMessageData {
   messageId: string;
@@ -112,7 +222,7 @@ const DUMMY_MESSAGES: ChatMessageData[] = [
   {
     messageId: "5",
     senderId: "userMe",
-    senderName: "나",
+    senderName: "qqq",
     content: "긴메시지ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ",
     timestamp: "오후 2:01",
   },
@@ -132,9 +242,34 @@ export async function fetchChats(roomId: string): Promise<ChatMessageData[]> {
 }
 
 // 방 추가
-export async function addRoom(userId: string, roomName: string): Promise<void> {
-  console.log("addRoom", roomName, userId);
-  return;
+export async function addRoom(roomName: string): Promise<string> {
+    const token = localStorage.getItem('accessToken');
+    if (!token) {
+        throw new Error('로그인이 필요합니다.');
+    }
+
+    const res = await fetch(`${API_BASE}/rooms`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ roomName }),
+    });
+
+    if (!res.ok) {
+        // 400, 401, 403 등 에러 처리
+        const err = await res.json().catch(() => null);
+        throw new Error(err?.message || `room 생성 실패: ${res.status}`);
+    }
+
+    const body = await res.json() as {
+        code: string;
+        message: string;
+        data: number; 
+    };
+
+    return body.data.toString();
 }
 
 export async function addUserToRoom(

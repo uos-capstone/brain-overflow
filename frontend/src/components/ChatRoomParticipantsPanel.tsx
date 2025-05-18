@@ -5,6 +5,7 @@ import { Participant } from '../util/api';
 interface ChatRoomParticipantsPanelProps {
     //roomId: string;
     participants: Participant[];
+    currentUser: Participant;
     top: number;
     left: number;
     zIndex: number;
@@ -14,6 +15,7 @@ interface ChatRoomParticipantsPanelProps {
 export const ChatRoomParticipantsPanel: React.FC<ChatRoomParticipantsPanelProps> = ({
     //roomId,
     participants,
+    currentUser,
     top,
     left,
     zIndex,
@@ -39,7 +41,7 @@ export const ChatRoomParticipantsPanel: React.FC<ChatRoomParticipantsPanelProps>
                     {participants.map((participant) => (
                         <li key={participant.id} className={styles.participantItem}>
                             {participant.userName}
-                            {participant.id === 'userMe' && <span className={styles.meIndicator}> (나)</span>}
+                            {participant.userName === currentUser.userName && <span className={styles.meIndicator}> (나)</span>}
                         </li>
                     ))}
                 </ul>
