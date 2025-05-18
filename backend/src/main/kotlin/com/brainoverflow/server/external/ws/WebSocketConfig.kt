@@ -42,7 +42,11 @@ class WebSocketConfig(
     override fun registerStompEndpoints(registry: StompEndpointRegistry) {
         // SockJS fallback 지원하는 엔드포인트 등록. 모든 클라이언트는 '/ws-chat' 엔드포인트를 사용합니다.
         registry.addEndpoint("/ws")
-            .setAllowedOrigins("http://localhost:5173", "https://brain-overflow.unknownpgr.com", "https://api-brain-overflow.unknownpgr.com")
+            .setAllowedOrigins(
+                "https://brain-overflow.unknownpgr.com",
+                "https://api-brain-overflow.unknownpgr.com",
+                "http://localhost:5173", "https://localhost:5173"
+            )
             .addInterceptors(JwtHandshakeInterceptor(jwtProvider))
             .setHandshakeHandler(CustomHandshakeHandler())
             .withSockJS()
