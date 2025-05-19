@@ -1,11 +1,6 @@
 // src/util/api.ts
 
 const API_BASE = import.meta.env.VITE_API_BASE ?? 'https://api-brain-overflow.unknownpgr.com';
-export interface Participant {
-  id: string;
-  userName: string;
-}
-
 export interface Chatroom {
   id: string;
   name: string;
@@ -48,7 +43,7 @@ const DUMMY_CHATROOMS: Chatroom[] = [
 
 export interface Participant {
     id: string;
-    userName: string;
+    nickName: string;
 }
 
 export interface Chatroom {
@@ -113,7 +108,7 @@ export async function fetchChatrooms(): Promise<Chatroom[]> {
                 name: r.roomName,
                 participants: json.data.map(u => ({
                     id: u.userId,
-                    userName: u.nickname,
+                    nickName: u.nickname,
                 })),
             };
         })
@@ -124,15 +119,15 @@ export async function fetchChatrooms(): Promise<Chatroom[]> {
 
 
 const DUMMY_PARTICIPANTS: Participant[] = [
-  { id: "user1", userName: "Alice" },
-  { id: "user2", userName: "Bob" },
-  { id: "user3", userName: "Charlie" },
-  { id: "user4", userName: "David" },
-  { id: "user5", userName: "Eve" },
-  { id: "user6", userName: "Frank" },
-  { id: "user7", userName: "Grace" },
-  { id: "user8", userName: "Henry" },
-  { id: "userMe", userName: "나" },
+  { id: "user1", nickName: "Alice" },
+    { id: "user2", nickName: "Bob" },
+    { id: "user3", nickName: "Charlie" },
+    { id: "user4", nickName: "David" },
+    { id: "user5", nickName: "Eve" },
+    { id: "user6", nickName: "Frank" },
+    { id: "user7", nickName: "Grace" },
+    { id: "user8", nickName: "Henry" },
+    { id: "userMe", nickName: "나" },
 ];
 
 export async function fetchParticipants(): Promise<Participant[]> {
@@ -143,7 +138,7 @@ export async function fetchParticipants(): Promise<Participant[]> {
 
 export const CUR_USER: Participant = {
   id: "userMe",
-  userName: "나",
+  nickName: "나",
 };
 interface MeResponse {
     code: string;
@@ -157,7 +152,8 @@ interface MeResponse {
 
 export async function getCurrentUser(): Promise<Participant> {
     const token = localStorage.getItem('accessToken');
-    if (!token) {
+    const id = localStorage.getItem('userId');
+    if (!token || !id) {
         throw new Error('로그인이 필요합니다.');
     }
 
@@ -178,8 +174,8 @@ export async function getCurrentUser(): Promise<Participant> {
     const body = await res.json() as MeResponse;
 
     return {
-        id: "user_id",
-        userName: body.data.nickname,
+        id: id,
+        nickName: body.data.nickname,
     };
 }
 export interface ChatMessageData {
@@ -187,7 +183,8 @@ export interface ChatMessageData {
   senderName: string;
   senderId: string;
   content: string;
-  timestamp: string;
+    timestamp: string;
+    type: string;
 }
 
 const DUMMY_MESSAGES: ChatMessageData[] = [
@@ -196,42 +193,48 @@ const DUMMY_MESSAGES: ChatMessageData[] = [
     senderId: "12345",
     senderName: "상대방2",
     content: "aaaa",
-    timestamp: "오후 2:00",
+        timestamp: "오후 2:00",
+        type: "CHAT",
   },
   {
     messageId: "2",
     senderId: "userMe",
     senderName: "나",
-    content: "긴메시지ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ",
-    timestamp: "오후 2:01",
+    content: "ㅡㅡㅡㅡㅡㅡㅡㅡ공지ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ",
+      timestamp: "오후 2:01",
+      type: "EVENT",
   },
   {
     messageId: "3",
     senderId: "12345",
     senderName: "상대방1",
     content: "ㄷㄱㄺㄹㄹㄷㄱㄹ",
-    timestamp: "오후 2:01",
+      timestamp: "오후 2:01",
+      type: "CHAT",
   },
   {
     messageId: "4",
     senderId: "12345",
     senderName: "상대방2",
     content: "aaaa",
-    timestamp: "오후 2:00",
+      timestamp: "오후 2:00",
+      type: "CHAT",
   },
   {
     messageId: "5",
     senderId: "userMe",
     senderName: "qqq",
     content: "긴메시지ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ",
-    timestamp: "오후 2:01",
+      timestamp: "오후 2:01",
+      type: "CHAT",
   },
   {
     messageId: "6",
     senderId: "12345",
     senderName: "상대방1",
     content: "ㄷㄱㄺㄹㄹㄷㄱㄹ",
-    timestamp: "오후 2:01",
+      timestamp: "오후 2:01",
+      type: "CHAT",
   },
 ];
 export async function fetchChats(roomId: string): Promise<ChatMessageData[]> {

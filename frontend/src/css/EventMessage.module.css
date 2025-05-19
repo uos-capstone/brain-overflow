@@ -1,0 +1,32 @@
+/* src/css/EventMessage.module.css */
+.eventMessageContainer {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	margin: 8px 0;
+	padding: 4px 10px;
+	width: 100%;
+	box-sizing: border-box;
+}
+
+.eventSender {
+	font-weight: bold;
+	font-size: 0.9em;
+	color: #333333;
+	margin-bottom: 4px;
+}
+
+.eventMessageText {
+	color: #263238;
+	background-color: #CDD3D6;
+	font-size: 0.875em;
+	padding: 7px 15px;
+	border-radius: 16px;
+	display: inline-block;
+	max-width: 85%;
+	text-align: center;
+	line-height: 1.4;
+	word-break: keep-all;
+	overflow-wrap: break-word;
+}

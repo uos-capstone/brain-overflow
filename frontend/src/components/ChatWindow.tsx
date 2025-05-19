@@ -3,6 +3,7 @@ import { useDrag } from 'react-dnd';
 import styles from '../css/ChatWindow.module.css';
 import { MyChatMessage } from './MyChatMessage';
 import { OtherChatMessage } from './OtherChatMessage';
+import { EventMessage } from './EventMessage';
 import {
     fetchChats,
     ChatMessageData,
@@ -103,7 +104,8 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
                 senderId: currentUser!.id,
                 senderName: "나",
                 content: trimmedMessage,
-                timestamp: new Date().toLocaleTimeString('ko-KR', { hour: 'numeric', minute: '2-digit', hour12: true })
+                timestamp: new Date().toLocaleTimeString('ko-KR', { hour: 'numeric', minute: '2-digit', hour12: true }),
+                type: "CHAT",
             };
 
             setMessages(prevMessages => [...prevMessages, newMessage]);
@@ -171,10 +173,18 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
 
             <div className={styles.content}>
                 {messages.map((chat) => {
-                    if (chat.senderName === currentUser!.userName) {
-                        return <MyChatMessage key={chat.messageId} chat={chat} />;
-                    } else {
-                        return <OtherChatMessage key={chat.messageId} chat={chat} />;
+                    switch (chat.type) {
+                        case 'EVENT':
+                            return <EventMessage key={chat.messageId} chat={chat} />;
+                        case 'CHAT':
+                            if (currentUser && chat.senderId === currentUser.id) {
+                                return <MyChatMessage key={chat.messageId} chat={chat} />;
+                            } else {
+                                return <OtherChatMessage key={chat.messageId} chat={chat} />;
+                            }
+                        default:
+                            console.warn(`Unknown message type: ${chat.type} for messageId: ${chat.messageId}`);
+                            return null;
                     }
                 })}
                 <div ref={messagesEndRef} />

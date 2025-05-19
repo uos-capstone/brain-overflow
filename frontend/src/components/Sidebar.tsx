@@ -356,7 +356,7 @@ export default function Sidebar() {
                     if (newParticipants.length > 0) {
                         return {
                             ...room,
-                            participants: [...room.participants, ...newParticipants.map(u => ({ id: u.id, userName: u.userName }))],
+                            participants: [...room.participants, ...newParticipants.map(u => ({ id: u.id, nickName: u.nickName }))],
                         };
                     }
                 }

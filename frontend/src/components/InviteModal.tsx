@@ -32,7 +32,7 @@ export const InviteModal: React.FC<InviteModalProps> = ({
         return allUsers.filter(user =>
             !currentParticipantIds.has(user.id) && // 이미 방에 없는 유저
             !selectedUsers.some(selected => selected.id === user.id) && // 아직 선택 목록에 없는 유저
-            user.userName.toLowerCase().includes(searchTerm.toLowerCase()) // 검색어와 일치하는 유저
+            user.nickName.toLowerCase().includes(searchTerm.toLowerCase()) // 검색어와 일치하는 유저
         );
     }, [allUsers, currentParticipantIds, selectedUsers, searchTerm]);
 
@@ -74,7 +74,7 @@ export const InviteModal: React.FC<InviteModalProps> = ({
                             {filteredAndAvailableUsers.length > 0 ? (
                                 filteredAndAvailableUsers.map(user => (
                                     <li key={user.id} className={styles.userListItem}>
-                                        <span>{user.userName} ({user.id})</span>
+                                        <span>{user.nickName} ({user.id})</span>
                                         <button onClick={() => handleSelectUser(user)} className={styles.addButton}>추가</button>
                                     </li>
                                 ))
@@ -91,7 +91,7 @@ export const InviteModal: React.FC<InviteModalProps> = ({
                             {selectedUsers.length > 0 ? (
                                 selectedUsers.map(user => (
                                     <li key={user.id} className={styles.selectedUserItem}>
-                                        <span>{user.userName}</span>
+                                        <span>{user.nickName}</span>
                                         <button onClick={() => handleDeselectUser(user.id)} className={styles.removeButton}>X</button>
                                     </li>
                                 ))

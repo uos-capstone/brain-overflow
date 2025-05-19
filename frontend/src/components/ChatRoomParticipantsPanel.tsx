@@ -40,8 +40,8 @@ export const ChatRoomParticipantsPanel: React.FC<ChatRoomParticipantsPanelProps>
                 <ul className={styles.participantsList}>
                     {participants.map((participant) => (
                         <li key={participant.id} className={styles.participantItem}>
-                            {participant.userName}
-                            {participant.userName === currentUser.userName && <span className={styles.meIndicator}> (나)</span>}
+                            {participant.nickName}
+                            {participant.id === currentUser.id && <span className={styles.meIndicator}> (나)</span>}
                         </li>
                     ))}
                 </ul>
