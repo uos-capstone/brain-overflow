@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>채팅방 목록</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.1/sockjs.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
+      padding: 40px;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .chatroom {
+      border-bottom: 1px solid #ddd;
+      padding: 10px 0;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+    }
+
+      .chatroom:last-child {
+        border-bottom: none;
+      }
+
+    .chatroom-title {
+      font-weight: bold;
+      font-size: 18px;
+    }
+
+    .chatroom-lastmessage {
+      color: #555;
+      margin-top: 5px;
+    }
+
+    .chatroom-time {
+      color: gray;
+      font-size: 12px;
+      margin-top: 2px;
+    }
+
+    input, button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      box-sizing: border-box;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>로그인 및 채팅방 목록</h2>
+    <input type="text" id="username" placeholder="아이디 (예: user@example.com)">
+    <input type="password" id="password" placeholder="비밀번호">
+    <button id="loginBtn">로그인 및 채팅방 불러오기</button>
+
+    <div id="chatroomList" style="display:none; margin-top:20px;">
+      <h3>참여 중인 채팅방</h3>
+      <div id="rooms"></div>
+    </div>
+  </div>
+
+  <script>
+    let stompClient = null;
+    let jwtToken = null;
+    let userId = null;
+
+		const API_BASE = 'https://api-brain-overflow.unknownpgr.com';
+
+    document.getElementById('loginBtn').addEventListener('click', async () => {
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value.trim();
+      if (!username || !password) {
+        return alert('아이디와 비밀번호를 입력하세요.');
+      }
+
+      try {
+				const res = await fetch(`${API_BASE}/auth/login`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
+        if (!res.ok) {
+          throw new Error('로그인 실패');
+        }
+        const data = await res.json();
+        jwtToken = data.data.token;
+        userId = data.data.userId;
+        localStorage.setItem('jwtToken', jwtToken);
+        localStorage.setItem('userId', userId);
+        connectWebSocket();
+      } catch (e) {
+        alert('로그인 오류: ' + e.message);
+      }
+    });
+
+    function connectWebSocket() {
+			const socket = new SockJS(`${API_BASE}/ws?token=${encodeURIComponent(jwtToken)}`);
+      stompClient = Stomp.over(socket);
+      stompClient.connect({ token: jwtToken }, () => {
+        // REST로 방목록 한 번만 조회
+				fetch(`${API_BASE}/rooms/chatroom`, {
+          headers: { 'Authorization': `Bearer ${jwtToken}` }
+        })
+          .then(res => res.json())
+          .then(data => displayChatRooms(data.rooms))
+          .catch(err => console.error('방목록 조회 실패', err));
+
+        // 2) 새 채팅 메시지 수신 구독
+        stompClient.subscribe('/user/queue/chat', msg => {
+          const chat = JSON.parse(msg.body);
+          refreshRoomItem(chat);
+        });
+      }, err => console.error('WS 연결 실패:', err));
+    }
+
+    function displayChatRooms(rooms) {
+      document.getElementById('chatroomList').style.display = 'block';
+      const container = document.getElementById('rooms');
+      container.innerHTML = '';
+      rooms.forEach(room => {
+        const div = document.createElement('div');
+        div.className = 'chatroom';
+        div.dataset.roomId = room.roomId;
+        div.innerHTML = `
+          <div class="chatroom-title">${room.roomName}</div>
+          <div class="chatroom-lastmessage">${room.lastMessage || '메시지가 없습니다.'}</div>
+          <div class="chatroom-time">${new Date(room.lastMessageTime).toLocaleString()}</div>
+        `;
+        div.addEventListener('click', () => {
+          window.location.href = `chat_room.html?roomId=${room.roomId}`;
+        });
+        container.appendChild(div);
+      });
+    }
+
+    // 채팅 메시지 오면 해당 방 아이템 갱신 및 맨 위로 이동
+    function refreshRoomItem(chat) {
+      const { roomId, content, timestamp } = chat;
+      const container = document.getElementById('rooms');
+      const existing = container.querySelector(`.chatroom[data-room-id="${roomId}"]`);
+      if (existing) {
+        // 1) 내용·시간 업데이트
+        existing.querySelector('.chatroom-lastmessage').textContent = content;
+        existing.querySelector('.chatroom-time').textContent = new Date(timestamp).toLocaleString();
+        // 2) 맨 위로 이동
+        container.prepend(existing);
+        // 3) 잠깐 배경 하이라이트 (선택)
+        existing.style.background = '#fffae6';
+        setTimeout(() => existing.style.background = '', 500);
+      }
+    }
+  </script>
+</body>
+</html>

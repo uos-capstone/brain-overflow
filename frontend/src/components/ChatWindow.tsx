@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useDrag } from 'react-dnd';
 import styles from '../css/ChatWindow.module.css';
 import { MyChatMessage } from './MyChatMessage';
@@ -62,13 +62,91 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
     const settingsButtonRef = useRef<HTMLButtonElement>(null);
     const participantsButtonRef = useRef<HTMLButtonElement>(null);
 
+    const [currentPage, setCurrentPage] = useState(0);
+    const [hasMoreOldMessages, setHasMoreOldMessages] = useState(true);
+    const [isLoadingOldMessages, setIsLoadingOldMessages] = useState(false);
+    const messageContainerRef = useRef<HTMLDivElement>(null);
+
     useEffect(() => {
-        Promise.all([fetchChats(id)])
-            .then(([messages]) => {
-                setMessages(messages)
-            })
-            //.finally(() => setLoading(false));
+        if (id) {
+            setMessages([]);
+            setCurrentPage(0); 
+            setHasMoreOldMessages(true);
+            setIsLoadingOldMessages(true);
+
+            fetchChats(id, 0)
+                .then((initialMessages) => {
+                    setMessages(initialMessages);
+                    if (initialMessages.length === 0) {
+                        setHasMoreOldMessages(false);
+                    }
+                    messagesEndRef.current?.scrollIntoView({ behavior: "auto" });
+                })
+                .catch(error => {
+                    console.error(`[ChatWindow ID: ${id}] 초기 메시지 로드 실패:`, error);
+                    setHasMoreOldMessages(false);
+                })
+                .finally(() => {
+                    setIsLoadingOldMessages(false);
+                })
+        }
+        return () => {
+            setMessages([]);
+            setCurrentPage(0);
+            setHasMoreOldMessages(true);
+            setIsLoadingOldMessages(false);
+        };
     }, [id]);
+
+    const loadPreviousMessages = useCallback(async () => {
+        if (!hasMoreOldMessages || isLoadingOldMessages) {
+            return;
+        }
+
+        setIsLoadingOldMessages(true);
+        const nextPage = currentPage + 1;
+
+        try {
+            const olderMessages = await fetchChats(id, nextPage);
+            if (olderMessages.length > 0) {
+                const messageContainer = messageContainerRef.current;
+                const previousScrollHeight = messageContainer?.scrollHeight || 0;
+                const previousScrollTop = messageContainer?.scrollTop || 0;
+
+                setMessages(prevMessages => [...olderMessages, ...prevMessages]);
+                setCurrentPage(nextPage);
+                if (messageContainer) {
+                    requestAnimationFrame(() => {
+                        messageContainer.scrollTop = (messageContainer.scrollHeight - previousScrollHeight) + previousScrollTop;
+                    });
+                }
+            } else {
+                setHasMoreOldMessages(false); 
+            }
+        } catch (error) {
+            console.error(`[ChatWindow ID: ${id}] 이전 메시지 로드 실패 (page: ${nextPage}):`, error);
+            setHasMoreOldMessages(false);
+        } finally {
+            setIsLoadingOldMessages(false);
+        }
+    }, [id, currentPage, hasMoreOldMessages, isLoadingOldMessages]); 
+
+    useEffect(() => {
+        const container = messageContainerRef.current;
+        const handleScroll = () => {
+            if (container && container.scrollTop === 0 && hasMoreOldMessages) {
+                loadPreviousMessages();
+            }
+        };
+        if (container) {
+            container.addEventListener('scroll', handleScroll);
+        }
+        return () => {
+            if (container) {
+                container.removeEventListener('scroll', handleScroll);
+            }
+        };
+    }, [hasMoreOldMessages, loadPreviousMessages]);
 
     const [{ isDragging }, drag] = useDrag(() => ({
         type: 'CHAT_WINDOW',
@@ -111,6 +189,10 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
             setMessages(prevMessages => [...prevMessages, newMessage]);
             console.log(`[ChatWindow ID: ${id}] 새 메시지 추가됨:`, newMessage);
             setInputValue('');
+
+            setTimeout(() => {
+                messagesEndRef.current?.scrollIntoView({ behavior: "auto" });
+            }, 0);
         }
     };
 
@@ -120,10 +202,6 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
             handleSendMessage();
         }
     };
-
-    useEffect(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "auto" });
-    }, [messages]);
 
     const headerRef = useRef<HTMLDivElement>(null);
     drag(headerRef);

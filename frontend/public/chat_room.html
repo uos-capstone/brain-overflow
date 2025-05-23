@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>채팅방</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.1/sockjs.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+  <style>
+    body {
+      font-family: Arial;
+      background: #f5f5f5;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+    }
+
+    #messageContainer {
+      height: 400px;
+      overflow-y: auto;
+      border: 1px solid #ddd;
+      padding: 10px;
+    }
+
+    .msg {
+      margin: 5px 0;
+    }
+
+      .msg .meta {
+        font-size: 12px;
+        color: #999;
+      }
+
+    #inputContainer {
+      display: flex;
+      margin-top: 10px;
+    }
+
+    #messageInput {
+      flex: 1;
+      padding: 10px;
+    }
+
+    #sendBtn {
+      padding: 10px;
+    }
+
+    #backBtn {
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container" id="chatWindow">
+    <button id="backBtn">← 목록으로</button>
+    <h3 id="roomTitle">Chat Room</h3>
+    <div id="messageContainer"></div>
+    <div id="inputContainer">
+      <input type="text" id="messageInput" placeholder="메시지 입력…" />
+      <button id="sendBtn" disabled>전송</button>
+    </div>
+  </div>
+
+  <script>
+    // URL에서 roomId 가져오기
+		const API_BASE_URL = 'https://api-brain-overflow.unknownpgr.com';
+    const params = new URLSearchParams(location.search);
+    const roomId = params.get('roomId');
+    const jwtToken = localStorage.getItem('jwtToken');
+    if (!jwtToken || !roomId) {
+      alert('접근 정보가 없습니다. 목록에서 다시 들어오세요.');
+      location.href = 'chat_list.html';
+    }
+
+    let stompClient, currentPage = 0;
+    const container = document.getElementById('messageContainer');
+    const input = document.getElementById('messageInput');
+    const sendBtn = document.getElementById('sendBtn');
+
+    // 1) SockJS/STOMP 연결 & 단일 구독
+		const socket = new SockJS(`https://api-brain-overflow.unknownpgr.com/ws?token=${encodeURIComponent(jwtToken)}`);
+    stompClient = Stomp.over(socket);
+    stompClient.connect({ token: jwtToken }, () => {
+      // 유저-기반 구독: 한 번만
+			stompClient.subscribe('/user/queue/chat', (message) => { // stomp.js에서는 보통 message 객체를 받고, message.body로 접근합니다.
+				const rawBody = message.body; // 원본 메시지 본문
+				try {
+					console.log('[CHAT_ROOM] /user/queue/chat 로부터 원본 메시지 수신:', rawBody); // ⬅️ 추가: 원본 내용 우선 확인
+					const msg = JSON.parse(rawBody);
+					console.log('[CHAT_ROOM] JSON 파싱 성공:', msg);
+
+					// roomId 타입 일치 확인 (URL에서 가져온 roomId는 문자열)
+					// 서버에서 보내주는 msg.roomId 타입에 따라 비교 방식을 맞춰주는 것이 좋습니다.
+					// 예: 서버가 roomId를 숫자로 보낸다면: if (msg.roomId && msg.roomId.toString() === roomId)
+					// 예: 서버가 roomId를 문자열로 보낸다면: if (msg.roomId && msg.roomId === roomId)
+					if (msg.roomId && msg.roomId.toString() === roomId) { // 안전하게 문자열로 변환하여 비교
+						appendMessage(msg);
+					} else {
+						console.log('[CHAT_ROOM] 현재 방 ID와 다른 메시지 수신 또는 roomId 누락. 메시지:', msg, '현재 roomId:', roomId);
+					}
+				} catch (e) {
+					console.error('[CHAT_ROOM] /user/queue/chat 에서 JSON 파싱 오류:', e);
+					// ⬅️ 바로 이 로그를 통해 어떤 HTML이 왔는지 확인할 수 있습니다!
+					console.log('[CHAT_ROOM] 오류 발생 시 원본 메시지 본문 (HTML 예상):', rawBody);
+				}
+			});
+
+      // JOIN 이벤트
+      stompClient.send('/app/chat', {}, JSON.stringify({
+        type: 'JOIN', roomId, content: null
+      }));
+
+      // 과거 메시지 첫 로드
+      loadMessages(0);
+      sendBtn.disabled = false;
+    }, err => console.error('WS 연결 실패:', err));
+
+    // 2) REST API로 과거 메시지 페이지별 로드
+		function loadMessages(page) {
+			fetch(`${API_BASE_URL}/rooms/chatroom/${roomId}?page=${page}`, {
+				headers: { 'Authorization': `Bearer ${jwtToken}` }
+			})
+				.then(res => {
+					console.log('[loadMessages] HTTP 응답 상태:', res.status, res.statusText); // ⬅️ 추가: 응답 상태 확인
+					// 먼저 응답을 텍스트로 읽어봅니다.
+					return res.text().then(textData => {
+						console.log('[loadMessages] HTTP API로부터 받은 원본 텍스트 응답:', textData); // ⬅️ 추가: 원본 텍스트 내용 확인!
+						try {
+							// 그 다음에 JSON으로 파싱 시도
+							return JSON.parse(textData);
+						} catch (e) {
+							console.error('[loadMessages] HTTP 응답을 JSON으로 파싱 중 오류:', e);
+							console.log('[loadMessages] 파싱 오류 시 원본 텍스트:', textData); // 파싱 실패 시 원본 텍스트 다시 로깅
+							throw new Error('Server did not return valid JSON from HTTP API.'); // 에러를 다시 던져서 아래 .catch에서 잡도록 함
+						}
+					});
+				})
+				.then(data => {
+					const chats = data.content; // spring data page.content
+					if (chats && Array.isArray(chats)) { // chats가 배열인지 확인
+						chats.reverse().forEach(m => appendMessage({
+							type: m.type,
+							roomId: m.roomId ? m.roomId.toString() : roomId, // m.roomId가 없을 경우 대비
+							sender: m.senderId, // API 응답에 senderId가 있다고 가정
+							content: m.content,
+							timestamp: m.timestamp ? new Date(m.timestamp).getTime() : Date.now() // m.timestamp 없을 경우 대비
+						}, true));
+						if (page === 0 && chats.length > 0) { // chats 내용이 있을 때만 스크롤
+							scrollToBottom();
+						}
+					} else {
+						console.warn('[loadMessages] 수신된 data.content가 유효한 배열이 아닙니다:', data);
+					}
+				})
+				.catch(err => {
+					console.error('[loadMessages] fetch 또는 데이터 처리 중 최종 오류:', err);
+				});
+		}
+
+    // 3) 메시지 렌더링
+    function appendMessage(msg, prepend = false) {
+      const el = document.createElement('div');
+      el.className = 'msg';
+      let text;
+      if (msg.type === 'JOIN') {
+        text = `<em>${msg.sender}님이 입장했습니다.</em>`;
+      } else if (msg.type === 'LEAVE') {
+        text = `<em>${msg.sender}님이 나갔습니다.</em>`;
+      } else {
+        text = `<strong>${msg.sender}:</strong> ${msg.content}`;
+      }
+      const time = new Date(msg.timestamp).toLocaleTimeString();
+      el.innerHTML = `<div>${text}</div><div class="meta">${time}</div>`;
+      prepend ? container.prepend(el) : container.appendChild(el);
+      if (!prepend) {
+        scrollToBottom();
+      }
+    }
+
+    function scrollToBottom() {
+      container.scrollTop = container.scrollHeight;
+    }
+
+    // 무한 스크롤
+    container.addEventListener('scroll', () => {
+      if (container.scrollTop === 0) {
+        loadMessages(++currentPage);
+      }
+    });
+
+    // 4) 채팅 보내기
+    input.addEventListener('input', () => {
+      sendBtn.disabled = input.value.trim().length === 0;
+    });
+    sendBtn.addEventListener('click', () => {
+      const content = input.value.trim();
+      if (!content) {
+        return;
+      }
+      stompClient.send('/app/chat', {}, JSON.stringify({
+        type: 'CHAT', roomId, content
+      }));
+      input.value = '';
+      sendBtn.disabled = true;
+    });
+
+    // 5) 뒤로가기(LEAVE)
+    document.getElementById('backBtn').addEventListener('click', () => {
+      stompClient.send('/app/chat', {}, JSON.stringify({
+        type: 'LEAVE', roomId, content: null
+      }));
+      // user-queue 패턴에선 unsubscribe 대상이 없으므로 바로 이동
+			location.href = 'kakaoroom.html';
+    });
+  </script>
+</body>
+</html>

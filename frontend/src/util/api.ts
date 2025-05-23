@@ -187,6 +187,7 @@ export interface ChatMessageData {
     type: string;
 }
 
+/*
 const DUMMY_MESSAGES: ChatMessageData[] = [
   {
     messageId: "1",
@@ -237,11 +238,94 @@ const DUMMY_MESSAGES: ChatMessageData[] = [
       type: "CHAT",
   },
 ];
-export async function fetchChats(roomId: string): Promise<ChatMessageData[]> {
-  console.log("fetchChats", roomId);
-  return new Promise((resolve) => {
-    setTimeout(() => resolve(DUMMY_MESSAGES), 3);
-  });
+*/
+export async function fetchChats(
+    roomId: string,
+    page: number,
+): Promise<ChatMessageData[]> {
+    console.log(`[api.ts fetchChats] 실제 API 호출 시작 - roomId: ${roomId}, page: ${page}`);
+    const token = localStorage.getItem('accessToken'); // 또는 'jwtToken' 등 실제 사용하는 토큰 키
+
+    if (!token) {
+        console.error('[api.ts fetchChats] 인증 토큰이 없습니다.');
+        return []; // 임시로 빈 배열 반환
+    }
+
+    try {
+        const response = await fetch(
+            `${API_BASE}/rooms/chatroom/${roomId}?page=${page}`,
+            {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                },
+            }
+        );
+
+        if (!response.ok) {
+            let errorData: any = `API 요청 실패 (상태 ${response.status})`;
+            try {
+                errorData = await response.json();
+            } catch (e) {
+                errorData = await response.text();
+                console.error(e);
+            }
+            console.error('[api.ts fetchChats] API 호출 실패:', response.status, response.statusText, errorData);
+            if (typeof errorData === 'string' && (errorData.trim().startsWith('<!doctype html>') || errorData.trim().startsWith('<html'))) {
+                console.error('[api.ts fetchChats] 서버가 JSON 대신 HTML을 반환했습니다 (API 오류).');
+                throw new Error('Server returned HTML instead of JSON for API error.');
+            }
+            throw new Error(typeof errorData === 'string' ? errorData : JSON.stringify(errorData));
+        }
+
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+            const responseText = await response.text();
+            console.warn('[api.ts fetchChats] API 응답이 JSON이 아닙니다. Content-Type:', contentType, '응답 본문:', responseText);
+            // 응답이 아예 없는 경우 (예: 204 No Content)도 고려할 수 있습니다.
+            if (response.status === 204 || !responseText) return [];
+            throw new Error('API response was not JSON.');
+        }
+
+        const data = await response.json() as { content: ChatMessageData[], totalElements?: number /* 등 기타 페이징 정보 */ };
+
+        if (!data.content || !Array.isArray(data.content)) {
+            console.warn('[api.ts fetchChats] API 응답에 "content" 배열이 없거나 배열이 아닙니다.', data);
+            return [];
+        }
+
+        // API 응답 데이터를 ChatMessageData 형식으로 변환
+        const chatMessages: ChatMessageData[] = data.content.map((item, index) => {
+            // messageId 처리: API 응답에 messageId가 없다면 임시 ID 생성
+            const messageId = item.messageId || `api-msg-${item.senderId}-${new Date(item.timestamp).getTime()}-${index}`;
+            const senderName = item.senderId;
+
+            // timestamp 형식 변환 (ISO 8601 -> "오후 2:00" 등)
+            const formattedTimestamp = new Date(item.timestamp).toLocaleTimeString('ko-KR', {
+                hour: 'numeric',
+                minute: '2-digit',
+                hour12: true,
+            });
+
+            return {
+                messageId: messageId,
+                senderId: item.senderId,
+                senderName: senderName, // senderId 값이 여기에 할당됨
+                content: item.content,
+                timestamp: formattedTimestamp,
+                type: item.type,
+            };
+        });
+
+        console.log(`[api.ts fetchChats] API 호출 성공, 변환된 메시지 ${chatMessages.length}건`);
+        return chatMessages;
+
+    } catch (error) {
+        console.error('[api.ts fetchChats] 메시지 로드 중 예외 발생:', error);
+        return [];
+    }
 }
 
 // 방 추가
