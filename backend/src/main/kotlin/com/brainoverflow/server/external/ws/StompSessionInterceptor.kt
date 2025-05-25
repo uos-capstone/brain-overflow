@@ -1,6 +1,6 @@
 package com.brainoverflow.server.external.ws
 
-import com.brainoverflow.server.service.chat.ChatRoomService
+import com.brainoverflow.server.service.chatroom.ChatRoomService
 import org.springframework.data.redis.core.StringRedisTemplate
 import org.springframework.messaging.Message
 import org.springframework.messaging.MessageChannel

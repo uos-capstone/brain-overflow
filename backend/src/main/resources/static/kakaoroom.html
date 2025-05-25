@@ -106,7 +106,7 @@
     stompClient = Stomp.over(socket);
     stompClient.connect({token: jwtToken}, () => {
       // REST로 방목록 한 번만 조회
-      fetch('/chatrooms', {
+      fetch('/rooms/chatroom', {
         headers: {'Authorization': `Bearer ${jwtToken}`}
       })
       .then(res => res.json())

@@ -9,6 +9,7 @@ data class SocketMessageResponse(
     val type: MessageType,
     val roomId: Long?,
     val senderId: UUID?,
+    val senderName: String?,
     val content: String?,
     val timestamp: LocalDateTime,
 ) {
@@ -17,6 +18,7 @@ data class SocketMessageResponse(
             return SocketMessageResponse(
                 roomId = chatMessageDocument.roomId,
                 senderId = chatMessageDocument.senderId,
+                senderName = chatMessageDocument.senderName,
                 content = chatMessageDocument.message,
                 timestamp = chatMessageDocument.createdAt,
                 type = chatMessageDocument.messageType
@@ -28,6 +30,7 @@ data class SocketMessageResponse(
                 type = MessageType.AI,
                 roomId = null,
                 senderId = null,
+                senderName = null,
                 content = resultId,
                 timestamp = LocalDateTime.now()
             )

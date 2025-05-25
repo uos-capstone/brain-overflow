@@ -1,4 +1,4 @@
-package com.brainoverflow.server.service.chat
+package com.brainoverflow.server.service.chatroom
 
 import com.brainoverflow.server.domain.chat.*
 import com.brainoverflow.server.domain.exception.ReturnCode

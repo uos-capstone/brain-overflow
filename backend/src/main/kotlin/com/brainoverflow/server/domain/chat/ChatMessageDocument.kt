@@ -13,6 +13,7 @@ class ChatMessageDocument(
     id: UUID,
     roomId: Long,
     senderId: UUID,
+    senderName: String,
     message: String?,
     createdAt: LocalDateTime,
     messageType: MessageType,
@@ -21,6 +22,7 @@ class ChatMessageDocument(
     var id: UUID? = id
     val roomId: Long = roomId
     val senderId: UUID = senderId
+    val senderName: String = senderName
     val message: String? = message
     val messageType: MessageType = messageType
     val createdAt: LocalDateTime = createdAt

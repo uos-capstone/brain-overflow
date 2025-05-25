@@ -1,12 +1,11 @@
 package com.brainoverflow.server.external.controller.chat
 
 import com.brainoverflow.server.external.controller.response.ApiResponse
-import com.brainoverflow.server.domain.chat.ChatRoom
 import com.brainoverflow.server.external.dto.request.chat.CreateRoomDto
 import com.brainoverflow.server.external.dto.response.chat.ChatRoomsResponse
 import com.brainoverflow.server.external.dto.response.chat.ChatUserData
 import com.brainoverflow.server.external.dto.response.chat.SocketMessageResponse
-import com.brainoverflow.server.service.chat.ChatRoomService
+import com.brainoverflow.server.service.chatroom.ChatRoomService
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.security.core.annotation.AuthenticationPrincipal
