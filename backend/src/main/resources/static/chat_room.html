@@ -97,11 +97,6 @@
       }
     });
 
-    // JOIN 이벤트
-    stompClient.send('/app/chat', {}, JSON.stringify({
-      type: 'JOIN', roomId, content: null
-    }));
-
     // 과거 메시지 첫 로드
     loadMessages(0);
     sendBtn.disabled = false;

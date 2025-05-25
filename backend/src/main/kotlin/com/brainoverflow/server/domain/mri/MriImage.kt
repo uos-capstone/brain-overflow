@@ -8,6 +8,8 @@ import java.util.*
 class MriImage(
     user: User,
     filePath: String,
+    age: Int,
+    gender: Gender,
 ) {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -17,6 +19,9 @@ class MriImage(
     val user: User = user
 
     val filePath: String = filePath // ← 실제 저장 경로
+
+    val age: Int = age
+    val gender: Gender = gender
 
     @OneToMany(mappedBy = "mriImage")
     val mriResults: List<MriResult> = listOf()

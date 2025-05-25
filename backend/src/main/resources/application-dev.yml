@@ -15,11 +15,13 @@ spring:
     redis:
       host: ${REDIS_HOST}
       port: ${REDIS_PORT}
+
   datasource:
     url: ${SPRING_DATASOURCE_URL}
     username: postgres
     password: postgres
     driver-class-name: org.postgresql.Driver
+
   h2:
     console:
       enabled: true
@@ -29,9 +31,6 @@ spring:
       ddl-auto: update
       naming:
         physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
-    show-sql: true
-    properties:
-      '[hibernate.format_sql]': true
 
   rabbitmq:
     host: ${SPRING_RABBITMQ_HOST}
@@ -47,13 +46,13 @@ spring:
           max-interval: 10s # 최대 재시도 인터벌
           max-attempts: 2 # 최대 재시도 횟수
           multiplier: 2 # 이전 interval * multiplier = 다음 interval
-logging:
-  level:
-    org.springframework.messaging: DEBUG
-    org.springframework.web.socket: DEBUG
-    org.springframework.web.socket.messaging: DEBUG
-    org.springframework.data.mongodb.core.MongoTemplate: DEBUG
-    org.springframework.data.mongodb.core: DEBUG
+#logging:
+#  level:
+#    org.springframework.messaging: DEBUG
+#    org.springframework.web.socket: DEBUG
+#    org.springframework.web.socket.messaging: DEBUG
+#    org.springframework.data.mongodb.core.MongoTemplate: DEBUG
+#    org.springframework.data.mongodb.core: DEBUG
 
 jwt:
   secret: 823e399822c5170927c9802b3feb60b1fe54debefb406ca5f4eaf05e0014ea63

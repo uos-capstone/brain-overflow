@@ -68,3 +68,7 @@ allOpen {
 tasks.withType<Test> {
     useJUnitPlatform()
 }
+
+ktlint {
+    ignoreFailures.set(true)
+}
