@@ -3,7 +3,6 @@ package com.brainoverflow.server.external.ws
 import com.brainoverflow.server.external.controller.auth.JwtProvider
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Configuration
-import org.springframework.data.redis.core.StringRedisTemplate
 import org.springframework.messaging.Message
 import org.springframework.messaging.MessageChannel
 import org.springframework.messaging.simp.config.ChannelRegistration
@@ -21,14 +20,13 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 class WebSocketConfig(
     private val jwtProvider: JwtProvider,
     @Value("\${spring.rabbitmq.host}") private val host: String,
-    private val stompSessionInterceptor: StompSessionInterceptor
+    private val stompSessionInterceptor: StompSessionInterceptor,
 ) : WebSocketMessageBrokerConfigurer {
-
     override fun configureMessageBroker(registry: MessageBrokerRegistry) {
         // 내부 메시지 브로커 대신, 오직 RabbitMQ STOMP Broker Relay를 사용합니다.
         registry.enableStompBrokerRelay("/topic", "/queue")
-            .setRelayHost(host)         // RabbitMQ 호스트 (예: 로컬 환경에서는 "localhost")
-            .setRelayPort(61613)               // RabbitMQ STOMP 포트 (RabbitMQ STOMP 플러그인 포트를 설정합니다.)
+            .setRelayHost(host) // RabbitMQ 호스트 (예: 로컬 환경에서는 "localhost")
+            .setRelayPort(61613) // RabbitMQ STOMP 포트 (RabbitMQ STOMP 플러그인 포트를 설정합니다.)
             .setClientLogin("guest")
             .setClientPasscode("guest")
             .setUserDestinationBroadcast("/topic/unresolved-user-dest")
@@ -45,7 +43,8 @@ class WebSocketConfig(
             .setAllowedOrigins(
                 "https://brain-overflow.unknownpgr.com",
                 "https://api-brain-overflow.unknownpgr.com",
-                "http://localhost:5173", "https://localhost:5173"
+                "http://localhost:5173",
+                "https://localhost:5173",
             )
             .addInterceptors(JwtHandshakeInterceptor(jwtProvider))
             .setHandshakeHandler(CustomHandshakeHandler())
@@ -54,26 +53,30 @@ class WebSocketConfig(
             .setHeartbeatTime(300_000)
     }
 
-
     override fun configureClientInboundChannel(registration: ChannelRegistration) {
         registration.interceptors(
-            stompSessionInterceptor
+            stompSessionInterceptor,
         )
     }
 
     override fun configureClientOutboundChannel(registration: ChannelRegistration) {
-        registration.interceptors(object : ChannelInterceptor {
-            override fun preSend(message: Message<*>, channel: MessageChannel): Message<*> {
-                val accessor = StompHeaderAccessor.wrap(message)
-                if (accessor.command == StompCommand.SUBSCRIBE) {
-                    // RabbitMQ STOMP 플러그인에 auto-delete=true 로 큐 생성 요청
-                    accessor.setNativeHeader("auto-delete", "true")
+        registration.interceptors(
+            object : ChannelInterceptor {
+                override fun preSend(
+                    message: Message<*>,
+                    channel: MessageChannel,
+                ): Message<*> {
+                    val accessor = StompHeaderAccessor.wrap(message)
+                    if (accessor.command == StompCommand.SUBSCRIBE) {
+                        // RabbitMQ STOMP 플러그인에 auto-delete=true 로 큐 생성 요청
+                        accessor.setNativeHeader("auto-delete", "true")
+                    }
+                    return MessageBuilder.createMessage(
+                        message.payload,
+                        accessor.messageHeaders,
+                    )
                 }
-                return MessageBuilder.createMessage(
-                    message.payload, accessor.messageHeaders
-                )
-            }
-        })
+            },
+        )
     }
 }
-

@@ -4,16 +4,13 @@ import org.springframework.amqp.core.*
 import org.springframework.amqp.rabbit.annotation.EnableRabbit
 import org.springframework.amqp.rabbit.connection.ConnectionFactory
 import org.springframework.amqp.rabbit.core.RabbitAdmin
-import org.springframework.amqp.rabbit.core.RabbitTemplate
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 
-
 @Configuration
 @EnableRabbit
 class RabbitMQConfig {
-
     @Bean
     fun rabbitAdmin(connectionFactory: ConnectionFactory): RabbitAdmin {
         return RabbitAdmin(connectionFactory)
@@ -38,7 +35,10 @@ class RabbitMQConfig {
 
     // 문자 알림 큐와 fanout exchange 바인딩
     @Bean
-    fun aiCompleteBinding(aiCompleteQueue: Queue, fanoutExchange: FanoutExchange): Binding {
+    fun aiCompleteBinding(
+        aiCompleteQueue: Queue,
+        fanoutExchange: FanoutExchange,
+    ): Binding {
         return BindingBuilder.bind(aiCompleteQueue).to(fanoutExchange)
     }
 

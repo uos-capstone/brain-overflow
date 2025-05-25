@@ -9,7 +9,7 @@ class User(
     nickname: String,
     role: Role,
     username: String,
-    password: String
+    password: String,
 ) {
     @Id
     val id: UUID = UUID.randomUUID()

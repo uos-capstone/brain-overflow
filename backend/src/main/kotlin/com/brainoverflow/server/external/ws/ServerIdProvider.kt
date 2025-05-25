@@ -6,11 +6,12 @@ import java.util.UUID
 
 @Component
 class ServerIdProvider {
-    private val serverId: String = try {
-        InetAddress.getLocalHost().hostName
-    } catch (e: Exception) {
-        UUID.randomUUID().toString() // fallback
-    }
+    private val serverId: String =
+        try {
+            InetAddress.getLocalHost().hostName
+        } catch (e: Exception) {
+            UUID.randomUUID().toString() // fallback
+        }
 
     fun get(): String = serverId
 }

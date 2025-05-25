@@ -8,7 +8,7 @@ data class SignupRequest(
     val nickname: String,
     val role: Role,
     val username: String,
-    val password: String
+    val password: String,
 ) {
     companion object {
         private val passwordEncoder = BCryptPasswordEncoder()
@@ -17,13 +17,13 @@ data class SignupRequest(
     fun toUser(): User {
         val encodePassword =
             com.brainoverflow.server.external.dto.request.user.SignupRequest.Companion.passwordEncoder.encode(
-                password
+                password,
             )
         return User(
             nickname = nickname,
             role = role,
             username = username,
-            password = encodePassword
+            password = encodePassword,
         )
     }
 }

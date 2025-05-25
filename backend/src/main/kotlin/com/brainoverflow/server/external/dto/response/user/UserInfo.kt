@@ -6,5 +6,4 @@ data class UserInfo(
     val nickname: String,
     val role: Role,
     val username: String,
-) {
-}
+)

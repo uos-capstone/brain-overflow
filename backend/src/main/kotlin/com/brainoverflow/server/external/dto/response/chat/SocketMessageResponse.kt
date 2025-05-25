@@ -21,7 +21,7 @@ data class SocketMessageResponse(
                 senderName = chatMessageDocument.senderName,
                 content = chatMessageDocument.message,
                 timestamp = chatMessageDocument.createdAt,
-                type = chatMessageDocument.messageType
+                type = chatMessageDocument.messageType,
             )
         }
 
@@ -32,7 +32,7 @@ data class SocketMessageResponse(
                 senderId = null,
                 senderName = null,
                 content = resultId,
-                timestamp = LocalDateTime.now()
+                timestamp = LocalDateTime.now(),
             )
         }
     }

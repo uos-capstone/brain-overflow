@@ -9,6 +9,5 @@ class ChatRoomUser(
     @Id @GeneratedValue val id: Long = 0,
     @ManyToOne(fetch = FetchType.LAZY) val chatRoom: ChatRoom,
     @ManyToOne(fetch = FetchType.LAZY) val user: User,
-    val invitedAt: LocalDateTime = LocalDateTime.now()
-) {
-}
+    val invitedAt: LocalDateTime = LocalDateTime.now(),
+)

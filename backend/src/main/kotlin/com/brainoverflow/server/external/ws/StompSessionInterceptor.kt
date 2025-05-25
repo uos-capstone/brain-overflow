@@ -15,15 +15,17 @@ import java.util.*
 class StompSessionInterceptor(
     private val redis: StringRedisTemplate,
     private val serverIdProvider: ServerIdProvider,
-    private val chatRoomService: ChatRoomService  // DB에서 방 조회용
+    private val chatRoomService: ChatRoomService, // DB에서 방 조회용
 ) : ChannelInterceptor {
-
     companion object {
         private const val USER_SERVER_KEY = "ws:user:%s"
         private const val ROOM_USERS_KEY = "room:%s:users"
     }
 
-    override fun preSend(message: Message<*>, channel: MessageChannel): Message<*> {
+    override fun preSend(
+        message: Message<*>,
+        channel: MessageChannel,
+    ): Message<*> {
         val accessor = StompHeaderAccessor.wrap(message)
         val userId = accessor.sessionAttributes?.get("userId") as? UUID ?: return message
 
@@ -48,7 +50,7 @@ class StompSessionInterceptor(
                 redis.delete(USER_SERVER_KEY.format(userId))
             }
 
-            else -> { /* SUBSCRIBE/UNSUBSCRIBE 로직은 제거 */
+            else -> { // SUBSCRIBE/UNSUBSCRIBE 로직은 제거
             }
         }
         return message

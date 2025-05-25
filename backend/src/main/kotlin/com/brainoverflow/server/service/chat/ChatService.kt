@@ -21,19 +21,23 @@ class ChatService(
 ) {
     private val log = LoggerFactory.getLogger(javaClass)
 
-    fun saveChat(userId: UUID, msg: ChatMessage) {
+    fun saveChat(
+        userId: UUID,
+        msg: ChatMessage,
+    ) {
         val sender = userService.getByUserId(userId)
-        val save = chatMessageRepository.save(
-            ChatMessageDocument(
-                id = UUID.randomUUID(),
-                roomId = msg.roomId.toLong(),
-                senderId = sender.id,
-                senderName = sender.nickname,
-                message = msg.content,
-                createdAt = LocalDateTime.now(),
-                messageType = msg.type
+        val save =
+            chatMessageRepository.save(
+                ChatMessageDocument(
+                    id = UUID.randomUUID(),
+                    roomId = msg.roomId.toLong(),
+                    senderId = sender.id,
+                    senderName = sender.nickname,
+                    message = msg.content,
+                    createdAt = LocalDateTime.now(),
+                    messageType = msg.type,
+                ),
             )
-        )
         val socketMessageResponse = SocketMessageResponse.fromChat(save)
         broadcastChat(socketMessageResponse)
     }
@@ -47,7 +51,7 @@ class ChatService(
             messagingTemplate.convertAndSendToUser(
                 user,
                 "/queue/chat",
-                socketMessageResponse
+                socketMessageResponse,
             )
         }
     }
