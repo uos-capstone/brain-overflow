@@ -6,6 +6,7 @@ import jakarta.persistence.*
 class MriResult(
     mriImage: MriImage,
     predictionStatus: PredictionStatus,
+    targetAge: Int,
 ) {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -21,11 +22,13 @@ class MriResult(
 
     var resultFilePath: String? = null
 
+    var targetAge: Int = targetAge
+
     fun changeStatus(predictionStatus: PredictionStatus) {
         this.predictionStatus = predictionStatus
     }
 
-    fun addComment(comment: String) {
-        this.resultFilePath = comment
+    fun addFilePath(filePath: String) {
+        this.resultFilePath = filePath
     }
 }
