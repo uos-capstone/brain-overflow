@@ -1,6 +1,5 @@
 package com.brainoverflow.server.config
 
-
 import com.brainoverflow.server.external.controller.auth.JwtAuthenticationFilter
 import com.brainoverflow.server.service.auth.CustomUserDetailsService
 import org.springframework.context.annotation.Bean
@@ -18,12 +17,11 @@ import org.springframework.web.cors.CorsConfigurationSource
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder as AuthBuilder
 
-
 @Configuration
 @EnableWebSecurity
 class SecurityConfig(
     private val customUserDetailsService: CustomUserDetailsService,
-    private val jwtAuthenticationFilter: JwtAuthenticationFilter
+    private val jwtAuthenticationFilter: JwtAuthenticationFilter,
 ) {
     @Bean
     fun filterChain(http: HttpSecurity): SecurityFilterChain {
@@ -38,7 +36,7 @@ class SecurityConfig(
                     "/ws/**", "/swagger-ui/**",
                     "/v3/api-docs",
                     "/v3/api-docs/**",
-                    "/chatroom"
+                    "/chatroom",
                 ).permitAll()
                 it.anyRequest().authenticated()
             }
@@ -52,7 +50,7 @@ class SecurityConfig(
         // JWT 인증 필터를 UsernamePasswordAuthenticationFilter 이전에 삽입
         http.addFilterBefore(
             jwtAuthenticationFilter,
-            UsernamePasswordAuthenticationFilter::class.java
+            UsernamePasswordAuthenticationFilter::class.java,
         )
 
         return http.build()
@@ -75,10 +73,11 @@ class SecurityConfig(
     }
 
     @Bean
-    fun daoAuthenticationProvider() = DaoAuthenticationProvider().apply {
-        setUserDetailsService(customUserDetailsService)
-        setPasswordEncoder(passwordEncoder())
-    }
+    fun daoAuthenticationProvider() =
+        DaoAuthenticationProvider().apply {
+            setUserDetailsService(customUserDetailsService)
+            setPasswordEncoder(passwordEncoder())
+        }
 
     // AuthenticationManager를 Bean으로 등록
     @Bean

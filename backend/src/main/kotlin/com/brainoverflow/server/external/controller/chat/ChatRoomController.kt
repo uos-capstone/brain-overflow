@@ -1,12 +1,11 @@
 package com.brainoverflow.server.external.controller.chat
 
 import com.brainoverflow.server.external.controller.response.ApiResponse
-import com.brainoverflow.server.domain.chat.ChatRoom
 import com.brainoverflow.server.external.dto.request.chat.CreateRoomDto
 import com.brainoverflow.server.external.dto.response.chat.ChatRoomsResponse
 import com.brainoverflow.server.external.dto.response.chat.ChatUserData
 import com.brainoverflow.server.external.dto.response.chat.SocketMessageResponse
-import com.brainoverflow.server.service.chat.ChatRoomService
+import com.brainoverflow.server.service.chatroom.ChatRoomService
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.security.core.annotation.AuthenticationPrincipal
@@ -17,12 +16,12 @@ import java.util.*
 @RestController
 @RequestMapping("/rooms")
 class ChatRoomController(
-    private val chatRoomService: ChatRoomService
+    private val chatRoomService: ChatRoomService,
 ) {
     @PostMapping
     fun create(
         @RequestBody createRoomDto: CreateRoomDto,
-        @AuthenticationPrincipal user: UserDetails
+        @AuthenticationPrincipal user: UserDetails,
     ): ApiResponse<Long> {
         val userId = UUID.fromString(user.username)
         val roomId = chatRoomService.create(createRoomDto, userId)
@@ -33,7 +32,7 @@ class ChatRoomController(
     fun invite(
         @PathVariable roomId: Long,
         @RequestParam("userId") targetUserId: UUID,
-        @AuthenticationPrincipal userDetails: UserDetails
+        @AuthenticationPrincipal userDetails: UserDetails,
     ): ApiResponse<Void> {
         val userId = UUID.fromString(userDetails.username)
         chatRoomService.invite(userId, targetUserId, roomId)
@@ -43,7 +42,7 @@ class ChatRoomController(
     @PostMapping("/{roomId}/join")
     fun joinRoom(
         @PathVariable roomId: Long,
-        @AuthenticationPrincipal userDetails: UserDetails
+        @AuthenticationPrincipal userDetails: UserDetails,
     ): ApiResponse<Void> {
         val userId = UUID.fromString(userDetails.username)
         chatRoomService.join(userId, roomId)
@@ -62,7 +61,7 @@ class ChatRoomController(
     @GetMapping("/chatroom/{roomId}")
     fun getChatroomMessages(
         @PathVariable roomId: Long,
-        @RequestParam page: Int
+        @RequestParam page: Int,
     ): Page<SocketMessageResponse> {
         val pageable = PageRequest.of(page, 100)
         return chatRoomService.getMessagesFromRoom(pageable, roomId)
@@ -70,7 +69,7 @@ class ChatRoomController(
 
     @GetMapping("/chatroom/{roomId}/members")
     fun getChatRoomMembers(
-        @PathVariable roomId: Long
+        @PathVariable roomId: Long,
     ): ApiResponse<List<ChatUserData>> {
         val allUserInChatRoom = chatRoomService.getAllUserInChatRoom(roomId)
         return ApiResponse.success(allUserInChatRoom)

@@ -10,8 +10,7 @@ import java.util.*
 
 @Repository
 class LocalFileRepository : FileRepository {
-
-    private val uploadDir = Paths.get("mri-uploads")  // 상대 경로 or 절대 경로
+    private val uploadDir = Paths.get("mri-uploads") // 상대 경로 or 절대 경로
 
     init {
         // 디렉토리가 없으면 생성

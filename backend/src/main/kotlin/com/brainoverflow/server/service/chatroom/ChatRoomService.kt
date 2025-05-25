@@ -1,13 +1,13 @@
-package com.brainoverflow.server.service.chat
+package com.brainoverflow.server.service.chatroom
 
 import com.brainoverflow.server.domain.chat.*
-import com.brainoverflow.server.domain.exception.ReturnCode
 import com.brainoverflow.server.domain.exception.BOException
+import com.brainoverflow.server.domain.exception.ReturnCode
 import com.brainoverflow.server.domain.user.User
 import com.brainoverflow.server.external.dto.request.chat.CreateRoomDto
-import com.brainoverflow.server.external.dto.response.chat.SocketMessageResponse
 import com.brainoverflow.server.external.dto.response.chat.ChatRoomDto
 import com.brainoverflow.server.external.dto.response.chat.ChatUserData
+import com.brainoverflow.server.external.dto.response.chat.SocketMessageResponse
 import com.brainoverflow.server.service.UserService
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
@@ -22,10 +22,13 @@ class ChatRoomService(
     private val chatRoomRepository: ChatRoomRepository,
     private val chatRoomUserRepository: ChatRoomUserRepository,
     private val userService: UserService,
-    private val chatMessageRepository: ChatMessageRepository
+    private val chatMessageRepository: ChatMessageRepository,
 ) {
     @Transactional
-    fun create(createRoomDto: CreateRoomDto, userId: UUID): Long {
+    fun create(
+        createRoomDto: CreateRoomDto,
+        userId: UUID,
+    ): Long {
         val user = userService.getByUserId(userId)
         val chatRoom = createRoomDto.toChatRoom(user)
         chatRoomRepository.save(chatRoom)
@@ -36,10 +39,15 @@ class ChatRoomService(
     }
 
     @Transactional
-    fun invite(inviteUserId: UUID, targetUserId: UUID, roomId: Long) {
+    fun invite(
+        inviteUserId: UUID,
+        targetUserId: UUID,
+        roomId: Long,
+    ) {
         val inviteUser = userService.getByUserId(inviteUserId)
-        val chatRoom = chatRoomRepository.findByIdOrNull(roomId)
-            ?: throw BOException(ReturnCode.ROOM_NOT_EXIST)
+        val chatRoom =
+            chatRoomRepository.findByIdOrNull(roomId)
+                ?: throw BOException(ReturnCode.ROOM_NOT_EXIST)
         checkUserInRoom(chatRoom, inviteUser)
 
         val targetUser = userService.getByUserId(targetUserId)
@@ -48,16 +56,23 @@ class ChatRoomService(
     }
 
     @Transactional
-    fun join(joinUserId: UUID, roomId: Long) {
+    fun join(
+        joinUserId: UUID,
+        roomId: Long,
+    ) {
         val joinUser = userService.getByUserId(joinUserId)
-        val chatRoom = chatRoomRepository.findByIdOrNull(roomId)
-            ?: throw BOException(ReturnCode.ROOM_NOT_EXIST)
+        val chatRoom =
+            chatRoomRepository.findByIdOrNull(roomId)
+                ?: throw BOException(ReturnCode.ROOM_NOT_EXIST)
 
         val roomUser = ChatRoomUser(chatRoom = chatRoom, user = joinUser)
         chatRoomUserRepository.save(roomUser)
     }
 
-    private fun checkUserInRoom(chatRoom: ChatRoom, user: User) {
+    private fun checkUserInRoom(
+        chatRoom: ChatRoom,
+        user: User,
+    ) {
         chatRoomUserRepository.findByUserAndChatRoom(user, chatRoom)
             ?: throw BOException(ReturnCode.USER_NOT_IN_ROOM)
     }
@@ -72,19 +87,22 @@ class ChatRoomService(
             }
     }
 
-    fun getMessagesFromRoom(pageable: PageRequest, roomId: Long): Page<SocketMessageResponse> {
+    fun getMessagesFromRoom(
+        pageable: PageRequest,
+        roomId: Long,
+    ): Page<SocketMessageResponse> {
         val documents = chatMessageRepository.findByRoomId(roomId = roomId, pageable = pageable)
         return documents.map { SocketMessageResponse.fromChat(it) }
     }
 
     fun getAllUserInChatRoom(roomId: Long): List<ChatUserData> {
-        val room = chatRoomRepository.findByIdOrNull(roomId)
-            ?: throw BOException(ReturnCode.ROOM_NOT_EXIST)
-        val users = room.chatRoomUser.map {
-            it.user
-        }
+        val room =
+            chatRoomRepository.findByIdOrNull(roomId)
+                ?: throw BOException(ReturnCode.ROOM_NOT_EXIST)
+        val users =
+            room.chatRoomUser.map {
+                it.user
+            }
         return users.map { ChatUserData(it.id, it.nickname) }
     }
-
-
 }

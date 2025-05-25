@@ -1,12 +1,12 @@
 package com.brainoverflow.server.service.mri
 
-import com.brainoverflow.server.domain.mri.PredictionStatus
-import com.brainoverflow.server.domain.exception.ReturnCode
 import com.brainoverflow.server.domain.exception.BOException
+import com.brainoverflow.server.domain.exception.ReturnCode
 import com.brainoverflow.server.domain.mri.MriImage
 import com.brainoverflow.server.domain.mri.MriImageRepository
 import com.brainoverflow.server.domain.mri.MriResult
 import com.brainoverflow.server.domain.mri.MriResultRepository
+import com.brainoverflow.server.domain.mri.PredictionStatus
 import com.brainoverflow.server.external.dto.response.mri.MriImageDto
 import com.brainoverflow.server.service.UserService
 import com.brainoverflow.server.service.port.FileRepository
@@ -18,9 +18,6 @@ import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.multipart.MultipartFile
-import java.nio.file.Files
-import java.nio.file.Paths
-import java.nio.file.StandardCopyOption
 import java.util.*
 
 @Service
@@ -31,17 +28,18 @@ class MriService(
     private val mriResultRepository: MriResultRepository,
     private val messageQueue: MessageQueue,
     private val userService: UserService,
-    private val fileRepository: FileRepository
+    private val fileRepository: FileRepository,
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
 
     @Transactional
     fun registerMRIPrediction(mriId: UUID) {
-        val mriImage = mriImageRepository.findByIdOrNull(mriId)
-            ?: throw BOException(ReturnCode.NOT_EXIST_IMAGE)
+        val mriImage =
+            mriImageRepository.findByIdOrNull(mriId)
+                ?: throw BOException(ReturnCode.NOT_EXIST_IMAGE)
         val mriResult = createMriResult(mriImage)
         messageQueue.sendMessage(
-            Message("AlzheimerAiQueue", mriImage.id.toString())
+            Message("AlzheimerAiQueue", mriImage.id.toString()),
         )
         mriResult.changeStatus(PredictionStatus.PROGRESS)
     }
@@ -56,12 +54,12 @@ class MriService(
     fun receiveResult(mriResultDto: com.brainoverflow.server.external.dto.request.mri.MriResultDto) {
         val mriImage =
             mriImageRepository.findByIdOrNull(mriResultDto.mriImageId) ?: throw BOException(
-                ReturnCode.NOT_EXIST_IMAGE
+                ReturnCode.NOT_EXIST_IMAGE,
             )
 
         val mriResult =
             mriImage.mriResults.find { it.id == mriResultDto.mriResultId } ?: throw BOException(
-                ReturnCode.NOT_EXIST_RESULT
+                ReturnCode.NOT_EXIST_RESULT,
             )
 
         mriResult.changeStatus(predictionStatus = PredictionStatus.COMPLETED)
@@ -71,21 +69,24 @@ class MriService(
 
         val serverId = redisTemplate.opsForValue().get("ws:user:$userId") ?: return
         val routingKey = "ai.response.queue.$serverId"
-        val payload = mapOf(
-            "userId" to userId,
-            "resultId" to mriResult.id,
-            "message" to "AI 응답이 완료되었습니다"
-        )
+        val payload =
+            mapOf(
+                "userId" to userId,
+                "resultId" to mriResult.id,
+                "message" to "AI 응답이 완료되었습니다",
+            )
 
         messageQueue.sendMessage(
             routingKey,
-            Message("ai.response.exchange", payload)
+            Message("ai.response.exchange", payload),
         )
     }
 
-
     @Transactional
-    fun registerMRIImage(file: MultipartFile, userId: UUID): UUID {
+    fun registerMRIImage(
+        file: MultipartFile,
+        userId: UUID,
+    ): UUID {
         // 유저 조회
         val user = userService.getByUserId(userId)
         // 파일 저장
@@ -102,9 +103,9 @@ class MriService(
     }
 
     fun findMriImage(mriId: UUID): MriImageDto {
-        val mriImage = mriImageRepository.findByIdOrNull(mriId)
-            ?: throw BOException(ReturnCode.NOT_EXIST_IMAGE)
+        val mriImage =
+            mriImageRepository.findByIdOrNull(mriId)
+                ?: throw BOException(ReturnCode.NOT_EXIST_IMAGE)
         return MriImageDto.from(mriImage)
     }
-
 }

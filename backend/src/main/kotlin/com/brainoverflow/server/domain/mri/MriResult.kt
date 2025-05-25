@@ -5,7 +5,7 @@ import jakarta.persistence.*
 @Entity
 class MriResult(
     mriImage: MriImage,
-    predictionStatus: PredictionStatus
+    predictionStatus: PredictionStatus,
 ) {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,5 +28,4 @@ class MriResult(
     fun addComment(comment: String) {
         this.resultFilePath = comment
     }
-
 }

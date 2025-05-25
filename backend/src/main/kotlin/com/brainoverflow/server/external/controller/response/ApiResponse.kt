@@ -5,19 +5,21 @@ import com.brainoverflow.server.domain.exception.ReturnCode
 data class ApiResponse<T>(
     val code: String,
     val message: String,
-    val data: T?
+    val data: T?,
 ) {
-
     companion object {
         fun <T> success(data: T? = null): ApiResponse<T> {
             return ApiResponse(
                 ReturnCode.SUCCESS.code,
                 ReturnCode.SUCCESS.message,
-                data
+                data,
             )
         }
 
-        fun <T> fail(returnCode: ReturnCode, data: T? = null): ApiResponse<T> {
+        fun <T> fail(
+            returnCode: ReturnCode,
+            data: T? = null,
+        ): ApiResponse<T> {
             return ApiResponse(returnCode.code, returnCode.message, data)
         }
 

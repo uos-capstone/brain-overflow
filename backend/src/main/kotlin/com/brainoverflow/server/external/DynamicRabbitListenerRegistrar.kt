@@ -22,9 +22,8 @@ class DynamicRabbitListenerRegistrar(
     private val serverIdProvider: ServerIdProvider,
     private val objectMapper: ObjectMapper,
     private val messagingTemplate: SimpMessagingTemplate,
-    private val amqpAdmin: AmqpAdmin       // <- 추가
+    private val amqpAdmin: AmqpAdmin, // <- 추가
 ) {
-
     companion object {
         const val EXCHANGE_NAME = "ai.response.exchange"
     }
@@ -40,25 +39,27 @@ class DynamicRabbitListenerRegistrar(
         val exchange = TopicExchange(EXCHANGE_NAME, true, true)
         amqpAdmin.declareExchange(exchange)
 
-        val binding = BindingBuilder
-            .bind(queue)
-            .to(exchange)
-            .with(queueName)
+        val binding =
+            BindingBuilder
+                .bind(queue)
+                .to(exchange)
+                .with(queueName)
         amqpAdmin.declareBinding(binding)
 
         // 4) 리스너 컨테이너 등록
-        val endpoint = SimpleRabbitListenerEndpoint().apply {
-            id = "listener-$serverId"
-            setQueueNames(queueName)
-            setMessageListener { message ->
-                val json = objectMapper.readTree(String(message.body))
-                val userId = json["userId"].asText()
-                val resultId = json["resultId"].asText()
-                println("userID = $userId")
-                val fromAiResponse = SocketMessageResponse.fromAiResponse(resultId)
-                messagingTemplate.convertAndSendToUser(userId, "/queue/chat", fromAiResponse)
+        val endpoint =
+            SimpleRabbitListenerEndpoint().apply {
+                id = "listener-$serverId"
+                setQueueNames(queueName)
+                setMessageListener { message ->
+                    val json = objectMapper.readTree(String(message.body))
+                    val userId = json["userId"].asText()
+                    val resultId = json["resultId"].asText()
+                    println("userID = $userId")
+                    val fromAiResponse = SocketMessageResponse.fromAiResponse(resultId)
+                    messagingTemplate.convertAndSendToUser(userId, "/queue/chat", fromAiResponse)
+                }
             }
-        }
         listenerRegistry.registerListenerContainer(endpoint, containerFactory, true)
         println("[✓] Dynamic listener registered for $queueName")
     }

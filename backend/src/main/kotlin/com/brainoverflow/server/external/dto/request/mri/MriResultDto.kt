@@ -6,5 +6,4 @@ data class MriResultDto(
     val mriImageId: UUID,
     val mriResultId: Long,
     val comment: String,
-) {
-}
+)
