@@ -73,7 +73,7 @@
   const jwtToken = localStorage.getItem('jwtToken');
   if (!jwtToken || !roomId) {
     alert('접근 정보가 없습니다. 목록에서 다시 들어오세요.');
-    location.href = 'chat_list.html';
+    location.href = 'kakaoroom.html';
   }
 
   let stompClient, currentPage = 0;
@@ -88,16 +88,14 @@
     // 유저-기반 구독: 한 번만
     stompClient.subscribe('/user/queue/chat', ({body}) => {
       const msg = JSON.parse(body);
+      console.log(msg)
+      console.log(msg.roomId === Number(roomId))
       // 현재 보고 있는 방 메시지면 append, 아니면 무시(뱃지 업데이트 등은 chat_list 쪽에서)
-      if (msg.roomId === roomId) {
+      if (msg.roomId === Number(roomId)) {
+        console.log("GET ROOM Message !!")
         appendMessage(msg);
       }
     });
-
-    // JOIN 이벤트
-    stompClient.send('/app/chat', {}, JSON.stringify({
-      type: 'JOIN', roomId, content: null
-    }));
 
     // 과거 메시지 첫 로드
     loadMessages(0);
@@ -106,7 +104,7 @@
 
   // 2) REST API로 과거 메시지 페이지별 로드
   function loadMessages(page) {
-    fetch(`/chatroom/${roomId}?page=${page}`, {
+    fetch(`/rooms/chatroom/${roomId}?page=${page}`, {
       headers: {'Authorization': `Bearer ${jwtToken}`}
     })
     .then(res => res.json())
@@ -115,7 +113,7 @@
       chats.reverse().forEach(m => appendMessage({
         type: m.type,
         roomId: m.roomId.toString(),
-        sender: m.senderId,
+        senderName: m.senderName,
         content: m.content,
         timestamp: new Date(m.timestamp).getTime()
       }, true));
@@ -131,12 +129,8 @@
     const el = document.createElement('div');
     el.className = 'msg';
     let text;
-    if (msg.type === 'JOIN') {
-      text = `<em>${msg.sender}님이 입장했습니다.</em>`;
-    } else if (msg.type === 'LEAVE') {
-      text = `<em>${msg.sender}님이 나갔습니다.</em>`;
-    } else {
-      text = `<strong>${msg.sender}:</strong> ${msg.content}`;
+    if (msg.type === 'CHAT') {
+      text = `<strong>${msg.senderName}:</strong> ${msg.content}`;
     }
     const time = new Date(msg.timestamp).toLocaleTimeString();
     el.innerHTML = `<div>${text}</div><div class="meta">${time}</div>`;
@@ -179,7 +173,7 @@
       type: 'LEAVE', roomId, content: null
     }));
     // user-queue 패턴에선 unsubscribe 대상이 없으므로 바로 이동
-    location.href = 'chat_list.html';
+    location.href = 'kakaoroom.html';
   });
 </script>
 </body>

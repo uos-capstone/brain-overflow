@@ -8,10 +8,13 @@ data class ChatRoomDto(
     val roomName: String,
     val roomUserNumber: Int,
     val lastMessage: String?,
-    val lastMessageTime: LocalDateTime
+    val lastMessageTime: LocalDateTime,
 ) {
     companion object {
-        fun from(chatRoom: ChatRoom, content: List<SocketMessageResponse>): ChatRoomDto {
+        fun from(
+            chatRoom: ChatRoom,
+            content: List<SocketMessageResponse>,
+        ): ChatRoomDto {
             return ChatRoomDto(
                 chatRoom.id,
                 chatRoom.name,

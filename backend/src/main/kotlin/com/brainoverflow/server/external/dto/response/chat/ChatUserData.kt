@@ -4,6 +4,5 @@ import java.util.UUID
 
 data class ChatUserData(
     val userId: UUID,
-    val nickname: String
-) {
-}
+    val nickname: String,
+)

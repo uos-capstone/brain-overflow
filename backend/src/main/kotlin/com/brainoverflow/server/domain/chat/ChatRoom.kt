@@ -11,6 +11,5 @@ class ChatRoom(
     @ManyToOne(fetch = FetchType.LAZY) val owner: User,
     @OneToMany(cascade = [(CascadeType.ALL)], mappedBy = "chatRoom")
     val chatRoomUser: List<ChatRoomUser> = listOf(),
-    val createdAt: LocalDateTime = LocalDateTime.now()
-){
-}
+    val createdAt: LocalDateTime = LocalDateTime.now(),
+)

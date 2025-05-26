@@ -1,11 +1,10 @@
 package com.brainoverflow.server.external.controller.mri
 
+import com.brainoverflow.server.domain.mri.Gender
 import com.brainoverflow.server.external.controller.response.ApiResponse
-import com.brainoverflow.server.external.dto.request.mri.MriResultDto
 import com.brainoverflow.server.external.dto.response.mri.MriImageDto
 import com.brainoverflow.server.service.mri.MriService
 import org.springframework.http.MediaType
-import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.web.bind.annotation.*
@@ -15,7 +14,7 @@ import java.util.*
 @RestController
 @RequestMapping("/mri")
 class MriController(
-    private val mriService: MriService
+    private val mriService: MriService,
 ) {
     @GetMapping
     fun getUserMRI(
@@ -26,31 +25,45 @@ class MriController(
     }
 
     @GetMapping("{mriId}")
-    fun getMRIData(@PathVariable mriId: UUID): ApiResponse<MriImageDto> {
+    fun getMRIData(
+        @PathVariable mriId: UUID,
+    ): ApiResponse<MriImageDto> {
         val response = mriService.findMriImage(mriId)
         return ApiResponse.success(response)
     }
 
-    @PostMapping(consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
+    @PostMapping(
+        consumes = [MediaType.MULTIPART_FORM_DATA_VALUE],
+    )
     fun registerMRI(
         @AuthenticationPrincipal user: UserDetails,
-        @RequestPart("file") file: MultipartFile
-    ): ApiResponse<String> {
-        mriService.registerMRIImage(file, UUID.fromString(user.username))
-        return ApiResponse.success("이미지 저장 성공")
+        @RequestPart("file") file: MultipartFile,
+        @RequestParam age: Int,
+        @RequestParam gender: Gender,
+    ): ApiResponse<UUID> {
+        val mriUUID =
+            mriService.registerMRIImage(file, UUID.fromString(user.username), age, gender)
+        return ApiResponse.success(mriUUID)
     }
 
     @PostMapping("/check-ad")
     fun calculateMRI(
-        @RequestParam mriImageId: UUID
-    ) {
-        mriService.registerMRIPrediction(mriImageId)
+        @RequestParam mriImageId: UUID,
+        @RequestParam targetAge: Int,
+    ): ApiResponse<Void> {
+        mriService.registerMRIPrediction(mriImageId, targetAge)
+        return ApiResponse.success()
     }
 
-    @PostMapping("/check/complete")
+    @PostMapping(
+        "/check/complete",
+        consumes = [MediaType.MULTIPART_FORM_DATA_VALUE],
+    )
     fun completeMRI(
-        @RequestBody mriResultDto: MriResultDto
+        @RequestPart("file") file: MultipartFile,
+        @RequestParam mriImageId: UUID,
+        @RequestParam mriResultId: Long,
     ) {
-        mriService.receiveResult(mriResultDto)
+        mriService.receiveResult(file, mriImageId, mriResultId)
     }
 }

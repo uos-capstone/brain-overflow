@@ -1,0 +1,11 @@
+# .editorconfig
+root = true
+
+[*.{kt,kts}]
+
+
+# lint Check 위반하지만, 자동으로 수정되지 않는 예외 처리
+ktlint_standard_no-wildcard-imports = disabled
+ktlint_standard_max-line-length = disabled
+ktlint_standard_discouraged-comment-location = disabled
+ktlint_standard_if-else-wrapping = disabled

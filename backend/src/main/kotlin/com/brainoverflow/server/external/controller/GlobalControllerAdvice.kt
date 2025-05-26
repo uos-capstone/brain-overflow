@@ -1,7 +1,7 @@
 package com.brainoverflow.server.external.controller
 
-import com.brainoverflow.server.domain.exception.ReturnCode
 import com.brainoverflow.server.domain.exception.BOException
+import com.brainoverflow.server.domain.exception.ReturnCode
 import com.brainoverflow.server.external.controller.response.ApiResponse
 import jakarta.servlet.http.HttpServletRequest
 import org.slf4j.LoggerFactory
@@ -35,8 +35,8 @@ class GlobalControllerAdvice {
         value = [
             HttpMessageNotReadableException::class,
             MissingServletRequestParameterException::class,
-            MethodArgumentTypeMismatchException::class
-        ]
+            MethodArgumentTypeMismatchException::class,
+        ],
     )
     fun handleRequestException(e: Exception): ResponseEntity<ApiResponse<Unit>> {
         return ResponseEntity
@@ -47,7 +47,7 @@ class GlobalControllerAdvice {
     @ExceptionHandler(HttpRequestMethodNotSupportedException::class)
     fun handleMethodNotSupportedException(
         e: HttpRequestMethodNotSupportedException,
-        request: HttpServletRequest
+        request: HttpServletRequest,
     ): ResponseEntity<ApiResponse<Unit>> {
         return ResponseEntity
             .status(HttpStatus.METHOD_NOT_ALLOWED)
@@ -61,32 +61,32 @@ class GlobalControllerAdvice {
             .body(
                 ApiResponse.fail(
                     ReturnCode.WRONG_PARAMETER,
-                    bindingResult.fieldErrors
-                )
+                    bindingResult.fieldErrors,
+                ),
             )
     }
 
     @ExceptionHandler(
-        value = [SQLException::class]
+        value = [SQLException::class],
     )
     fun handleServerException(
         e: SQLException,
-        request: HttpServletRequest
+        request: HttpServletRequest,
     ): ResponseEntity<ApiResponse<Unit>> {
-//		slackService.sendSlackForError(e, request)
+// 		slackService.sendSlackForError(e, request)
         return ResponseEntity
             .status(HttpStatus.INTERNAL_SERVER_ERROR)
             .body(ApiResponse.error(ReturnCode.INTERNAL_SERVER_ERROR))
     }
 
     @ExceptionHandler(
-        value = [RuntimeException::class]
+        value = [RuntimeException::class],
     )
     fun handleBusinessException(
         e: RuntimeException,
-        request: HttpServletRequest
+        request: HttpServletRequest,
     ): ResponseEntity<ApiResponse<Unit>> {
-//		slackService.sendSlackForError(e, request)
+// 		slackService.sendSlackForError(e, request)
         logger.error(e.message, e)
         return ResponseEntity
             .status(HttpStatus.INTERNAL_SERVER_ERROR)

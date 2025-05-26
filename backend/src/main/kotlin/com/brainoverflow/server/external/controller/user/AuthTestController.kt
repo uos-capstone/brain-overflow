@@ -11,7 +11,9 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping("/test")
 class AuthTestController {
     @GetMapping("/me")
-    fun getUserAuth(@AuthenticationPrincipal userDetails: UserDetails): ApiResponse<String> {
+    fun getUserAuth(
+        @AuthenticationPrincipal userDetails: UserDetails,
+    ): ApiResponse<String> {
         return ApiResponse.success(userDetails.username)
     }
 }

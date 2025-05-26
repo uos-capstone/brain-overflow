@@ -1,7 +1,6 @@
 package com.brainoverflow.server.domain.exception
 
 class BOException(private val returnCode: ReturnCode) : RuntimeException() {
-
     private val code: String = returnCode.code
     private val msg: String = returnCode.message
 

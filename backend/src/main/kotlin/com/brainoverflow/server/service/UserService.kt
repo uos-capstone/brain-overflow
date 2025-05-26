@@ -1,7 +1,7 @@
 package com.brainoverflow.server.service
 
-import com.brainoverflow.server.domain.exception.ReturnCode
 import com.brainoverflow.server.domain.exception.BOException
+import com.brainoverflow.server.domain.exception.ReturnCode
 import com.brainoverflow.server.domain.user.User
 import com.brainoverflow.server.domain.user.UserRepository
 import org.springframework.data.repository.findByIdOrNull

@@ -1,16 +1,15 @@
 package com.brainoverflow.server.external.ws
 
+import org.springframework.amqp.rabbit.core.RabbitAdmin
 import org.springframework.context.event.EventListener
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor
 import org.springframework.stereotype.Component
-import org.springframework.amqp.rabbit.core.RabbitAdmin
 import org.springframework.web.socket.messaging.SessionDisconnectEvent
 
 @Component
 class WebSocketDisconnectListener(
-    private val rabbitAdmin: RabbitAdmin // Spring의 RabbitMQ 제어용 클래스
+    private val rabbitAdmin: RabbitAdmin, // Spring의 RabbitMQ 제어용 클래스
 ) {
-
     @EventListener
     fun handleSessionDisconnect(event: SessionDisconnectEvent) {
         val headerAccessor = StompHeaderAccessor.wrap(event.message)

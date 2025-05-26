@@ -13,11 +13,14 @@ class RabbitMQMessageQueue(
         rabbitTemplate.convertAndSend("AlzheimerAiService", message)
     }
 
-    override fun sendMessage(routingKey: String, message: Message) {
+    override fun sendMessage(
+        routingKey: String,
+        message: Message,
+    ) {
         rabbitTemplate.convertAndSend(
             message.channel,
             routingKey,
-            message.message
+            message.message,
         )
     }
 }
