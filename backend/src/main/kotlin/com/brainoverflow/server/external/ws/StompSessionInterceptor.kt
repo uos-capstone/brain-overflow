@@ -48,6 +48,13 @@ class StompSessionInterceptor(
             StompCommand.DISCONNECT -> {
                 // 기존과 동일하게 서버 매핑만 지우면 됩니다
                 redis.delete(USER_SERVER_KEY.format(userId))
+
+                // 2) 방-멤버 관계도 모두 정리
+                chatRoomService.getUsersChatList(userId)
+                    .forEach { roomDto ->
+                        redis.opsForSet()
+                            .remove(ROOM_USERS_KEY.format(roomDto.roomId), userId.toString())
+                    }
             }
 
             else -> { // SUBSCRIBE/UNSUBSCRIBE 로직은 제거

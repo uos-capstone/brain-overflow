@@ -26,7 +26,7 @@ class WebSocketDisconnectListener(
             return
         }
 
-        val queueName = "chatrooms-user$sessionId"
+        val queueName = "chat-user$sessionId"
         try {
             rabbitAdmin.deleteQueue(queueName)
             println("🧹 RabbitMQ 큐 삭제 완료: $queueName")

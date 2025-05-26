@@ -11,6 +11,7 @@ import com.brainoverflow.server.external.dto.response.chat.SocketMessageResponse
 import com.brainoverflow.server.service.UserService
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Sort
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -82,7 +83,10 @@ class ChatRoomService(
         val roomUsers = chatRoomUserRepository.findByUser(user)
         return roomUsers.map { it.chatRoom }
             .map {
-                val messagesFromRoom = getMessagesFromRoom(PageRequest.of(0, 1), it.id)
+                val messagesFromRoom = getMessagesFromRoom(
+                    PageRequest.of(0, 1, Sort.Direction.DESC, "createdAt"),
+                    it.id
+                )
                 ChatRoomDto.from(it, messagesFromRoom.content)
             }
     }

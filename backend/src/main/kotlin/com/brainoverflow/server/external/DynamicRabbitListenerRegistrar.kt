@@ -26,6 +26,7 @@ class DynamicRabbitListenerRegistrar(
 ) {
     companion object {
         const val EXCHANGE_NAME = "ai.response.exchange"
+        const val CHAT_EXCHANGE = "chat.exchange"
     }
 
     @EventListener(ApplicationReadyEvent::class)
@@ -62,5 +63,48 @@ class DynamicRabbitListenerRegistrar(
             }
         listenerRegistry.registerListenerContainer(endpoint, containerFactory, true)
         println("[✓] Dynamic listener registered for $queueName")
+    }
+
+    @EventListener(ApplicationReadyEvent::class)
+    fun registerChatListener() {
+        val serverId = serverIdProvider.get()
+        val queueName = "chat.queue.$serverId"
+
+        // Exchange / Queue / Binding 선언
+        amqpAdmin.declareExchange(TopicExchange(CHAT_EXCHANGE, true, true))
+        amqpAdmin.declareQueue(Queue(queueName, false, true, true))
+        amqpAdmin.declareBinding(
+            BindingBuilder
+                .bind(Queue(queueName))
+                .to(TopicExchange(CHAT_EXCHANGE))
+                .with("#"),
+        )
+
+        // Listener 등록
+        val endpoint =
+            SimpleRabbitListenerEndpoint().apply {
+                id = "chat-listener-$serverId"
+                setQueueNames(queueName)
+                setMessageListener { message ->
+                    // Map<String, Any> 형태로 역직렬화
+                    val node = objectMapper.readTree(message.body)
+                    val userIds = node["userIds"].map { it.asText() }
+                    val chat =
+                        objectMapper.treeToValue(
+                            node["chat"],
+                            SocketMessageResponse::class.java,
+                        )
+
+                    // Redis 없이, 바로 유저 리스트 순회
+                    userIds.forEach { userId ->
+                        messagingTemplate.convertAndSendToUser(
+                            userId,
+                            "/queue/chat",
+                            chat,
+                        )
+                    }
+                }
+            }
+        listenerRegistry.registerListenerContainer(endpoint, containerFactory, true)
     }
 }
