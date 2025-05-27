@@ -8,6 +8,7 @@ import com.brainoverflow.server.external.dto.response.chat.SocketMessageResponse
 import com.brainoverflow.server.service.chatroom.ChatRoomService
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Sort
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.web.bind.annotation.*
@@ -63,7 +64,7 @@ class ChatRoomController(
         @PathVariable roomId: Long,
         @RequestParam page: Int,
     ): Page<SocketMessageResponse> {
-        val pageable = PageRequest.of(page, 100)
+        val pageable = PageRequest.of(page, 100, Sort.Direction.DESC, "createdAt")
         return chatRoomService.getMessagesFromRoom(pageable, roomId)
     }
 

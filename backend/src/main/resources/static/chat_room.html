@@ -110,7 +110,7 @@
     .then(res => res.json())
     .then(data => {
       const chats = data.content; // spring data page.content
-      chats.reverse().forEach(m => appendMessage({
+      chats.forEach(m => appendMessage({
         type: m.type,
         roomId: m.roomId.toString(),
         senderName: m.senderName,

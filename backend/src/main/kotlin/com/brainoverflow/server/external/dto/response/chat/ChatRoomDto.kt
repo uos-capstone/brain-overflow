@@ -19,8 +19,8 @@ data class ChatRoomDto(
                 chatRoom.id,
                 chatRoom.name,
                 chatRoom.chatRoomUser.size,
-                content.lastOrNull()?.content ?: " ",
-                content.lastOrNull()?.timestamp ?: LocalDateTime.now(),
+                content.firstOrNull()?.content ?: " ",
+                content.firstOrNull()?.timestamp ?: LocalDateTime.now(),
             )
         }
     }
