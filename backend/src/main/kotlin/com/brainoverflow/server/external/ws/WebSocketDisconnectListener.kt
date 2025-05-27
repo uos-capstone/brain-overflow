@@ -21,6 +21,7 @@ class WebSocketDisconnectListener(
     }
 
     fun deleteUserQueue(sessionId: String?) {
+        return
         if (sessionId.isNullOrBlank()) {
             println("SessionId 없음. 큐 삭제 스킵.")
             return
