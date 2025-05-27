@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useCallback, useLayoutEffect } from 'react';
 import { useDrag } from 'react-dnd';
 import styles from '../css/ChatWindow.module.css';
 import { MyChatMessage } from './MyChatMessage';
@@ -9,6 +9,11 @@ import {
     ChatMessageData,
     Participant,
 } from '../util/api';
+import {
+    subscribeToRoomMessages,
+    ServerChatMessage, 
+    sendChatMessage,
+} from '../util/socket';
 
 /*
 interface ChatMessageData {
@@ -66,6 +71,64 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
     const [hasMoreOldMessages, setHasMoreOldMessages] = useState(true);
     const [isLoadingOldMessages, setIsLoadingOldMessages] = useState(false);
     const messageContainerRef = useRef<HTMLDivElement>(null);
+    const isUserAtBottomRef = useRef(true);
+
+    useEffect(() => {
+        const container = messageContainerRef.current;
+        if (!container) return;
+
+        const onScroll = () => {
+            const bottomGap =
+                container.scrollHeight - container.scrollTop - container.clientHeight;
+            isUserAtBottomRef.current = bottomGap <= 30; // 30px 이내면 “바닥”
+        };
+
+        container.addEventListener('scroll', onScroll);
+        return () => container.removeEventListener('scroll', onScroll);
+    }, []);
+
+    useEffect(() => {
+        if (!id || !currentUser?.id) {
+            return;
+        }
+
+        const handleNewServerMessage = (serverMsg: ServerChatMessage) => {
+            console.log(
+                `[ChatWindow ID: ${id}] handleNewServerMessage 실행됨. 수신된 서버 메시지:`,
+                JSON.stringify(serverMsg) // 서버에서 온 원본 메시지 확인
+            );
+
+            const newUiMessage: ChatMessageData = {
+                messageId: serverMsg.messageId,
+                senderId: serverMsg.senderId,
+                senderName: serverMsg.senderName,
+                content: serverMsg.content,
+                timestamp: new Date(serverMsg.timestamp).toLocaleTimeString('ko-KR', {
+                    hour: 'numeric',
+                    minute: '2-digit',
+                    hour12: true,
+                }),
+                type: serverMsg.type, // 'CHAT' 또는 'EVENT'
+            };
+
+            setMessages((prevMessages) => {
+                return [...prevMessages, newUiMessage];
+            });
+        };
+
+        const unsubscribe = subscribeToRoomMessages(id, handleNewServerMessage);
+
+        return () => {
+            unsubscribe();
+        };
+    }, [id, currentUser]);
+
+    useLayoutEffect(() => {
+        // 직전에 “바닥 근처”였던 경우에만 자동 스크롤
+        if (isUserAtBottomRef.current) {
+            messagesEndRef.current?.scrollIntoView({ behavior: 'auto' });
+        }
+    }, [messages]);
 
     useEffect(() => {
         if (id) {
@@ -177,17 +240,8 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
     const handleSendMessage = () => {
         const trimmedMessage = inputValue.trim();
         if (trimmedMessage) {
-            const newMessage: ChatMessageData = {
-                messageId: Date.now().toString(),
-                senderId: currentUser!.id,
-                senderName: "나",
-                content: trimmedMessage,
-                timestamp: new Date().toLocaleTimeString('ko-KR', { hour: 'numeric', minute: '2-digit', hour12: true }),
-                type: "CHAT",
-            };
-
-            setMessages(prevMessages => [...prevMessages, newMessage]);
-            console.log(`[ChatWindow ID: ${id}] 새 메시지 추가됨:`, newMessage);
+            sendChatMessage(id, trimmedMessage);
+            console.log(`[ChatWindow ID: ${id}] 새 메시지 추가됨:`);
             setInputValue('');
 
             setTimeout(() => {
@@ -249,7 +303,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
                 </div>
             </div>
 
-            <div className={styles.content}>
+            <div className={styles.content} ref={messageContainerRef}>
                 {messages.map((chat) => {
                     switch (chat.type) {
                         case 'EVENT':
