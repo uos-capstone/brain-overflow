@@ -50,9 +50,14 @@ class AuthService(
             userRepository.findByIdOrNull(userId) ?: throw BOException(ReturnCode.NOT_EXIST_USER)
 
         return UserInfo(
+            user.id,
             user.nickname,
             user.role,
             user.username,
         )
+    }
+
+    fun findAllUser(): List<User> {
+        return userRepository.findAll()
     }
 }

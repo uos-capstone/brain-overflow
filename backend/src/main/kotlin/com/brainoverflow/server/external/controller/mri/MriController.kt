@@ -2,6 +2,7 @@ package com.brainoverflow.server.external.controller.mri
 
 import com.brainoverflow.server.domain.mri.Gender
 import com.brainoverflow.server.external.controller.response.ApiResponse
+import com.brainoverflow.server.external.dto.request.mri.MriResultDto
 import com.brainoverflow.server.external.dto.response.mri.MriImageDto
 import com.brainoverflow.server.service.mri.MriService
 import org.springframework.http.MediaType
@@ -63,7 +64,16 @@ class MriController(
         @RequestPart("file") file: MultipartFile,
         @RequestParam mriImageId: UUID,
         @RequestParam mriResultId: Long,
-    ) {
+    ): ApiResponse<Void> {
         mriService.receiveResult(file, mriImageId, mriResultId)
+        return ApiResponse.success()
+    }
+
+    @GetMapping("/result/{id}")
+    fun getMriResultData(
+        @PathVariable id: Long,
+    ): ApiResponse<MriResultDto> {
+        val mriResult = mriService.getMriResult(id)
+        return ApiResponse.success(MriResultDto.fromDomain(mriResult))
     }
 }
