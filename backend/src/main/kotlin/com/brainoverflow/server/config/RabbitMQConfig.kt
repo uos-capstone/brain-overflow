@@ -11,10 +11,10 @@ import org.springframework.context.annotation.Configuration
 @Configuration
 @EnableRabbit
 class RabbitMQConfig {
-    @Bean
-    fun rabbitAdmin(connectionFactory: ConnectionFactory): RabbitAdmin {
-        return RabbitAdmin(connectionFactory)
-    }
+//    @Bean
+//    fun rabbitAdmin(connectionFactory: ConnectionFactory): RabbitAdmin {
+//        return RabbitAdmin(connectionFactory)
+//    }
 
     // Fanout Exchange를 사용하여 모든 바인딩된 큐로 메시지 전송
     @Bean

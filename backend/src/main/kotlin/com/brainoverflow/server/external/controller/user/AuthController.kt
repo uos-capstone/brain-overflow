@@ -18,7 +18,7 @@ class AuthController(
 ) {
     @PostMapping("/login")
     fun login(
-        @RequestBody loginRequest: com.brainoverflow.server.external.dto.request.user.LoginRequest,
+        @RequestBody loginRequest: LoginRequest,
     ): ApiResponse<TokenResponse> {
         val response = authService.login(loginRequest)
         return ApiResponse.success(response)
@@ -39,5 +39,19 @@ class AuthController(
         val userId = UUID.fromString(userDetails.username)
         val userInfo = authService.getUserInfo(userId)
         return ApiResponse.success(userInfo)
+    }
+
+    @GetMapping
+    fun getAllUserInfo(): ApiResponse<List<UserInfo>> {
+        val users = authService.findAllUser()
+        val userInfos = users.map {
+            UserInfo(
+                id = it.id,
+                nickname = it.nickname,
+                role = it.role,
+                username = it.username,
+            )
+        }
+        return ApiResponse.success(userInfos)
     }
 }

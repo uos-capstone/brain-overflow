@@ -132,4 +132,11 @@ class MriService(
                 ?: throw BOException(ReturnCode.NOT_EXIST_IMAGE)
         return MriImageDto.from(mriImage)
     }
+
+    fun getMriResult(id: Long): MriResult {
+        val mriResult =
+            mriResultRepository.findByIdOrNull(id) ?: throw BOException(ReturnCode.NOT_EXIST_RESULT)
+
+        return mriResult
+    }
 }

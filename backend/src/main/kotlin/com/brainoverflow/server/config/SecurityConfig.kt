@@ -37,6 +37,7 @@ class SecurityConfig(
                     "/v3/api-docs",
                     "/v3/api-docs/**",
                     "/chatroom",
+                    "/uploads/**"
                 ).permitAll()
                 it.anyRequest().authenticated()
             }
