@@ -223,6 +223,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
         },
     }), [id, x, y, onMove]);
 
+
     const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
         if (e.target instanceof HTMLElement && e.target.closest('button, input')) {
             return;

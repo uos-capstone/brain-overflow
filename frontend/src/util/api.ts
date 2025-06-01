@@ -296,11 +296,15 @@ export async function fetchChats(
             return [];
         }
 
+        data.content.sort((a, b) => {
+            return new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime();
+        });
+
         // API 응답 데이터를 ChatMessageData 형식으로 변환
         const chatMessages: ChatMessageData[] = data.content.map((item, index) => {
             // messageId 처리: API 응답에 messageId가 없다면 임시 ID 생성
             const messageId = item.messageId || `api-msg-${item.senderId}-${new Date(item.timestamp).getTime()}-${index}`;
-            const senderName = item.senderId;
+            const senderName = item.senderName;
 
             // timestamp 형식 변환 (ISO 8601 -> "오후 2:00" 등)
             const formattedTimestamp = new Date(item.timestamp).toLocaleTimeString('ko-KR', {

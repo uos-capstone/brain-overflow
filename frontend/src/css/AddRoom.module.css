@@ -6,7 +6,7 @@
 	left: 0;
 	right: 0;
 	bottom: 0;
-	background: rgba(0, 0, 0, 0.6);
+	background: rgba(0, 0, 0, 0.7); /* 배경을 조금 더 어둡게 하여 집중도 향상 */
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -14,21 +14,22 @@
 }
 
 .modalContent {
-	background: #fff;
+	background: #2c2f33; /* 배경을 다크 테마에 맞게 변경 */
 	padding: 25px 30px;
 	border-radius: 8px;
 	width: 90%;
 	max-width: 400px;
-	box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-	color: #333;
+	box-shadow: 0 5px 20px rgba(0,0,0,0.4); /* 그림자도 어두운 테마에 맞게 조정 */
+	color: #f0f0f0; /* 기본 텍스트 색상을 밝게 변경 */
 	position: relative;
+	border: 1px solid #444; /* 경계선을 살짝 추가해 입체감 부여 */
 }
 
 .modalTitle {
 	margin-top: 0;
 	margin-bottom: 20px;
 	font-size: 1.4rem;
-	color: #333;
+	color: #ffffff; /* 제목 텍스트 색상을 흰색으로 변경 */
 	font-weight: 500;
 	text-align: center;
 }
@@ -37,16 +38,22 @@
 	width: 100%;
 	padding: 10px 12px;
 	margin-bottom: 15px;
-	border: 1px solid #ccc;
+	border: 1px solid #555; /* 테두리 색상 변경 */
 	border-radius: 4px;
 	font-size: 1rem;
 	box-sizing: border-box;
 	transition: border-color 0.2s, box-shadow 0.2s;
+	background-color: #3b3e42; /* 입력창 배경색 변경 */
+	color: #f0f0f0; /* 입력되는 텍스트 색상 변경 */
 }
+
+	.inputField::placeholder { /* 플레이스홀더 색상도 변경 */
+		color: #888;
+	}
 
 	.inputField:focus {
 		outline: none;
-		border-color: #007bff;
+		border-color: #007bff; /* 포커스 시 파란색 테두리는 유지하여 시인성 확보 */
 		box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
 	}
 
@@ -56,22 +63,23 @@
 	margin-top: 15px;
 }
 
+/* 기본 버튼 (취소) */
 .button {
 	padding: 8px 18px;
 	margin-left: 10px;
 	border-radius: 4px;
-	border: 1px solid #ccc;
+	border: 1px solid #555; /* 테두리 색상 변경 */
 	cursor: pointer;
 	font-size: 0.9rem;
-	background-color: #f8f9fa;
-	color: #333;
+	background-color: #4a4d52; /* 버튼 배경색 변경 */
+	color: #f0f0f0; /* 버튼 텍스트 색상 변경 */
 	transition: background-color 0.2s, border-color 0.2s, box-shadow 0.2s;
 	line-height: 1.5;
 }
 
 	.button:hover {
-		background-color: #e2e6ea;
-		border-color: #adb5bd;
+		background-color: #5a5d62; /* 호버 시 배경색 변경 */
+		border-color: #6a6d72;
 	}
 
 	.button:focus {
@@ -80,6 +88,7 @@
 		box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
 	}
 
+/* 주요 버튼 (추가) */
 .primaryButton {
 	background: #007bff;
 	color: #fff;
