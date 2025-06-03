@@ -18,7 +18,8 @@ import {
     getCurrentUser,
     Chatroom,
     Participant,
-    addRoom
+    addRoom,
+    inviteUserToRoom
 } from '../util/api';
 
 /*
@@ -345,26 +346,65 @@ export default function Sidebar() {
     }, []);
 
     // 사용자 초대
-    const handleInviteUsersToRoom = useCallback((roomId: string, usersToInvite: Participant[]) => {
-        setChatrooms(currentChatrooms =>
-            currentChatrooms.map(room => {
-                if (room.id === roomId) {
-                    const existingParticipantIds = new Set(room.participants.map(p => p.id));
-                    const newParticipants = usersToInvite.filter(
-                        user => !existingParticipantIds.has(user.id)
-                    );
-                    if (newParticipants.length > 0) {
-                        return {
-                            ...room,
-                            participants: [...room.participants, ...newParticipants.map(u => ({ id: u.id, nickName: u.nickName }))],
-                        };
-                    }
-                }
-                return room;
-            })
+    const handleInviteUsersToRoom = useCallback(async (roomId: string | null, usersToInvite: Participant[]) => {
+        if (!roomId) {
+            console.error("초대할 방의 ID가 없습니다.");
+            return;
+        }
+
+        const token = localStorage.getItem('accessToken');
+        if (!token) {
+            alert('초대를 위해서는 로그인이 필요합니다.');
+            return;
+        }
+
+        // [수정] 직접 fetch를 호출하는 대신, api.ts의 함수를 호출합니다.
+        const invitePromises = usersToInvite.map(user =>
+            inviteUserToRoom(roomId, user.id)
         );
-        closeInviteModal(); // 초대 후 모달 닫기
-        // 필요하다면, 초대 성공/실패 알림 등을 추가할 수 있습니다.
+
+        const results = await Promise.allSettled(invitePromises);
+
+        const successfulInvites: Participant[] = [];
+        const failedInvites: string[] = [];
+
+        results.forEach((result, index) => {
+            const user = usersToInvite[index];
+            if (result.status === 'fulfilled') {
+                successfulInvites.push(user);
+            } else {
+                // result.reason에 inviteUserToRoom에서 던진 Error 객체가 들어있습니다.
+                console.error(result.reason);
+                failedInvites.push(user.nickName);
+            }
+        });
+
+        // 성공한 사용자들만 UI에 반영하는 로직은 동일합니다.
+        if (successfulInvites.length > 0) {
+            setChatrooms(currentChatrooms =>
+                currentChatrooms.map(room => {
+                    if (String(room.id) === roomId) {
+                        const existingParticipantIds = new Set(room.participants.map(p => p.id));
+                        const newParticipants = successfulInvites.filter(
+                            user => !existingParticipantIds.has(user.id)
+                        );
+                        if (newParticipants.length > 0) {
+                            return { ...room, participants: [...room.participants, ...newParticipants] };
+                        }
+                    }
+                    return room;
+                })
+            );
+        }
+
+        // 사용자에게 최종 결과를 알려주는 로직도 동일합니다.
+        if (failedInvites.length > 0) {
+            alert(`초대 실패: ${failedInvites.join(', ')}\n나머지 사용자는 성공적으로 초대되었습니다.`);
+        } else {
+            alert('선택한 모든 사용자를 성공적으로 초대했습니다.');
+        }
+
+        closeInviteModal();
     }, [closeInviteModal]);
 
     // 방 최소화

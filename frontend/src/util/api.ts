@@ -44,6 +44,7 @@ const DUMMY_CHATROOMS: Chatroom[] = [
 export interface Participant {
     id: string;
     nickName: string;
+    userName?: string;
 }
 
 export interface Chatroom {
@@ -117,7 +118,7 @@ export async function fetchChatrooms(): Promise<Chatroom[]> {
     return chatrooms;
 }
 
-
+/*
 const DUMMY_PARTICIPANTS: Participant[] = [
   { id: "user1", nickName: "Alice" },
     { id: "user2", nickName: "Bob" },
@@ -129,11 +130,47 @@ const DUMMY_PARTICIPANTS: Participant[] = [
     { id: "user8", nickName: "Henry" },
     { id: "userMe", nickName: "나" },
 ];
+*/
 
+interface ApiUser {
+    id: string;
+    nickname: string;
+    username: string;
+    role: string;
+}
 export async function fetchParticipants(): Promise<Participant[]> {
-  return new Promise((resolve) => {
-    setTimeout(() => resolve(DUMMY_PARTICIPANTS), 300);
-  });
+    const token = localStorage.getItem('accessToken');
+    const API_URL = 'https://api-brain-overflow.unknownpgr.com/auth';
+    if (!token) {
+        console.error("토큰이 없어 API를 호출할 수 없습니다.");
+        return []; // 토큰 없으면 빈 배열 반환
+    }
+
+    try {
+        const response = await fetch(API_URL, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+            },
+        });
+
+        if (!response.ok) {
+            throw new Error(`API 요청 실패, 상태 코드: ${response.status}`);
+        }
+
+        const apiUsers = await response.json();
+
+        const participants: Participant[] = apiUsers.data.map((user: ApiUser) => ({
+            id: user.id,
+            nickName: user.nickname,
+            userName: user.username,
+        }));
+
+        return participants;
+
+    } catch (error) {
+        console.error('사용자 목록을 가져오는 중 오류가 발생했습니다:', error);
+        return []; // 에러가 발생하면 빈 배열을 반환
+    }
 }
 
 export const CUR_USER: Participant = {
@@ -265,7 +302,7 @@ export async function fetchChats(
         );
 
         if (!response.ok) {
-            let errorData: any = `API 요청 실패 (상태 ${response.status})`;
+            let errorData: string = `API 요청 실패 (상태 ${response.status})`;
             try {
                 errorData = await response.json();
             } catch (e) {
@@ -377,4 +414,24 @@ export async function deleteUserFromRoom(
 ): Promise<void> {
   console.log("deleteUserFromRoom", userId, roomName);
   return;
+}
+
+export async function inviteUserToRoom(roomId: string, userId: string): Promise<void> {
+    const url = `${API_BASE}/rooms/${roomId}/invite?userId=${userId}`;
+    const token = localStorage.getItem('accessToken');
+    const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${token}`,
+        },
+    });
+
+    if (!response.ok) {
+        // API 호출이 실패하면, 에러를 발생시켜 호출한 쪽(Sidebar.tsx)에서 잡을 수 있도록 합니다.
+        const errorBody = await response.json().catch(() => null);
+        throw new Error(errorBody?.message || `'${userId}' 사용자 초대 실패 (상태: ${response.status})`);
+    }
+
+    // 성공 시에는 특별히 반환할 데이터가 없으므로 그냥 종료합니다.
+    return;
 }

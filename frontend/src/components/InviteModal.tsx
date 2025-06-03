@@ -74,7 +74,7 @@ export const InviteModal: React.FC<InviteModalProps> = ({
                             {filteredAndAvailableUsers.length > 0 ? (
                                 filteredAndAvailableUsers.map(user => (
                                     <li key={user.id} className={styles.userListItem}>
-                                        <span>{user.nickName} ({user.id})</span>
+                                        <span>{user.nickName} ({user.userName})</span>
                                         <button onClick={() => handleSelectUser(user)} className={styles.addButton}>추가</button>
                                     </li>
                                 ))
