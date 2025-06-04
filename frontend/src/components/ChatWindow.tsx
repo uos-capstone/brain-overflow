@@ -4,6 +4,7 @@ import styles from '../css/ChatWindow.module.css';
 import { MyChatMessage } from './MyChatMessage';
 import { OtherChatMessage } from './OtherChatMessage';
 import { EventMessage } from './EventMessage';
+import { MRIMessage } from './MRIMessage';
 import {
     fetchChats,
     ChatMessageData,
@@ -258,6 +259,10 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
         }
     };
 
+    const handleMRIContentClick = (content: string) => {
+        console.log('MRI클릭', content);
+    };
+
     const headerRef = useRef<HTMLDivElement>(null);
     drag(headerRef);
 
@@ -310,7 +315,9 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
                         case 'EVENT':
                             return <EventMessage key={chat.messageId} chat={chat} />;
                         case 'CHAT':
-                            if (currentUser && chat.senderId === currentUser.id) {
+                            if (chat.content.startsWith('<MRI>')) {
+                                return <MRIMessage key={chat.messageId} chat={chat} onClick={handleMRIContentClick} />;
+                            } else if (currentUser && chat.senderId === currentUser.id) {
                                 return <MyChatMessage key={chat.messageId} chat={chat} />;
                             } else {
                                 return <OtherChatMessage key={chat.messageId} chat={chat} />;
