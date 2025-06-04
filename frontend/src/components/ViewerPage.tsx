@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react';
-import { DndProvider } from 'react-dnd';
-import { HTML5Backend } from 'react-dnd-html5-backend';
-import Sidebar from './Sidebar';
-import FileHeader from './FileHeader';
-import CanvasArea from './CanvasArea';
+import React, { useEffect, useState } from "react";
+import { DndProvider } from "react-dnd";
+import { HTML5Backend } from "react-dnd-html5-backend";
+import Sidebar from "./Sidebar";
+import FileHeader from "./FileHeader";
+import CanvasArea from "./CanvasArea";
 
 export interface NiiFile {
   name: string;
@@ -17,15 +17,21 @@ const ViewerPage: React.FC = () => {
 
   useEffect(() => {
     async function loadExample() {
-      const response = await fetch('publicFiles/mri/example.nii');
+      const response = await fetch("publicFiles/mri/example.nii");
       const blob = await response.blob();
-      const file = new File([blob], 'example.nii');
-      setFiles([{
-        name: 'example.nii',
-        active: true,
-        file: file,
-        age: 0,
-      }]);
+      const file = new File([blob], "example.nii");
+      setFiles((prev) => {
+        const updated = [...prev.map((f) => ({ ...f, active: false }))];
+        return [
+          ...updated,
+          {
+            name: "example.nii",
+            active: true,
+            file: file,
+            age: 0,
+          },
+        ];
+      });
     }
 
     loadExample();
@@ -43,7 +49,7 @@ const ViewerPage: React.FC = () => {
         <main className="flex-1 px-0 py-0 overflow-y-auto">
           <div className="max-w-none">
             <FileHeader files={files} setFiles={setFiles} />
-            <CanvasArea activeFile={files.find(f => f.active) || null} />
+            <CanvasArea activeFile={files.find((f) => f.active) || null} />
           </div>
         </main>
       </div>

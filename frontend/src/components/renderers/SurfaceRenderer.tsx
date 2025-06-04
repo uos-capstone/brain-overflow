@@ -1,6 +1,6 @@
 //@ts-ignore
-import { surfaceNets } from 'isosurface';
-import { mat4, vec3 } from 'gl-matrix';
+import { surfaceNets } from "isosurface";
+import { mat4, vec3 } from "gl-matrix";
 
 function gaussianBlur3D(
   data: Float32Array,
@@ -18,8 +18,7 @@ function gaussianBlur3D(
   for (let z = -radius; z <= radius; z++) {
     for (let y = -radius; y <= radius; y++) {
       for (let x = -radius; x <= radius; x++) {
-        const weight =
-          Math.exp(-(x * x + y * y + z * z) / (2 * sigma * sigma));
+        const weight = Math.exp(-(x * x + y * y + z * z) / (2 * sigma * sigma));
         kernel.push(weight);
         kernelSum += weight;
       }
@@ -31,11 +30,8 @@ function gaussianBlur3D(
   }
 
   const get = (x: number, y: number, z: number): number => {
-    if (
-      x < 0 || x >= width ||
-      y < 0 || y >= height ||
-      z < 0 || z >= depth
-    ) return 0;
+    if (x < 0 || x >= width || y < 0 || y >= height || z < 0 || z >= depth)
+      return 0;
     return data[x + y * width + z * width * height];
   };
 
@@ -62,7 +58,10 @@ function gaussianBlur3D(
   return output;
 }
 
-function filterLargestComponent(mesh: { positions: number[][], cells: number[][] }) {
+function filterLargestComponent(mesh: {
+  positions: number[][];
+  cells: number[][];
+}) {
   const vertexCount = mesh.positions.length;
   const adjList: number[][] = Array.from({ length: vertexCount }, () => []);
 
@@ -96,8 +95,8 @@ function filterLargestComponent(mesh: { positions: number[][], cells: number[][]
   const largest = components.reduce((a, b) => (a.length > b.length ? a : b));
   const keepSet = new Set(largest);
 
-  const newCells = mesh.cells.filter(([a, b, c]) =>
-    keepSet.has(a) && keepSet.has(b) && keepSet.has(c)
+  const newCells = mesh.cells.filter(
+    ([a, b, c]) => keepSet.has(a) && keepSet.has(b) && keepSet.has(c)
   );
 
   const indexMap = new Map<number, number>();
@@ -121,7 +120,7 @@ function filterLargestComponent(mesh: { positions: number[][], cells: number[][]
   };
 }
 
-export class SurfaceRenderer {
+export class MarchingCubeRenderer {
   private device: GPUDevice;
   private vertexBuffer: GPUBuffer;
   private indexBuffer: GPUBuffer;
@@ -130,7 +129,7 @@ export class SurfaceRenderer {
   private uniformBuffer: GPUBuffer;
   private bindGroup: GPUBindGroup;
   private dims: [number, number, number];
-  private canvas: HTMLCanvasElement
+  private canvas: HTMLCanvasElement;
 
   constructor(
     device: GPUDevice,
@@ -148,10 +147,13 @@ export class SurfaceRenderer {
 
     const blurredVoxelData = gaussianBlur3D(voxelData, dims, 3, 1.2);
 
-    const mesh = surfaceNets([width, height, depth], (x:number, y:number, z:number) => {
-      const index = x + y * width + z * width * height;
-      return blurredVoxelData[index] - isovalues;
-    });
+    const mesh = surfaceNets(
+      [width, height, depth],
+      (x: number, y: number, z: number) => {
+        const index = x + y * width + z * width * height;
+        return blurredVoxelData[index] - isovalues;
+      }
+    );
 
     const cleanedMesh = filterLargestComponent(mesh);
 
@@ -224,29 +226,29 @@ export class SurfaceRenderer {
           let lighting = ambient + 0.7 * diff + 0.5 * spec;
           return vec4(baseColor * lighting, 1.0);
         }
-      `
+      `,
     });
 
     this.pipeline = this.device.createRenderPipeline({
-      layout: 'auto',
+      layout: "auto",
       vertex: {
         module: shaderModule,
-        entryPoint: 'vsMain',
-        buffers: [{
-          arrayStride: 12,
-          attributes: [
-            { shaderLocation: 0, format: 'float32x3', offset: 0 },
-          ],
-        }],
+        entryPoint: "vsMain",
+        buffers: [
+          {
+            arrayStride: 12,
+            attributes: [{ shaderLocation: 0, format: "float32x3", offset: 0 }],
+          },
+        ],
       },
       fragment: {
         module: shaderModule,
-        entryPoint: 'fsMain',
+        entryPoint: "fsMain",
         targets: [{ format }],
       },
       primitive: {
-        topology: 'triangle-list',
-        cullMode: 'none',
+        topology: "triangle-list",
+        cullMode: "none",
         // frontFace: 'ccw',
       },
     });
@@ -263,7 +265,7 @@ export class SurfaceRenderer {
   }
 
   update(mvp: mat4, eye: vec3): void {
-    const uniformData = new Float32Array(64/4 + 16/4 + 16/4);
+    const uniformData = new Float32Array(64 / 4 + 16 / 4 + 16 / 4);
     uniformData.set(Float32Array.from(mvp), 0);
     uniformData.set(this.dims, 16);
     uniformData.set(eye, 20);
@@ -274,8 +276,15 @@ export class SurfaceRenderer {
     pass.setPipeline(this.pipeline);
     pass.setBindGroup(0, this.bindGroup);
     pass.setVertexBuffer(0, this.vertexBuffer);
-    pass.setIndexBuffer(this.indexBuffer, 'uint32');
-    pass.setViewport(0, 0, this.canvas.width/3*2, this.canvas.height, 0, 1);
+    pass.setIndexBuffer(this.indexBuffer, "uint32");
+    pass.setViewport(
+      0,
+      0,
+      (this.canvas.width / 3) * 2,
+      this.canvas.height,
+      0,
+      1
+    );
     pass.drawIndexed(this.indexCount, 1, 0, 0, 0);
   }
 }

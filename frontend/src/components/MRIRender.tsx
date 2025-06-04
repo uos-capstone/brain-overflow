@@ -1,9 +1,11 @@
-import { mat4, vec3, quat } from 'gl-matrix';
-import { VolumeRenderer } from './renderers/VolumeRenderer';
-// import { SurfaceRenderer } from './renderers/SurfaceRenderer';
-import { BoxRingRenderer } from './renderers/BoxRingRenderer';
-import { SliceRenderer } from './renderers/SliceRenderer';
-import { GizmoRenderer } from './renderers/GizmoRenderer';
+import { mat4, vec3, quat } from "gl-matrix";
+import { SingleRayMarchingRenderer } from "./renderers/SingleRayMarchingRenderer";
+import { MultiRayMarchingRenderer } from "./renderers/MultiRayMarchingRenderer";
+import { MultiRayCastingRenderer } from "./renderers/MultiRayCastingRenderer";
+import { MarchingCubeRenderer } from "./renderers/SurfaceRenderer";
+import { BoxRingRenderer } from "./renderers/BoxRingRenderer";
+import { SliceRenderer } from "./renderers/SliceRenderer";
+import { GizmoRenderer } from "./renderers/GizmoRenderer";
 
 export async function main(
   canvas: HTMLCanvasElement,
@@ -12,6 +14,8 @@ export async function main(
   affine: Float32Array,
   device: GPUDevice,
   sliceCentersRef: React.RefObject<[number, number, number]>,
+  tfParamRef: React.RefObject<[number, number, number, number, number, number]>,
+  renderingModeRef: React.RefObject<string>
 ) {
   const dpr = window.devicePixelRatio || 1;
 
@@ -26,21 +30,43 @@ export async function main(
 
   const context = canvas.getContext("webgpu") as GPUCanvasContext;
   const format = navigator.gpu.getPreferredCanvasFormat();
-  context.configure({ device, format, alphaMode: 'opaque' });
+  context.configure({ device, format, alphaMode: "opaque" });
 
   const texture = device.createTexture({
     size: dims,
-    format: 'r32float',
+    format: "rgba8unorm", // ✅ filtering 지원됨
     usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST,
-    dimension: '3d',
+    dimension: "3d",
   });
+
+  const rgba = new Uint8Array(voxelData.length * 4);
+  for (let i = 0; i < voxelData.length; i++) {
+    const v = Math.min(Math.max(voxelData[i], 0), 1);
+    const byte = Math.floor(v * 255);
+    rgba.set([byte, byte, byte, 255], i * 4);
+  }
 
   device.queue.writeTexture(
     { texture },
-    voxelData,
-    { bytesPerRow: dims[0] * 4, rowsPerImage: dims[1] },
+    rgba,
+    {
+      bytesPerRow: dims[0] * 4, // 4 channels × 4 bytes (Float32)
+      rowsPerImage: dims[1],
+    },
     dims
   );
+
+  const tfParamBuffer = device.createBuffer({
+    size: 6 * 4, // 6 floats × 4 bytes
+    usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+  });
+
+  function updateTFParams() {
+    if (tfParamRef.current) {
+      const data = new Float32Array(tfParamRef.current);
+      device.queue.writeBuffer(tfParamBuffer, 0, data);
+    }
+  }
 
   // let cameraTheta = Math.PI / 2;
   // let cameraPhi = Math.PI / 2;
@@ -51,13 +77,13 @@ export async function main(
   let lastX = 0;
   let lastY = 0;
 
-  canvas.addEventListener('mousedown', (e) => {
+  canvas.addEventListener("mousedown", (e) => {
     dragging = true;
     lastX = e.clientX;
     lastY = e.clientY;
   });
-  canvas.addEventListener('mouseup', () => dragging = false);
-  canvas.addEventListener('mousemove', (e) => {
+  canvas.addEventListener("mouseup", () => (dragging = false));
+  canvas.addEventListener("mousemove", (e) => {
     if (!dragging) return;
     const dx = e.clientX - lastX;
     const dy = e.clientY - lastY;
@@ -75,18 +101,46 @@ export async function main(
 
     quat.multiply(cameraQuat, yaw, cameraQuat);
     quat.multiply(cameraQuat, pitch, cameraQuat);
-
   });
-  canvas.addEventListener('wheel', (e) => {
-    if (canvas.matches(':hover')) {
-      e.preventDefault();
-      cameraRadius *= 1 + e.deltaY * 0.001;
-      cameraRadius = Math.max(0.1, Math.min(10.0, cameraRadius));
-    }
-  }, { passive: false });
+  canvas.addEventListener(
+    "wheel",
+    (e) => {
+      if (canvas.matches(":hover")) {
+        e.preventDefault();
+        cameraRadius *= 1 + e.deltaY * 0.001;
+        cameraRadius = Math.max(0.1, Math.min(10.0, cameraRadius));
+      }
+    },
+    { passive: false }
+  );
 
-  const volumeRenderer = new VolumeRenderer(device, texture, dims, canvas);
-  // const surfaceRenderer = new SurfaceRenderer(device, voxelData, dims, canvas);
+  const singleRayMarchingRenderer = new SingleRayMarchingRenderer(
+    device,
+    texture,
+    dims,
+    canvas,
+    tfParamBuffer
+  );
+  const multiRayMarchingRenderer = new MultiRayMarchingRenderer(
+    device,
+    texture,
+    dims,
+    canvas,
+    tfParamBuffer
+  );
+  const multiRayCastingRenderer = new MultiRayCastingRenderer(
+    device,
+    texture,
+    dims,
+    canvas,
+    tfParamBuffer
+  );
+  const marchingCubeRenderer = new MarchingCubeRenderer(
+    device,
+    voxelData,
+    dims,
+    canvas
+  );
   const sliceRenderer = new SliceRenderer(device, texture, dims, canvas);
   const boxRingRenderer = new BoxRingRenderer(device, dims, canvas);
   const gizmoRenderer = new GizmoRenderer(device, canvas);
@@ -110,7 +164,12 @@ export async function main(
 
     const forward = vec3.transformQuat(vec3.create(), [0, 0, -1], cameraQuat);
     const up = vec3.transformQuat(vec3.create(), [0, 1, 0], cameraQuat);
-    const eye = vec3.scaleAndAdd(vec3.create(), cameraTarget, forward, -cameraRadius);
+    const eye = vec3.scaleAndAdd(
+      vec3.create(),
+      cameraTarget,
+      forward,
+      -cameraRadius
+    );
 
     const view = mat4.lookAt(mat4.create(), eye, cameraTarget, up);
     const viewProj = mat4.multiply(mat4.create(), proj, view);
@@ -119,21 +178,33 @@ export async function main(
 
     const encoder = device.createCommandEncoder();
     const pass = encoder.beginRenderPass({
-      colorAttachments: [{
-        view: context.getCurrentTexture().createView(),
-        loadOp: 'clear',
-        storeOp: 'store',
-        clearValue: { r: 0, g: 0, b: 0, a: 1 },
-      }]
+      colorAttachments: [
+        {
+          view: context.getCurrentTexture().createView(),
+          loadOp: "clear",
+          storeOp: "store",
+          clearValue: { r: 0, g: 0, b: 0, a: 1 },
+        },
+      ],
     });
 
-    volumeRenderer.update(invViewProj, invAffine);
-    volumeRenderer.draw(pass);
+    updateTFParams();
 
     const mvp = mat4.multiply(mat4.create(), proj, view);
 
-    // surfaceRenderer.update(mvp, eye);
-    // surfaceRenderer.draw(pass);
+    if (renderingModeRef.current == "single_rayMarching") {
+      singleRayMarchingRenderer.update(invViewProj, invAffine);
+      singleRayMarchingRenderer.draw(pass);
+    } else if (renderingModeRef.current == "multi_rayMarching") {
+      multiRayMarchingRenderer.update(invViewProj, invAffine);
+      multiRayMarchingRenderer.draw(pass);
+    } else if (renderingModeRef.current == "multi_rayCasting") {
+      multiRayCastingRenderer.update(invViewProj, invAffine);
+      multiRayCastingRenderer.draw(pass);
+    } else if (renderingModeRef.current == "marchingCube") {
+      marchingCubeRenderer.update(mvp, eye);
+      marchingCubeRenderer.draw(pass);
+    }
 
     boxRingRenderer.update(sliceCentersRef.current, mvp);
     boxRingRenderer.draw(pass);

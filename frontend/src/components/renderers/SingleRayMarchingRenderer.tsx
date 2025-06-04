@@ -1,4 +1,4 @@
-import { mat4 } from 'gl-matrix';
+import { mat4 } from "gl-matrix";
 
 const volumeShaderCode = `
 struct Uniforms {
@@ -13,25 +13,36 @@ struct VertexOut {
   @location(1) rayDir : vec3<f32>,
 };
 
+struct TFParams {
+  dMin1: f32,
+  dMax1: f32,
+  dMin2: f32,
+  dMax2: f32,
+  alpha1: f32,
+  alpha2: f32,
+};
+
 @group(0) @binding(0) var<uniform> uniforms : Uniforms;
 @group(0) @binding(1) var volume : texture_3d<f32>;
+@group(0) @binding(2) var volumeSampler : sampler;
+@group(0) @binding(3) var<uniform> tf : TFParams;
 
 @vertex
 fn vsMain(@builtin(vertex_index) idx : u32) -> VertexOut {
   var pos = array<vec2<f32>, 6>(
-    vec2<f32>(-1.0, -1.0), vec2<f32>(1.0, -1.0), vec2<f32>(-1.0, 1.0),
-    vec2<f32>(-1.0, 1.0), vec2<f32>(1.0, -1.0), vec2<f32>(1.0, 1.0)
+    vec2f(-1.0, -1.0), vec2f(1.0, -1.0), vec2f(-1.0, 1.0),
+    vec2f(-1.0, 1.0), vec2f(1.0, -1.0), vec2f(1.0, 1.0)
   );
 
   let uv = pos[idx];
-  let near = vec4<f32>(uv, 0.0, 1.0);
-  let far = vec4<f32>(uv, 1.0, 1.0);
+  let near = vec4f(uv, 0.0, 1.0);
+  let far = vec4f(uv, 1.0, 1.0);
 
   let worldNear = (uniforms.invViewProj * near).xyz / (uniforms.invViewProj * near).w;
   let worldFar = (uniforms.invViewProj * far).xyz / (uniforms.invViewProj * far).w;
 
-  var out : VertexOut;
-  out.position = vec4<f32>(uv, 0.0, 1.0);
+  var out: VertexOut;
+  out.position = vec4f(uv, 0.0, 1.0);
   out.rayOrigin = worldNear;
   out.rayDir = normalize(worldFar - worldNear);
   return out;
@@ -75,9 +86,10 @@ fn fsMain(in: VertexOut) -> @location(0) vec4<f32> {
 
   return vec4f(sum, sum, sum, 1.0);
 }
+
 `;
 
-export class VolumeRenderer {
+export class SingleRayMarchingRenderer {
   private device: GPUDevice;
   private pipeline: GPURenderPipeline;
   private bindGroup: GPUBindGroup;
@@ -86,7 +98,13 @@ export class VolumeRenderer {
   private dims: [number, number, number];
   private canvas: HTMLCanvasElement;
 
-  constructor(device: GPUDevice, volumeTexture: GPUTexture, dims: [number, number, number], canvas: HTMLCanvasElement) {
+  constructor(
+    device: GPUDevice,
+    volumeTexture: GPUTexture,
+    dims: [number, number, number],
+    canvas: HTMLCanvasElement,
+    tfParamBuffer: GPUBuffer
+  ) {
     this.device = device;
     this.dims = dims;
     this.textureView = volumeTexture.createView();
@@ -102,16 +120,44 @@ export class VolumeRenderer {
 
     const bindGroupLayout = device.createBindGroupLayout({
       entries: [
-        { binding: 0, visibility: GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT, buffer: {} },
-        { binding: 1, visibility: GPUShaderStage.FRAGMENT, texture: { viewDimension: '3d', sampleType: 'unfilterable-float' } },
+        {
+          binding: 0,
+          visibility: GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT,
+          buffer: {},
+        },
+        {
+          binding: 1,
+          visibility: GPUShaderStage.FRAGMENT,
+          texture: { viewDimension: "3d", sampleType: "float" },
+        },
+        {
+          binding: 2,
+          visibility: GPUShaderStage.FRAGMENT,
+          sampler: { type: "filtering" },
+        },
+        { binding: 3, visibility: GPUShaderStage.FRAGMENT, buffer: {} },
       ],
     });
 
+    const sampler = device.createSampler({
+      magFilter: "linear",
+      minFilter: "linear",
+      addressModeU: "clamp-to-edge",
+      addressModeV: "clamp-to-edge",
+      addressModeW: "clamp-to-edge",
+    });
+
     this.pipeline = device.createRenderPipeline({
-      layout: device.createPipelineLayout({ bindGroupLayouts: [bindGroupLayout] }),
-      vertex: { module: shaderModule, entryPoint: 'vsMain' },
-      fragment: { module: shaderModule, entryPoint: 'fsMain', targets: [{ format: navigator.gpu.getPreferredCanvasFormat() }] },
-      primitive: { topology: 'triangle-list' },
+      layout: device.createPipelineLayout({
+        bindGroupLayouts: [bindGroupLayout],
+      }),
+      vertex: { module: shaderModule, entryPoint: "vsMain" },
+      fragment: {
+        module: shaderModule,
+        entryPoint: "fsMain",
+        targets: [{ format: navigator.gpu.getPreferredCanvasFormat() }],
+      },
+      primitive: { topology: "triangle-list" },
     });
 
     this.bindGroup = device.createBindGroup({
@@ -119,6 +165,8 @@ export class VolumeRenderer {
       entries: [
         { binding: 0, resource: { buffer: this.uniformBuffer } },
         { binding: 1, resource: this.textureView },
+        { binding: 2, resource: sampler },
+        { binding: 3, resource: { buffer: tfParamBuffer } },
       ],
     });
   }
@@ -134,7 +182,14 @@ export class VolumeRenderer {
   draw(pass: GPURenderPassEncoder) {
     pass.setPipeline(this.pipeline);
     pass.setBindGroup(0, this.bindGroup);
-    pass.setViewport(0, 0, this.canvas.width/3*2, this.canvas.height, 0, 1);
+    pass.setViewport(
+      0,
+      0,
+      (this.canvas.width / 3) * 2,
+      this.canvas.height,
+      0,
+      1
+    );
     pass.draw(6, 1, 0, 0);
   }
 }
