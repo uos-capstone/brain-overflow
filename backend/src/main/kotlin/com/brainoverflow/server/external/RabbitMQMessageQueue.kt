@@ -10,7 +10,7 @@ class RabbitMQMessageQueue(
     private val rabbitTemplate: RabbitTemplate,
 ) : MessageQueue {
     override fun sendMessage(message: Message) {
-        rabbitTemplate.convertAndSend("AlzheimerAiService", message)
+        rabbitTemplate.convertAndSend(message.channel, "", message.message)
     }
 
     override fun sendMessage(

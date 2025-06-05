@@ -8,10 +8,13 @@ import com.brainoverflow.server.external.dto.request.chat.CreateRoomDto
 import com.brainoverflow.server.external.dto.response.chat.ChatRoomDto
 import com.brainoverflow.server.external.dto.response.chat.ChatUserData
 import com.brainoverflow.server.external.dto.response.chat.SocketMessageResponse
+import com.brainoverflow.server.external.ws.StompSessionInterceptor.Companion.ROOM_USERS_KEY
 import com.brainoverflow.server.service.UserService
+import io.lettuce.core.RedisClient
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
+import org.springframework.data.redis.core.StringRedisTemplate
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -24,6 +27,7 @@ class ChatRoomService(
     private val chatRoomUserRepository: ChatRoomUserRepository,
     private val userService: UserService,
     private val chatMessageRepository: ChatMessageRepository,
+    private val redis: StringRedisTemplate,
 ) {
     @Transactional
     fun create(
@@ -35,6 +39,8 @@ class ChatRoomService(
         chatRoomRepository.save(chatRoom)
 
         val roomUser = ChatRoomUser(chatRoom = chatRoom, user = user)
+        redis.opsForSet()
+            .add(ROOM_USERS_KEY.format(chatRoom.id), userId.toString())
         val newRoom = chatRoomUserRepository.save(roomUser)
         return newRoom.id
     }
