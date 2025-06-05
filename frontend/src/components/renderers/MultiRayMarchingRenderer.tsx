@@ -1,6 +1,6 @@
 import { mat4 } from "gl-matrix";
 
-const volumeShaderCode = `
+const volumeShaderCode = /*wgsl*/ `
 struct Uniforms {
   invAffine : mat4x4<f32>,
   invViewProj : mat4x4<f32>,
@@ -70,7 +70,6 @@ fn fsMain(in: VertexOut) -> @location(0) vec4<f32> {
   var t = 0.0;
   var accum = vec4f(0.0);
 
-  // ✅ 조명 벡터 정의
   let lightDir = normalize(vec3f(1.0, 1.0, 1.0));
   let viewDir = normalize(-in.rayDir);
 
@@ -86,7 +85,6 @@ fn fsMain(in: VertexOut) -> @location(0) vec4<f32> {
       let texCoord = voxelPos;
       let d = textureSampleLevel(volume, volumeSampler, texCoord, 0.0).r;
 
-      // ✅ gradient 계산
       let eps = vec3f(1.0) / uniforms.volumeDims;
       let dx = textureSampleLevel(volume, volumeSampler, texCoord + vec3f(eps.x, 0.0, 0.0), 0.0).r -
                textureSampleLevel(volume, volumeSampler, texCoord - vec3f(eps.x, 0.0, 0.0), 0.0).r;
@@ -98,16 +96,15 @@ fn fsMain(in: VertexOut) -> @location(0) vec4<f32> {
 
       var sample = transferFunction(d);
 
-// 조명 계산
-let lambert = max(dot(normal, lightDir), 0.0);
-let halfVec = normalize(lightDir + viewDir);
-let specular = pow(max(dot(normal, halfVec), 0.0), 128.0);
-let lighting = 0.8 + 2.0 * lambert + 10.0 * specular;
+      // let lambert = max(dot(normal, lightDir), 0.0);
+      // let halfVec = normalize(lightDir + viewDir);
+      // // let specular = pow(max(dot(normal, halfVec), 0.0), 128.0);
+      // let lighting = 0.8 + 2.0 * lambert + 10.0 * specular;
 
-// sample.color에 lighting 곱하기 (새로 만들어야 함!)
-sample = vec4f(sample.rgb * lighting*8, sample.a);
+      // sample = vec4f(sample.rgb * lighting, sample.a);
 
-      // ✅ front-to-back compositing
+      sample = vec4f(sample.rgb, sample.a);
+
       let oneMinusAlpha = 1.0 - accum.a;
       accum = vec4f(
         accum.rgb + sample.rgb * sample.a * oneMinusAlpha,
@@ -118,7 +115,7 @@ sample = vec4f(sample.rgb * lighting*8, sample.a);
     t += stepSize;
   }
 
-  return vec4f(accum.rgb, 1.0);
+  return vec4f(accum.rgb * 10, 1.0);
 }
 
 `;

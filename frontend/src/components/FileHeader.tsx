@@ -4,12 +4,19 @@ import { HTML5Backend } from "react-dnd-html5-backend";
 
 const ItemType = "TAB";
 
+interface MriResult {
+  mriResultId: number;
+  targetAge: number;
+  resultFile: File;
+}
+
 export interface NiiFile {
   name: string;
   active: boolean;
   file: File;
   age: number;
   fromRemote?: boolean;
+  results?: MriResult[];
 }
 
 interface TabProps {
@@ -64,9 +71,9 @@ const Tab: React.FC<TabProps> = ({
     >
       <span className="mr-2 text-pink-400">🧠</span>
       {file.name}
-      {file.fromRemote && (
+      {/* {file.fromRemote && (
         <span className="ml-1 text-xs text-blue-400">(remote)</span>
-      )}
+      )} */}
       <span
         className="ml-2 text-gray-400 hover:text-red-400 cursor-pointer"
         onClick={(e) => {
@@ -103,21 +110,15 @@ const loadRemoteFiles = async (
     const loadedFiles: NiiFile[] = [];
 
     for (const item of json.data) {
+      // ✅ 1. 원본 MRI 파일 처리
       const fileRes = await fetch(
-        "https://api-brain-overflow.unknownpgr.com/uploads/" + item.filePath,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+        "https://api-brain-overflow.unknownpgr.com/uploads/" + item.filePath
       );
       const blob = await fileRes.blob();
-      const filename = item.mriId.split("/").pop() || "remote.nii";
+      const filename = item.mriId + ".nii";
       const file = new File([blob], filename, {
         type: "application/octet-stream",
       });
-
-      console.log(file);
 
       loadedFiles.push({
         name: filename,
@@ -126,6 +127,33 @@ const loadRemoteFiles = async (
         age: 0,
         fromRemote: true,
       });
+
+      for (const resultDto of item.mriResultDtoList || []) {
+        const resultFileRes = await fetch(
+          "https://api-brain-overflow.unknownpgr.com/uploads/" +
+            resultDto.resultFilePath,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        const resultBlob = await resultFileRes.blob();
+        const resultFile = new File(
+          [resultBlob],
+          `result-${resultDto.mriResultId}.nii`,
+          { type: "application/octet-stream" }
+        );
+
+        loadedFiles.push({
+          name: `result-${resultDto.mriResultId}.nii`,
+          file: resultFile,
+          active: false,
+          age: resultDto.targetAge ?? 0,
+          fromRemote: true,
+        });
+      }
     }
 
     setFiles((prev) => {
