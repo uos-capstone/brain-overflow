@@ -24,7 +24,7 @@ export interface ServerChatMessage {
 }
 export function connectStomp(
   token: string,
-  // userId: string,
+  userId: string,
   onConnect: () => void,
   onError: (error: string | Frame) => void
 ) {
@@ -47,6 +47,8 @@ export function connectStomp(
       //         const { userId: uid, message } = JSON.parse(msg.body);
       //         console.log(`[AI] ${uid}: ${message}`);
       // });
+
+      console.log(userId);
 
       stompClient?.subscribe(`/user/queue/chat`, (msg: StompMessage) => {
         try {
