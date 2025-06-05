@@ -24,7 +24,7 @@ export interface ServerChatMessage {
 }
 export function connectStomp(
   token: string,
-  userId: string,
+  // userId: string,
   onConnect: () => void,
   onError: (error: string | Frame) => void
 ) {
