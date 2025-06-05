@@ -20,8 +20,8 @@ class StompSessionInterceptor(
     private val chatRoomService: ChatRoomService, // DB에서 방 조회용
 ) : ChannelInterceptor {
     companion object {
-        private const val USER_SERVER_KEY = "ws:user:%s"
-        private const val ROOM_USERS_KEY = "room:%s:users"
+        const val USER_SERVER_KEY = "ws:user:%s"
+        const val ROOM_USERS_KEY = "room:%s:users"
         private val log = LoggerFactory.getLogger(StompSessionInterceptor::class.java)
     }
 
