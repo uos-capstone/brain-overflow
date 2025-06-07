@@ -6,6 +6,7 @@ interface NiiFile {
   active: boolean;
   file: File;
   age: number;
+  cognitiveStatus: string;
 }
 
 interface FileUploadProps {
@@ -18,7 +19,9 @@ const FileUpload: React.FC<FileUploadProps> = ({ setFiles }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [temporaryFiles, setTemporaryFiles] = useState<NiiFile[]>([]);
   const [sex, setSex] = useState("male");
-  const [cognitiveStatus, setCognitiveStatus] = useState("Alzheimer's Disease");
+  const [targetCognitiveStatus, setTargetCognitiveStatus] = useState(
+    "Alzheimer's Disease"
+  );
   const [targetAge, setTargetAge] = useState(70);
   const inputRef = useRef<HTMLInputElement | null>(null);
 
@@ -28,9 +31,13 @@ const FileUpload: React.FC<FileUploadProps> = ({ setFiles }) => {
     e.preventDefault();
     setIsDragging(false);
     const droppedFiles = Array.from(e.dataTransfer.files);
-    const niiFiles: NiiFile[] = droppedFiles
-      .filter(isNiiFile)
-      .map((file) => ({ name: file.name, active: false, file, age: 0 }));
+    const niiFiles: NiiFile[] = droppedFiles.filter(isNiiFile).map((file) => ({
+      name: file.name,
+      active: false,
+      file,
+      age: 0,
+      cognitiveStatus: "Alzheimer's Disease",
+    }));
     if (niiFiles.length === 0) {
       alert("Only .nii files are allowed.");
       return;
@@ -40,9 +47,13 @@ const FileUpload: React.FC<FileUploadProps> = ({ setFiles }) => {
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     const selectedFiles = Array.from(e.target.files || []);
-    const niiFiles: NiiFile[] = selectedFiles
-      .filter(isNiiFile)
-      .map((file) => ({ name: file.name, active: false, file, age: 0 }));
+    const niiFiles: NiiFile[] = selectedFiles.filter(isNiiFile).map((file) => ({
+      name: file.name,
+      active: false,
+      file,
+      age: 0,
+      cognitiveStatus: "Alzheimer's Disease",
+    }));
     if (niiFiles.length === 0) {
       alert("Only .nii files are allowed.");
     } else {
@@ -57,6 +68,20 @@ const FileUpload: React.FC<FileUploadProps> = ({ setFiles }) => {
     );
   };
 
+  const handleCognitiveStatusChange = (index: number, value: string) => {
+    setTemporaryFiles((prev) =>
+      prev.map((file, i) =>
+        i === index ? { ...file, cognitiveStatus: value } : file
+      )
+    );
+  };
+
+  const cognitiveStatusMap: Record<string, string> = {
+    "Alzheimer's Disease": "AD",
+    "Mild Cognitive Impairment": "MCI",
+    "Cognitively Normal": "CN",
+  };
+
   const handleGenerate = async () => {
     const token = localStorage.getItem("accessToken");
 
@@ -66,6 +91,10 @@ const FileUpload: React.FC<FileUploadProps> = ({ setFiles }) => {
       formData.append("file", niiFile.file);
       formData.append("age", niiFile.age.toString());
       formData.append("gender", sex.toUpperCase());
+      formData.append(
+        "targetDiagnosis",
+        cognitiveStatusMap[niiFile.cognitiveStatus]
+      );
 
       try {
         const res = await fetch(
@@ -128,9 +157,8 @@ const FileUpload: React.FC<FileUploadProps> = ({ setFiles }) => {
   // const handleCompleteMRI = async () => {
   //   const token = localStorage.getItem("accessToken");
 
-  //   const mriImageId = "edb0b802-a2d8-46aa-a31a-16c54cfbf3e6";
-  //   const mriResultId = 12;
-  //   const targetAge = 70;
+  //   const mriImageId = "6786c5e3-02b2-4160-b6dc-49db7df24152";
+  //   const mriResultId = 14;
 
   //   const niiFile = temporaryFiles[0];
   //   if (!niiFile) {
@@ -198,7 +226,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ setFiles }) => {
               {temporaryFiles.map((file, idx) => (
                 <div
                   key={idx}
-                  className="grid grid-cols-[1fr_auto_auto] items-center gap-4 border-b border-gray-700 pb-2 text-sm text-gray-300"
+                  className="grid grid-cols-[1fr_auto_auto_auto] items-center gap-4 border-b border-gray-700 pb-2 text-sm text-gray-300"
                 >
                   <span className="truncate">{file.name}</span>
                   <input
@@ -211,6 +239,18 @@ const FileUpload: React.FC<FileUploadProps> = ({ setFiles }) => {
                     }
                     className="bg-[#2a2a2a] border border-gray-600 text-white rounded px-2 py-1 w-24 text-sm focus:outline-none focus:ring focus:ring-blue-500"
                   />
+                  <select
+                    value={file.cognitiveStatus}
+                    onClick={(e) => e.stopPropagation()}
+                    onChange={(e) =>
+                      handleCognitiveStatusChange(idx, e.target.value)
+                    }
+                    className="bg-[#2a2a2a] border border-gray-600 text-white rounded px-2 py-1 w-24 text-sm focus:outline-none focus:ring focus:ring-blue-500"
+                  >
+                    <option>Alzheimer's Disease</option>
+                    <option>Mild Cognitive Impairment</option>
+                    <option>Cognitively Normal</option>
+                  </select>
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
@@ -243,21 +283,6 @@ const FileUpload: React.FC<FileUploadProps> = ({ setFiles }) => {
 
           <div>
             <label className="block text-sm text-gray-300 mb-1">
-              Last Cognitive Status
-            </label>
-            <select
-              value={cognitiveStatus}
-              onChange={(e) => setCognitiveStatus(e.target.value)}
-              className="w-full bg-[#1e1e1e] border border-gray-700 rounded-md px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option>Alzheimer's Disease</option>
-              <option>Mild Cognitive Impairment</option>
-              <option>Cognitively Normal</option>
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-sm text-gray-300 mb-1">
               Target Age
             </label>
             <input
@@ -266,6 +291,21 @@ const FileUpload: React.FC<FileUploadProps> = ({ setFiles }) => {
               onChange={(e) => setTargetAge(Number(e.target.value))}
               className="w-full bg-[#1e1e1e] border border-gray-700 rounded-md px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
+          </div>
+
+          <div>
+            <label className="block text-sm text-gray-300 mb-1">
+              Target Cognitive Status
+            </label>
+            <select
+              value={targetCognitiveStatus}
+              onChange={(e) => setTargetCognitiveStatus(e.target.value)}
+              className="w-full bg-[#1e1e1e] border border-gray-700 rounded-md px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option>Alzheimer's Disease</option>
+              <option>Mild Cognitive Impairment</option>
+              <option>Cognitively Normal</option>
+            </select>
           </div>
         </div>
 
