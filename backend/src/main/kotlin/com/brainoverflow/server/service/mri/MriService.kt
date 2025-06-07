@@ -43,10 +43,12 @@ class MriService(
                 "AlzheimerAiQueue",
                 MriPredicateData(
                     mriResult.id!!,
+                    mriImage.id!!,
                     mriImage.filePath,
                     mriImage.age,
                     mriImage.gender,
                     targetAge,
+                    mriImage.targetDiagnosis
                 ),
             ),
         )
@@ -110,13 +112,14 @@ class MriService(
         userId: UUID,
         age: Int,
         gender: Gender,
+        targetDiagnosis: TargetDiagnosis,
     ): UUID {
         // 유저 조회
         val user = userService.getByUserId(userId)
         // 파일 저장
         val filePath = fileRepository.save(file)
         // 엔티티 저장
-        val mriImage = MriImage(user, filePath, age, gender)
+        val mriImage = MriImage(user, filePath, age, gender, targetDiagnosis)
         val imageSaved = mriImageRepository.save(mriImage)
         return imageSaved.id!!
     }

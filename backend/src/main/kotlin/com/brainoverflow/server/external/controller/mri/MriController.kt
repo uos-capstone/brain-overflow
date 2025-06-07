@@ -1,6 +1,7 @@
 package com.brainoverflow.server.external.controller.mri
 
 import com.brainoverflow.server.domain.mri.Gender
+import com.brainoverflow.server.domain.mri.TargetDiagnosis
 import com.brainoverflow.server.external.controller.response.ApiResponse
 import com.brainoverflow.server.external.dto.request.mri.MriResultDto
 import com.brainoverflow.server.external.dto.response.mri.MriImageDto
@@ -41,9 +42,16 @@ class MriController(
         @RequestPart("file") file: MultipartFile,
         @RequestParam age: Int,
         @RequestParam gender: Gender,
+        @RequestParam targetDiagnosis: TargetDiagnosis
     ): ApiResponse<UUID> {
         val mriUUID =
-            mriService.registerMRIImage(file, UUID.fromString(user.username), age, gender)
+            mriService.registerMRIImage(
+                file,
+                UUID.fromString(user.username),
+                age,
+                gender,
+                targetDiagnosis
+            )
         return ApiResponse.success(mriUUID)
     }
 

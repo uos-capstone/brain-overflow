@@ -10,6 +10,7 @@ class MriImage(
     filePath: String,
     age: Int,
     gender: Gender,
+    targetDiagnosis: TargetDiagnosis
 ) {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -25,4 +26,6 @@ class MriImage(
 
     @OneToMany(mappedBy = "mriImage")
     val mriResults: List<MriResult> = listOf()
+
+    val targetDiagnosis: TargetDiagnosis = targetDiagnosis
 }
