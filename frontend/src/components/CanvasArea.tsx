@@ -2,13 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import * as nifti from "nifti-reader-js";
 import { main } from "./MRIRender";
 import { getGPUDevice } from "./GPUDevice";
-
-interface NiiFile {
-  name: string;
-  active: boolean;
-  file: File;
-  age: number;
-}
+import { NiiFile } from "../util/type";
 
 interface CanvasAreaProps {
   activeFile: NiiFile | null;

@@ -1,18 +1,6 @@
 import React, { useRef, useState, DragEvent, ChangeEvent } from "react";
 import { useNavigate } from "react-router-dom";
-
-interface NiiFile {
-  name: string;
-  active: boolean;
-  file: File;
-  age: number;
-  cognitiveStatus: string;
-}
-
-interface FileUploadProps {
-  files: NiiFile[];
-  setFiles: React.Dispatch<React.SetStateAction<NiiFile[]>>;
-}
+import { NiiFile, FileUploadProps } from "../util/type";
 
 const FileUpload: React.FC<FileUploadProps> = ({ setFiles }) => {
   const navigate = useNavigate();
@@ -36,7 +24,6 @@ const FileUpload: React.FC<FileUploadProps> = ({ setFiles }) => {
       active: false,
       file,
       age: 0,
-      cognitiveStatus: "Alzheimer's Disease",
     }));
     if (niiFiles.length === 0) {
       alert("Only .nii files are allowed.");
@@ -52,7 +39,6 @@ const FileUpload: React.FC<FileUploadProps> = ({ setFiles }) => {
       active: false,
       file,
       age: 0,
-      cognitiveStatus: "Alzheimer's Disease",
     }));
     if (niiFiles.length === 0) {
       alert("Only .nii files are allowed.");
@@ -68,13 +54,13 @@ const FileUpload: React.FC<FileUploadProps> = ({ setFiles }) => {
     );
   };
 
-  const handleCognitiveStatusChange = (index: number, value: string) => {
-    setTemporaryFiles((prev) =>
-      prev.map((file, i) =>
-        i === index ? { ...file, cognitiveStatus: value } : file
-      )
-    );
-  };
+  // const handleCognitiveStatusChange = (index: number, value: string) => {
+  //   setTemporaryFiles((prev) =>
+  //     prev.map((file, i) =>
+  //       i === index ? { ...file, cognitiveStatus: value } : file
+  //     )
+  //   );
+  // };
 
   const cognitiveStatusMap: Record<string, string> = {
     "Alzheimer's Disease": "AD",
@@ -93,7 +79,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ setFiles }) => {
       formData.append("gender", sex.toUpperCase());
       formData.append(
         "targetDiagnosis",
-        cognitiveStatusMap[niiFile.cognitiveStatus]
+        cognitiveStatusMap[targetCognitiveStatus]
       );
 
       try {
@@ -157,8 +143,8 @@ const FileUpload: React.FC<FileUploadProps> = ({ setFiles }) => {
   // const handleCompleteMRI = async () => {
   //   const token = localStorage.getItem("accessToken");
 
-  //   const mriImageId = "6786c5e3-02b2-4160-b6dc-49db7df24152";
-  //   const mriResultId = 14;
+  //   const mriImageId = "0d943a7b-4a52-461d-8c10-b9a2599a9ea5";
+  //   const mriResultId = 73;
 
   //   const niiFile = temporaryFiles[0];
   //   if (!niiFile) {
@@ -239,7 +225,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ setFiles }) => {
                     }
                     className="bg-[#2a2a2a] border border-gray-600 text-white rounded px-2 py-1 w-24 text-sm focus:outline-none focus:ring focus:ring-blue-500"
                   />
-                  <select
+                  {/* <select
                     value={file.cognitiveStatus}
                     onClick={(e) => e.stopPropagation()}
                     onChange={(e) =>
@@ -250,7 +236,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ setFiles }) => {
                     <option>Alzheimer's Disease</option>
                     <option>Mild Cognitive Impairment</option>
                     <option>Cognitively Normal</option>
-                  </select>
+                  </select> */}
                   <button
                     onClick={(e) => {
                       e.stopPropagation();

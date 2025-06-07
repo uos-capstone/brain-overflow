@@ -1,18 +1,12 @@
-import React, { useState } from 'react';
-import { DndProvider } from 'react-dnd';
-import { HTML5Backend } from 'react-dnd-html5-backend';
-import Sidebar from './Sidebar';
-import TopBanner from './TopBanner';
-import FileUpload from './FileUpload';
+import React, { useState } from "react";
+import { DndProvider } from "react-dnd";
+import { HTML5Backend } from "react-dnd-html5-backend";
+import Sidebar from "./Sidebar";
+import TopBanner from "./TopBanner";
+import FileUpload from "./FileUpload";
 // import FileHeader from './FileHeader';
 // import CanvasArea from './CanvasArea';
-
-export interface NiiFile {
-  name: string;
-  active: boolean;
-  file: File;
-  age: number;
-}
+import { NiiFile } from "../util/type";
 
 const MainPage: React.FC = () => {
   const [files, setFiles] = useState<NiiFile[]>([]);

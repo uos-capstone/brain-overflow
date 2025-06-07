@@ -4,13 +4,7 @@ import { HTML5Backend } from "react-dnd-html5-backend";
 import Sidebar from "./Sidebar";
 import FileHeader from "./FileHeader";
 import CanvasArea from "./CanvasArea";
-
-export interface NiiFile {
-  name: string;
-  active: boolean;
-  file: File;
-  age: number;
-}
+import { NiiFile } from "../util/type";
 
 const ViewerPage: React.FC = () => {
   const [files, setFiles] = useState<NiiFile[]>([]);
@@ -29,6 +23,7 @@ const ViewerPage: React.FC = () => {
             active: true,
             file: file,
             age: 0,
+            cognitiveStatus: "AD",
           },
         ];
       });

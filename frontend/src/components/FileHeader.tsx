@@ -1,23 +1,9 @@
 import React, { useEffect, useRef } from "react";
 import { DndProvider, useDrag, useDrop } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
+import { NiiFile } from "../util/type";
 
 const ItemType = "TAB";
-
-interface MriResult {
-  mriResultId: number;
-  targetAge: number;
-  resultFile: File;
-}
-
-export interface NiiFile {
-  name: string;
-  active: boolean;
-  file: File;
-  age: number;
-  fromRemote?: boolean;
-  results?: MriResult[];
-}
 
 interface TabProps {
   file: NiiFile;
