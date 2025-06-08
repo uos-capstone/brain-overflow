@@ -42,11 +42,11 @@ vae_params:
 vqvae_params:
   im_channels: 1
   z_channels: 32
-  codebook_size : 1024
-  down_channels : [32, 64, 128]
-  mid_channels : [128, 128]
-  down_sample : [True, True]
-  attn_down : [False, False]
+  codebook_size : 4096
+  down_channels : [32, 64, 128, 256]
+  mid_channels : [256, 256]
+  down_sample : [True, True, False]
+  attn_down : [False, False, False]
   norm_channels: 32
   num_heads: 4
   num_down_layers : 2
@@ -56,41 +56,41 @@ vqvae_params:
 train_params:
   seed: 1111
   task_name: 'adni'
-  ldm_batch_size: 4
-  controlnet_batch_size: 6
+  ldm_batch_size: 1
+  controlnet_batch_size: 1
   vae_batch_size: 1
   vqvae_batch_size: 1
   disc_step_start: 0
   disc_weight: 0.1
-  codebook_weight: 1.0
-  commitment_beta: 0.25
-  perceptual_weight: 2.0
+  codebook_weight: 2.0
+  commitment_beta: 0.5
+  perceptual_weight: 1.0
   kl_weight: 0.0001
   ldm_epochs: 3000
   controlnet_epochs: 3000
   vae_epochs: 20
-  vqvae_epochs: 3000
+  vqvae_epochs: 100
   num_samples : 1
   num_grid_rows : 1
-  num_workers: 2
+  num_workers: 8
   ldm_lr: 0.000005
   controlnet_lr: 0.000005
   controlnet_lr_steps : [10]
-  vae_lr: 0.00003
-  vae_acc_steps: 6
+  vae_lr: 0.0001
+  vae_acc_steps: 4
   vae_image_save_steps: 256
   save_latents: False
   vae_latent_dir_name: 'vae_latents'
   vqvae_latent_dir_name: 'vqvae_latents'
-  ldm_ckpt_name: '/DataRead2/chsong/checkpoints/ldm_checkpoint_12.pth'
-  ldm_best_ckpt_name: '/DataRead2/chsong/checkpoints/ldm_best_checkpoint_12.pth'
+  ldm_ckpt_name: 'checkpoints/ldm_checkpoint.pth'
+  ldm_best_ckpt_name: 'checkpoints/ldm_best_checkpoint.pth'
   vae_autoencoder_ckpt_name: 'vae_autoencoder_ckpt.pth'
-  vqvae_autoencoder_ckpt_name: '/DataRead2/chsong/checkpoints/vqvae_autoencoder_ckpt_13.pth'
-  vae_discriminator_ckpt_name: 'vae_discriminator_ckpt.pth'
-  vqvae_discriminator_ckpt_name: '/DataRead2/chsong/checkpoints/vqvae_discriminator_ckpt_13.pth'
   vqvae_best_ckpt_name: '/DataRead2/chsong/checkpoints/vqvae_best_checkpoint_2.pth'
-  controlnet_ckpt_name: '/DataRead2/chsong/checkpoints/controlnet_ckpt_2.pth'
-  controlnet_best_ckpt_name: '/DataRead2/chsong/checkpoints/controlnet_best_ckpt_2.pth'
+  vqvae_autoencoder_ckpt_name: 'checkpoints/vqvae_best_checkpoint_2.pth'
+  vae_discriminator_ckpt_name: 'vae_discriminator_ckpt.pth'
+  vqvae_discriminator_ckpt_name: 'checkpoints/vqvae_discriminator_ckpt_2.pth'
+  controlnet_ckpt_name: 'checkpoints/controlnet_ckpt.pth'
+  controlnet_best_ckpt_name: 'checkpoints/controlnet_best_ckpt.pth'
   dataset_csv: '/home/chsong/project/longitudinal/utils/dataset.csv'
   cache_dir: '/DataRead2/chsong/cache'
   cache_dir_B: '/DataRead2/chsong/cache_B'
@@ -98,6 +98,4 @@ train_params:
   meta_csv: '/home/chsong/project/longitudinal/adni/meta'
   A_csv: '/home/chsong/project/longitudinal/adni/meta/A.csv'
   B_csv: '/home/chsong/project/longitudinal/adni/meta/B.csv'
-  evaluate_controlnet_result_name: '/home/chsong/project/longitudinal/adni/samples/evaluate_controlnet_result'
-  evaluate_ldm_result_name: '/home/chsong/project/longitudinal/adni/samples/evaluate_ldm_result'
-  scale_factor: 1.963382601737976
+  evaluate_result_name: '/home/chsong/project/longitudinal/adni/samples/evaluate_result_2'
