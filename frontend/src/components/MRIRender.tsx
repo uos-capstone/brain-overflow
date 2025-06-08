@@ -77,6 +77,11 @@ export async function main(
   let lastX = 0;
   let lastY = 0;
 
+  affine[0] = 1;
+  affine[5] = 1;
+  affine[10] = 1;
+  affine[15] = 1;
+
   canvas.addEventListener("mousedown", (e) => {
     dragging = true;
     lastX = e.clientX;

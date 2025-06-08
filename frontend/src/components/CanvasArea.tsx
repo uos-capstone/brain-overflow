@@ -62,7 +62,50 @@ function CanvasArea({ activeFile }: CanvasAreaProps) {
         setSliceCenters([dims[2] / 2, dims[0] / 2, dims[1] / 2]);
 
         const imageData = nifti.readImage(header, fileBuffer);
-        const raw = new Int16Array(imageData);
+
+        let raw:
+          | Int8Array
+          | Uint8Array
+          | Int16Array
+          | Uint16Array
+          | Int32Array
+          | Uint32Array
+          | Float32Array
+          | Float64Array;
+
+        switch (header.datatypeCode) {
+          case 2:
+            raw = new Uint8Array(imageData);
+            break;
+          case 4:
+            raw = new Int16Array(imageData);
+            break;
+          case 8:
+            raw = new Int32Array(imageData);
+            break;
+          case 16:
+            raw = new Float32Array(imageData);
+            break;
+          case 64:
+            raw = new Float64Array(imageData);
+            break;
+          case 256:
+            raw = new Int8Array(imageData);
+            break;
+          case 512:
+            raw = new Uint16Array(imageData);
+            break;
+          case 768:
+            raw = new Uint32Array(imageData);
+            break;
+          default:
+            alert(
+              `Unsupported or unknown NIfTI datatypeCode: ${header.datatypeCode}`
+            );
+            return;
+        }
+
+        // console.log("datatype code:", header.datatypeCode);
 
         let min = Infinity;
         let max = -Infinity;
@@ -72,10 +115,14 @@ function CanvasArea({ activeFile }: CanvasAreaProps) {
           if (raw[i] > max) max = raw[i];
         }
 
+        // console.log(min, max);
+
         const voxel = new Float32Array(raw.length);
         for (let i = 0; i < raw.length; i++) {
           voxel[i] = (raw[i] - min) / (max - min);
         }
+
+        // console.log(voxel);
 
         const affine = new Float32Array((header as any).affine.flat());
 
