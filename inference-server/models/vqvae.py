@@ -1,11 +1,9 @@
 import torch
 import torch.nn as nn
 from models.blocks import DownBlock, MidBlock, UpBlock
-from models.ema_codebook import EMAQuantizer
 
 
 class VQVAE(nn.Module):
-    FREEZE_EPOCHS = 5
     def __init__(self, im_channels, model_config):
         super().__init__()
         self.down_channels = model_config['down_channels']
@@ -63,8 +61,7 @@ class VQVAE(nn.Module):
         self.pre_quant_conv = nn.Conv3d(self.z_channels, self.z_channels, kernel_size=1)
 
         # Codebook
-        # self.embedding = nn.Embedding(self.codebook_size, self.z_channels)
-        self.codebook = EMAQuantizer(self.z_channels, self.codebook_size, clip_val=4.0)
+        self.embedding = nn.Embedding(self.codebook_size, self.z_channels)
         ####################################################
 
         ##################### Decoder ######################
@@ -96,41 +93,40 @@ class VQVAE(nn.Module):
         self.decoder_norm_out = nn.GroupNorm(self.norm_channels, self.down_channels[0])
         self.decoder_conv_out = nn.Conv3d(self.down_channels[0], im_channels, kernel_size=3, padding=1)
 
+    def quantize(self, x):
+        B, C, D, H, W = x.shape
 
-    # def quantize(self, x):
-    #     B, C, D, H, W = x.shape
-    #
-    #     # B, C, D, H, W -> B, D, H, W, C
-    #     x = x.permute(0, 2, 3, 4, 1)
-    #
-    #     # B, H, W, C -> B, H*W, C
-    #     x = x.reshape(x.size(0), -1, x.size(-1))
-    #
-    #     # Find nearest embedding/codebook vector
-    #     # dist between (B, H*W, C) and (B, K, C) -> (B, H*W, K)
-    #     dist = torch.cdist(x, self.embedding.weight[None, :].repeat((x.size(0), 1, 1)))
-    #     # (B, H*W)
-    #     min_encoding_indices = torch.argmin(dist, dim=-1)
-    #
-    #     # Replace encoder output with nearest codebook
-    #     # quant_out -> B*H*W, C
-    #     quant_out = torch.index_select(self.embedding.weight, 0, min_encoding_indices.view(-1))
-    #
-    #     # x -> B*H*W, C
-    #     x = x.reshape((-1, x.size(-1)))
-    #     commmitment_loss = torch.mean((quant_out.detach() - x) ** 2)
-    #     codebook_loss = torch.mean((quant_out - x.detach()) ** 2)
-    #     quantize_losses = {
-    #         'codebook_loss': codebook_loss,
-    #         'commitment_loss': commmitment_loss
-    #     }
-    #     # Straight through estimation
-    #     quant_out = x + (quant_out - x).detach()
-    #
-    #     # quant_out -> B, C, D, H, W
-    #     quant_out = quant_out.reshape((B, D, H, W, C)).permute(0, 4, 1, 2, 3)
-    #     min_encoding_indices = min_encoding_indices.reshape((-1, quant_out.size(-2), quant_out.size(-1)))
-    #     return quant_out, quantize_losses, min_encoding_indices
+        # B, C, D, H, W -> B, D, H, W, C
+        x = x.permute(0, 2, 3, 4, 1)
+
+        # B, H, W, C -> B, H*W, C
+        x = x.reshape(x.size(0), -1, x.size(-1))
+
+        # Find nearest embedding/codebook vector
+        # dist between (B, H*W, C) and (B, K, C) -> (B, H*W, K)
+        dist = torch.cdist(x, self.embedding.weight[None, :].repeat((x.size(0), 1, 1)))
+        # (B, H*W)
+        min_encoding_indices = torch.argmin(dist, dim=-1)
+
+        # Replace encoder output with nearest codebook
+        # quant_out -> B*H*W, C
+        quant_out = torch.index_select(self.embedding.weight, 0, min_encoding_indices.view(-1))
+
+        # x -> B*H*W, C
+        x = x.reshape((-1, x.size(-1)))
+        commmitment_loss = torch.mean((quant_out.detach() - x) ** 2)
+        codebook_loss = torch.mean((quant_out - x.detach()) ** 2)
+        quantize_losses = {
+            'codebook_loss': codebook_loss,
+            'commitment_loss': commmitment_loss
+        }
+        # Straight through estimation
+        quant_out = x + (quant_out - x).detach()
+
+        # quant_out -> B, C, D, H, W
+        quant_out = quant_out.reshape((B, D, H, W, C)).permute(0, 4, 1, 2, 3)
+        min_encoding_indices = min_encoding_indices.reshape((-1, quant_out.size(-2), quant_out.size(-1)))
+        return quant_out, quantize_losses, min_encoding_indices
 
     def encode(self, x):
         out = self.encoder_conv_in(x)
@@ -142,11 +138,8 @@ class VQVAE(nn.Module):
         out = nn.SiLU()(out)
         out = self.encoder_conv_out(out)
         out = self.pre_quant_conv(out)
-        if self.training and getattr(self, 'current_epoch', 0) < self.FREEZE_EPOCHS:
-            out = out + 0.05 * torch.randn_like(out)
-        quant_out, quant_loss, indices = self.codebook(out)
-
-        return quant_out, quant_loss
+        out, quant_losses, _ = self.quantize(out)
+        return out, quant_losses
 
     def decode(self, z):
         out = z
@@ -160,12 +153,9 @@ class VQVAE(nn.Module):
         out = self.decoder_norm_out(out)
         out = nn.SiLU()(out)
         out = self.decoder_conv_out(out)
-        out = torch.tanh(out)
         return out
 
     def forward(self, x):
-        z_q, quant_losses = self.encode(x)
-        out = self.decode(z_q)
-        return out, z_q, quant_losses
-
-
+        z, quant_losses = self.encode(x)
+        out = self.decode(z)
+        return out, z, quant_losses
