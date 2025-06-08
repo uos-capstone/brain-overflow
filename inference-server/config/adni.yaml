@@ -85,10 +85,10 @@ train_params:
   ldm_ckpt_name: '/DataRead2/chsong/checkpoints/ldm_checkpoint_12.pth'
   ldm_best_ckpt_name: '/DataRead2/chsong/checkpoints/ldm_best_checkpoint_12.pth'
   vae_autoencoder_ckpt_name: 'vae_autoencoder_ckpt.pth'
-  vqvae_autoencoder_ckpt_name: '/DataRead2/chsong/checkpoints/vqvae_best_checkpoint_2.pth
+  vqvae_autoencoder_ckpt_name: '/DataRead2/chsong/checkpoints/vqvae_autoencoder_ckpt_13.pth'
   vae_discriminator_ckpt_name: 'vae_discriminator_ckpt.pth'
   vqvae_discriminator_ckpt_name: '/DataRead2/chsong/checkpoints/vqvae_discriminator_ckpt_13.pth'
-  vqvae_best_ckpt_name: '/DataRead2/chsong/checkpoints/vqvae_best_ckpt_13.pth'
+  vqvae_best_ckpt_name: '/DataRead2/chsong/checkpoints/vqvae_best_checkpoint_2.pth'
   controlnet_ckpt_name: '/DataRead2/chsong/checkpoints/controlnet_ckpt_2.pth'
   controlnet_best_ckpt_name: '/DataRead2/chsong/checkpoints/controlnet_best_ckpt_2.pth'
   dataset_csv: '/home/chsong/project/longitudinal/utils/dataset.csv'
