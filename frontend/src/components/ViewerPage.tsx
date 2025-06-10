@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import Sidebar from "./Sidebar";
 import FileHeader from "./FileHeader";
 import CanvasArea from "./CanvasArea";
-import { NiiFile } from "../util/type";
+import { useFileContext } from "../util/fileContext";
 
 const ViewerPage: React.FC = () => {
-  const [files, setFiles] = useState<NiiFile[]>([]);
+  const { files, setFiles } = useFileContext();
 
   useEffect(() => {
     async function loadExample() {
@@ -40,7 +40,7 @@ const ViewerPage: React.FC = () => {
       {/* Main content */}
       <main className="flex-1 px-0 py-0 overflow-y-auto">
         <div className="max-w-none">
-          <FileHeader files={files} setFiles={setFiles} />
+          <FileHeader />
           <CanvasArea activeFile={files.find((f) => f.active) || null} />
         </div>
       </main>

@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import { useDrag, useDrop } from "react-dnd";
 import { NiiFile } from "../util/type";
+import { useFileContext } from "../util/fileContext";
 
 const ItemType = "TAB";
 
@@ -15,6 +16,7 @@ interface TabProps {
 interface DragItem {
   index: number;
   type: string;
+  file: NiiFile;
 }
 
 const Tab: React.FC<TabProps> = ({
@@ -38,7 +40,7 @@ const Tab: React.FC<TabProps> = ({
 
   const [, drag] = useDrag<DragItem>({
     type: ItemType,
-    item: { index, type: ItemType },
+    item: { index, type: ItemType, file },
   });
 
   drag(drop(ref));
@@ -71,11 +73,6 @@ const Tab: React.FC<TabProps> = ({
     </div>
   );
 };
-
-interface FileHeaderProps {
-  files: NiiFile[];
-  setFiles: React.Dispatch<React.SetStateAction<NiiFile[]>>;
-}
 
 const loadRemoteFiles = async (
   setFiles: React.Dispatch<React.SetStateAction<NiiFile[]>>
@@ -153,7 +150,9 @@ const loadRemoteFiles = async (
   }
 };
 
-const FileHeader: React.FC<FileHeaderProps> = ({ files, setFiles }) => {
+const FileHeader: React.FC = () => {
+  const { files, setFiles } = useFileContext();
+
   useEffect(() => {
     loadRemoteFiles(setFiles);
   }, [setFiles]);

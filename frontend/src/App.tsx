@@ -14,6 +14,7 @@ import LoginPage from "./components/LoginPage";
 import SignUpPage from "./components/SignUpPage";
 import MainPage from "./components/MainPage";
 import ViewerPage from "./components/ViewerPage";
+import { FileProvider } from "./util/fileContext";
 
 function AnimatedRoutes({ isAuthenticated }: { isAuthenticated: boolean }) {
   const location = useLocation();
@@ -51,7 +52,9 @@ function AnimatedRoutes({ isAuthenticated }: { isAuthenticated: boolean }) {
             path="/viewer"
             element={
               <PageTransition>
-                <ViewerPage />
+                <FileProvider>
+                  <ViewerPage />
+                </FileProvider>
               </PageTransition>
             }
           />
