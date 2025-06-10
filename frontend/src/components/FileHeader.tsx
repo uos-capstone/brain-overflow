@@ -85,6 +85,10 @@ const loadRemoteFiles = async (
   setFiles: React.Dispatch<React.SetStateAction<NiiFile[]>>
 ) => {
   const token = localStorage.getItem("accessToken");
+  if (!token) {
+    console.error("Access token not found.");
+    return;
+  }
 
   try {
     const res = await fetch("https://api-brain-overflow.unknownpgr.com/mri", {
@@ -96,56 +100,53 @@ const loadRemoteFiles = async (
     const json = await res.json();
     if (!res.ok) throw new Error(json.message || "MRI 목록 조회 실패");
 
-    const loadedFiles: NiiFile[] = [];
+    // MRI 및 결과 파일을 모두 병렬 fetch하도록 Promise 배열 생성
+    const allFilePromises = json.data.flatMap((item: any) => {
+      const mriId = item.mriId;
 
-    for (const item of json.data) {
-      // ✅ 1. 원본 MRI 파일 처리
-      const fileRes = await fetch(
-        "https://api-brain-overflow.unknownpgr.com/uploads/" + item.filePath
-      );
-      const blob = await fileRes.blob();
-      const filename = item.mriId + ".nii";
-      const file = new File([blob], filename, {
-        type: "application/octet-stream",
-      });
+      const mriFilePromise = fetch(
+        `https://api-brain-overflow.unknownpgr.com/uploads/${item.filePath}`
+      )
+        .then((res) => res.blob())
+        .then((blob) => ({
+          name: `${mriId}.nii`,
+          file: new File([blob], `${mriId}.nii`, {
+            type: "application/octet-stream",
+          }),
+          active: false,
+          age: 0,
+          fromRemote: true,
+        }));
 
-      loadedFiles.push({
-        name: filename,
-        file,
-        active: false,
-        age: 0,
-        fromRemote: true,
-      });
-
-      for (const resultDto of item.mriResultDtoList || []) {
-        const resultFileRes = await fetch(
-          "https://api-brain-overflow.unknownpgr.com/uploads/" +
-            resultDto.resultFilePath,
+      const resultPromises = (item.mriResultDtoList || []).map((result: any) =>
+        fetch(
+          `https://api-brain-overflow.unknownpgr.com/uploads/${result.resultFilePath}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
             },
           }
-        );
+        )
+          .then((res) => res.blob())
+          .then((blob) => ({
+            name: `result-${result.mriResultId}.nii`,
+            file: new File([blob], `result-${result.mriResultId}.nii`, {
+              type: "application/octet-stream",
+            }),
+            active: false,
+            age: result.targetAge ?? 0,
+            fromRemote: true,
+            predictionStatus: result.mriPredictionStatus,
+          }))
+      );
 
-        const resultBlob = await resultFileRes.blob();
-        const resultFile = new File(
-          [resultBlob],
-          `result-${resultDto.mriResultId}.nii`,
-          { type: "application/octet-stream" }
-        );
+      return [mriFilePromise, ...resultPromises];
+    });
 
-        loadedFiles.push({
-          name: `result-${resultDto.mriResultId}.nii`,
-          file: resultFile,
-          active: false,
-          age: resultDto.targetAge ?? 0,
-          fromRemote: true,
-          predictionStatus: resultDto.mriPredictionStatus,
-        });
-      }
-    }
+    // 병렬 fetch 수행
+    const loadedFiles: NiiFile[] = await Promise.all(allFilePromises);
 
+    // 상태 업데이트
     setFiles((prev) => {
       const combined = [...prev, ...loadedFiles];
       if (!combined.some((f) => f.active) && combined.length > 0) {
@@ -154,7 +155,7 @@ const loadRemoteFiles = async (
       return combined;
     });
   } catch (err) {
-    console.error("🛑 MRI 데이터 불러오기 실패:", err);
+    console.error("🛑 MRI 데이터 병렬 로딩 실패:", err);
   }
 };
 
