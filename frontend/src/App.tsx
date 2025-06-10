@@ -1,4 +1,6 @@
 import React from "react";
+import { DndProvider } from "react-dnd";
+import { HTML5Backend } from "react-dnd-html5-backend";
 import {
   BrowserRouter as Router,
   Routes,
@@ -64,9 +66,11 @@ function App() {
   const [isAuthenticated] = React.useState(false);
 
   return (
-    <Router>
-      <AnimatedRoutes isAuthenticated={isAuthenticated} />
-    </Router>
+    <DndProvider backend={HTML5Backend}>
+      <Router>
+        <AnimatedRoutes isAuthenticated={isAuthenticated} />
+      </Router>
+    </DndProvider>
   );
 }
 

@@ -1,6 +1,5 @@
 import React, { useEffect, useRef } from "react";
-import { DndProvider, useDrag, useDrop } from "react-dnd";
-import { HTML5Backend } from "react-dnd-html5-backend";
+import { useDrag, useDrop } from "react-dnd";
 import { NiiFile } from "../util/type";
 
 const ItemType = "TAB";
@@ -183,20 +182,18 @@ const FileHeader: React.FC<FileHeaderProps> = ({ files, setFiles }) => {
   };
 
   return (
-    <DndProvider backend={HTML5Backend}>
-      <div className="flex h-9 border-b border-gray-700 overflow-x-auto bg-[#2a2a2a]">
-        {files.map((file, index) => (
-          <Tab
-            key={`${file.name}-${index}`}
-            file={file}
-            index={index}
-            moveTab={moveTab}
-            onClose={handleClose}
-            onClick={handleClick}
-          />
-        ))}
-      </div>
-    </DndProvider>
+    <div className="flex h-9 border-b border-gray-700 overflow-x-auto bg-[#2a2a2a]">
+      {files.map((file, index) => (
+        <Tab
+          key={`${file.name}-${index}`}
+          file={file}
+          index={index}
+          moveTab={moveTab}
+          onClose={handleClose}
+          onClick={handleClick}
+        />
+      ))}
+    </div>
   );
 };
 

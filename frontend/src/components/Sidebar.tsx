@@ -1,7 +1,5 @@
 // Sidebar.tsx
 import { useState, useCallback, useEffect } from "react";
-import { DndProvider } from "react-dnd";
-import { HTML5Backend } from "react-dnd-html5-backend";
 import { useNavigate } from "react-router-dom";
 import { ChatWindow } from "./ChatWindow";
 import styles from "../css/Sidebar.module.css";
@@ -22,6 +20,7 @@ import {
   addRoom,
   inviteUserToRoom,
 } from "../util/api";
+import { disconnectStomp } from "../util/socket";
 
 /*
 export interface Participant {
@@ -52,6 +51,8 @@ export default function Sidebar() {
   const [allParticipants, setParticipants] = useState<Participant[]>([]);
   const [currentUser, setCurrentUser] = useState<Participant | null>(null);
   //const [loading, setLoading] = useState(true);
+
+  const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
 
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [openIds, setOpenIds] = useState<string[]>([]);
@@ -142,6 +143,14 @@ export default function Sidebar() {
       setIsAddRoomOpen(false);
     }
   }, []);
+
+  // 로그아웃
+  const handleConfirmLogout = useCallback(() => {
+    disconnectStomp();
+    localStorage.removeItem("accessToken");
+    navigate("/login");
+    setIsLogoutConfirmOpen(false);
+  }, [navigate]);
 
   // 설정 열기
   const handleOpenSettings = useCallback(
@@ -607,7 +616,7 @@ export default function Sidebar() {
       : null;
 
   return (
-    <DndProvider backend={HTML5Backend}>
+    <div>
       {(activeWindows.some((id) => !pinnedIds.includes(id)) ||
         settingsOpenForId !== null ||
         participantsPanelOpenForId !== null) && (
@@ -629,6 +638,14 @@ export default function Sidebar() {
           </div>
 
           <div
+            onClick={() => navigate("/viewer")}
+            className={`${styles.sidebarIcon} ${styles.sidebarIconTop}`}
+            title="뷰어로 가기"
+          >
+            🧠
+          </div>
+
+          <div
             onClick={() => setDrawerOpen((o) => !o)}
             className={`${styles.sidebarIcon} ${styles.sidebarIconTop}`}
             title={drawerOpen ? "목록 닫기" : "목록 열기"}
@@ -636,11 +653,13 @@ export default function Sidebar() {
             💬
           </div>
         </div>
+
         <div
+          onClick={() => setIsLogoutConfirmOpen(true)}
           className={`${styles.sidebarIcon} ${styles.sidebarIconBottom}`}
-          title="전체 설정 (미구현)"
+          title="로그아웃"
         >
-          ⚙️
+          🚪
         </div>
       </div>
 
@@ -789,6 +808,17 @@ export default function Sidebar() {
           zIndex={INVITE_MODAL_Z_INDEX}
         />
       )}
-    </DndProvider>
+
+      <ConfirmModal
+        isOpen={isLogoutConfirmOpen}
+        title="로그아웃"
+        message="정말로 로그아웃 하시겠습니까?"
+        onConfirm={handleConfirmLogout}
+        onCancel={() => setIsLogoutConfirmOpen(false)}
+        confirmText="로그아웃"
+        cancelText="취소"
+        zIndex={CONFIRM_MODAL_Z_INDEX}
+      />
+    </div>
   );
 }
