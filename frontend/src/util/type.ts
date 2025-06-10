@@ -10,6 +10,7 @@ export interface NiiFile {
   file: File;
   age: number;
   fromRemote?: boolean;
+  predictionStatus?: "PROGRESS" | "COMPLETE";
   results?: MriResult[];
 }
 

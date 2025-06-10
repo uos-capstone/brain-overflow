@@ -56,7 +56,14 @@ const Tab: React.FC<TabProps> = ({
       }`}
       onClick={() => onClick(index)}
     >
-      <span className="mr-2 text-pink-400">🧠</span>
+      <span className="mr-2 text-pink-400">
+        {file.predictionStatus === "PROGRESS" ? (
+          <span className="animate-spin inline-block w-3 h-3 border-2 border-pink-400 border-t-transparent rounded-full" />
+        ) : (
+          "🧠"
+        )}
+      </span>
+
       {file.name}
       {/* {file.fromRemote && (
         <span className="ml-1 text-xs text-blue-400">(remote)</span>
@@ -134,6 +141,7 @@ const loadRemoteFiles = async (
           active: false,
           age: resultDto.targetAge ?? 0,
           fromRemote: true,
+          predictionStatus: resultDto.mriPredictionStatus,
         });
       }
     }

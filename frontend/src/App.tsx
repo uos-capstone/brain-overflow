@@ -43,8 +43,10 @@ function AnimatedRoutes({ isAuthenticated }: { isAuthenticated: boolean }) {
             path="/generator"
             element={
               <PageTransition>
-                {/* {isAuthenticated ? <MainPage /> : <Navigate to="/login" replace />} */}
-                {isAuthenticated ? <MainPage /> : <MainPage />}
+                <FileProvider>
+                  {/* {isAuthenticated ? <MainPage /> : <Navigate to="/login" replace />} */}
+                  {isAuthenticated ? <MainPage /> : <MainPage />}
+                </FileProvider>
               </PageTransition>
             }
           />

@@ -44,7 +44,66 @@ function CanvasArea({ activeFile }: CanvasAreaProps) {
   }, [renderingMode]);
 
   useEffect(() => {
-    if (!activeFile || !activeFile.file) return;
+    if (!activeFile) return;
+
+    const file = activeFile.file;
+    const resultIdMatch = activeFile.name.match(/result-(\d+)\.nii/);
+    const mriResultId = resultIdMatch?.[1];
+
+    const fetchLatestResult = async () => {
+      try {
+        const token = localStorage.getItem("accessToken");
+        const res = await fetch(
+          `https://api-brain-overflow.unknownpgr.com/mri/result/${mriResultId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        if (!res.ok) throw new Error("결과 재조회 실패");
+
+        const json = await res.json();
+        const { resultFilePath } = json.data;
+
+        const download = await fetch(
+          `https://api-brain-overflow.unknownpgr.com/uploads/${resultFilePath}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        const newBlob = await download.blob();
+
+        if (newBlob.size === 0) {
+          alert("❌ 파일이 아직 생성되지 않았습니다.");
+          return;
+        }
+
+        // update activeFile.file with new File (optional)
+        const newFile = new File([newBlob], activeFile.name, {
+          type: "application/octet-stream",
+        });
+        activeFile.file = newFile;
+
+        // trigger rendering again manually (or trigger a state update)
+        // or: setFiles(...) with updated file
+      } catch (err) {
+        console.error("📡 최신 결과 확인 실패:", err);
+        alert("❌ 파일이 없거나 결과가 아직 준비되지 않았습니다.");
+      }
+    };
+
+    if (!file || file.size === 0) {
+      if (mriResultId) {
+        fetchLatestResult();
+      } else {
+        alert(`❌ '${activeFile.name}' 파일을 열 수 없습니다.`);
+      }
+      return;
+    }
 
     const readAndRender = async () => {
       const device = await getGPUDevice();

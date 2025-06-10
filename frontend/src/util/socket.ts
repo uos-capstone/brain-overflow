@@ -12,6 +12,31 @@ declare global {
 let stompClient: Client | null = null;
 const messageBus = new EventEmitter(); // 메시지 버스 인스턴스 생성
 
+function showBrowserNotification(title: string, body: string) {
+  if (!("Notification" in window)) {
+    console.warn("이 브라우저는 Notification API를 지원하지 않습니다.");
+    return;
+  }
+
+  if (Notification.permission === "granted") {
+    new Notification(title, { body });
+  } else if (Notification.permission !== "denied") {
+    Notification.requestPermission().then((permission) => {
+      if (permission === "granted") {
+        new Notification(title, { body });
+      }
+    });
+  }
+}
+
+let onResultComplete: ((resultId: string) => void) | null = null;
+
+export function registerResultCompleteHandler(
+  handler: (resultId: string) => void
+) {
+  onResultComplete = handler;
+}
+
 // 서버로부터 받는 채팅 메시지의 예상 구조 (roomId 포함 필수!)
 export interface ServerChatMessage {
   roomId: string;
@@ -57,6 +82,14 @@ export function connectStomp(
             messageBus.emit(`room-${messagePayload.roomId}`, messagePayload);
           } else {
             console.warn("roomId가 없는 메시지 수신:", messagePayload);
+            showBrowserNotification(
+              "🧠 MRI 생성 완료",
+              `결과 ID: ${messagePayload.content}`
+            );
+
+            if (onResultComplete) {
+              onResultComplete(messagePayload.content);
+            }
           }
         } catch (e) {
           console.error(`[/user/queue/chat] 메시지 파싱 오류:`, msg.body, e);
