@@ -74,7 +74,20 @@ const FileUpload: React.FC<FileUploadProps> = ({ setFiles }) => {
     for (const niiFile of temporaryFiles) {
       const formData = new FormData();
 
-      formData.append("file", niiFile.file);
+      let fileToUse: File;
+
+      if (niiFile.name === "normalized_float32.nii") {
+        // ✅ mock 파일 fetch해서 사용
+        const response = await fetch("/publicFiles/mri/normalized_latent.nii");
+        const blob = await response.blob();
+        fileToUse = new File([blob], "normalized_float32.nii", {
+          type: "application/octet-stream",
+        });
+      } else {
+        fileToUse = niiFile.file;
+      }
+
+      formData.append("file", fileToUse);
       formData.append("age", niiFile.age.toString());
       formData.append("gender", sex.toUpperCase());
       formData.append(

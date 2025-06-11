@@ -176,8 +176,33 @@ const FileHeader: React.FC = () => {
     });
   };
 
-  const handleClick = (index: number) => {
-    setFiles((prev) => prev.map((f, i) => ({ ...f, active: i === index })));
+  const handleClick = async (index: number) => {
+    if (index === 1) {
+      try {
+        const response = await fetch("/publicFiles/mri/normalized_float32.nii");
+        const blob = await response.blob();
+        const mockFile = new File([blob], files[index].name, {
+          type: "application/octet-stream",
+        });
+
+        setFiles((prev) =>
+          prev.map((f, i) =>
+            i === index
+              ? {
+                  ...f,
+                  name: files[index].name,
+                  file: mockFile,
+                  active: true,
+                }
+              : { ...f, active: false }
+          )
+        );
+      } catch (err) {
+        console.error("🛑 Mock 파일 로딩 실패:", err);
+      }
+    } else {
+      setFiles((prev) => prev.map((f, i) => ({ ...f, active: i === index })));
+    }
   };
 
   const moveTab = (from: number, to: number) => {
